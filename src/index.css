@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  /* App-wide typeface — use `font-sans` / inherit for all upcoming screens */
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-950: #17163a;
+  --color-brand-900: #1e1c4a;
+  --color-brand-800: #232354;
+  --color-brand-700: #2d2b5e;
+  --color-brand-100: #eef0fb;
+
+  --color-accent-500: #e85a6b;
+  --color-accent-400: #f26d7d;
+
+  --color-ink: #1a1a2e;
+  --color-muted: #6b7280;
+  --color-subtle: #9ca3af;
+  --color-line: #e5e7eb;
+  --color-line-strong: #d1d5db;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f8f9fc;
+
+  --spacing-form: 1.25rem;
+  --radius-control: 0.5rem;
+  --radius-pill: 9999px;
+
+  /* Shared shell header height (sidebar logo + page top bar) */
+  --spacing-shell-header: 3.5rem;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  html {
+    font-family: var(--font-sans);
+  }
+
+  body {
+    margin: 0;
+    font-family: inherit;
+    color: var(--color-ink);
+    background: var(--color-surface);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+  }
+}
