@@ -16,7 +16,7 @@ export function BrandLogo({
       <img
         src={logo}
         alt="Recruitment SMART"
-        className={cn('h-12 w-auto object-contain', imgClassName)}
+        className={cn('h-9 w-auto object-contain', imgClassName)}
       />
     </div>
   )

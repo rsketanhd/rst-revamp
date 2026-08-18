@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react'
 import {
   EyeOff,
   MessageCircleQuestion,
@@ -9,6 +10,7 @@ import {
   ThreeDotsMenu,
   type ThreeDotsMenuItem,
 } from './ThreeDotsMenu'
+import { ShareJobPopover } from './ShareJobPopover'
 
 export type JobCardActionId =
   | 'viewEdit'
@@ -23,7 +25,8 @@ export type JobCardMenuProps = {
   onAction?: (action: JobCardActionId) => void
 }
 
-const JOB_MENU_META: Array<{
+/** Shared action defs for the jobs ⋮ menu and bulk toolbar. */
+export const JOB_CARD_ACTIONS: Array<{
   id: JobCardActionId
   label: string
   icon: ThreeDotsMenuItem['icon']
@@ -57,26 +60,45 @@ const JOB_MENU_META: Array<{
 
 /**
  * Jobs-specific ⋮ menu (preset items).
- * For other screens, use `ThreeDotsMenu` with your own `items`.
+ * Share Job opens the social share overlay (design: icon bar + right caret).
  */
 export function JobCardMenu({
   jobCode,
   jobTitle,
   onAction,
 }: JobCardMenuProps) {
-  const items: ThreeDotsMenuItem[] = JOB_MENU_META.map((item) => ({
+  const anchorRef = useRef<HTMLDivElement>(null)
+  const [shareOpen, setShareOpen] = useState(false)
+
+  const items: ThreeDotsMenuItem[] = JOB_CARD_ACTIONS.map((item) => ({
     id: item.id,
     label: item.label,
     icon: item.icon,
   }))
 
   return (
-    <ThreeDotsMenu
-      triggerLabel={`More actions for ${jobCode} - ${jobTitle}`}
-      items={items}
-      side="left"
-      align="center"
-      onItemSelect={(id) => onAction?.(id as JobCardActionId)}
-    />
+    <div ref={anchorRef} className="relative inline-flex">
+      <ThreeDotsMenu
+        triggerLabel={`More actions for ${jobCode} - ${jobTitle}`}
+        items={items}
+        side="left"
+        align="center"
+        onItemSelect={(id) => {
+          const action = id as JobCardActionId
+          if (action === 'share') {
+            setShareOpen(true)
+          }
+          onAction?.(action)
+        }}
+      />
+
+      <ShareJobPopover
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        anchorRef={anchorRef}
+        jobCode={jobCode}
+        jobTitle={jobTitle}
+      />
+    </div>
   )
 }

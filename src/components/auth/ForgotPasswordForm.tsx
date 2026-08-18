@@ -1,6 +1,5 @@
 import type { FormEvent } from 'react'
 import { useState } from 'react'
-import { BrandLogo } from './BrandLogo'
 import { Button, Input } from '../ui'
 import { validateEmail } from '../../lib/auth'
 
@@ -49,10 +48,6 @@ export function ForgotPasswordForm({
       noValidate
       aria-label="Reset password"
     >
-      <div className="mb-8 flex flex-col items-center">
-        <BrandLogo />
-      </div>
-
       <div className="mb-8 text-center">
         <h1 className="text-[2rem] font-bold tracking-tight text-brand-800">
           Reset password

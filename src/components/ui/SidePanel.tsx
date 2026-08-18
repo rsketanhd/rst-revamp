@@ -26,6 +26,8 @@ export type SidePanelProps = {
    * Applied as `style.width` and wins over the default max-width when set.
    */
   width?: number | string
+  /** Classes for the header (default brand navy) */
+  headerClassName?: string
   /** Classes for the scrollable body */
   bodyClassName?: string
   /** Classes for the footer row */
@@ -45,6 +47,7 @@ export function SidePanel({
   className,
   widthClassName = DEFAULT_WIDTH_CLASS,
   width,
+  headerClassName,
   bodyClassName,
   footerClassName,
 }: SidePanelProps) {
@@ -129,7 +132,12 @@ export function SidePanel({
           className,
         )}
       >
-        <header className="flex h-14 shrink-0 items-center justify-between bg-[#2D2061] px-5 sm:px-6">
+        <header
+          className={cn(
+            'flex h-14 shrink-0 items-center justify-between px-5 sm:px-6',
+            headerClassName ?? 'bg-[#2D2061]',
+          )}
+        >
           <h2
             id={titleId}
             className="text-base font-semibold tracking-tight text-white"

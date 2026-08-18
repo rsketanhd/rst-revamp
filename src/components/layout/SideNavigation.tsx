@@ -108,14 +108,19 @@ const NAV_SECTIONS: NavSection[] = [
         icon: <SquareUser className="size-[1.15rem]" strokeWidth={1.75} />,
         children: [
           {
-            id: 'interview-schedule',
-            label: 'Schedule',
-            to: '/e2e-interviews/schedule',
+            id: 'one-way',
+            label: 'One-Way Interviews',
+            to: '/e2e-interviews/one-way',
           },
           {
-            id: 'interview-feedback',
-            label: 'Feedback',
-            to: '/e2e-interviews/feedback',
+            id: 'two-way',
+            label: 'Two-Way Interviews',
+            to: '/e2e-interviews/two-way',
+          },
+          {
+            id: 'interview-scheduler',
+            label: 'Interview Scheduler & Analytics',
+            to: '/e2e-interviews/scheduler',
           },
         ],
       },
@@ -134,7 +139,7 @@ const NAV_SECTIONS: NavSection[] = [
       {
         id: 'settings',
         label: 'Settings',
-        to: '/settings',
+        to: '/settings/recruiter-profile',
         icon: <Settings className="size-[1.15rem]" strokeWidth={1.75} />,
       },
     ],
@@ -149,9 +154,7 @@ export function SideNavigation({
 }: SideNavigationProps) {
   const [uncontrolledCollapsed, setUncontrolledCollapsed] =
     useState(defaultCollapsed)
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    'e2e-interviews': true,
-  })
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -165,11 +168,20 @@ export function SideNavigation({
   }
 
   useEffect(() => {
-    // Auto-open parent group when a child route is active
     for (const section of NAV_SECTIONS) {
       for (const item of section.items) {
-        if (item.children?.some((child) => location.pathname.startsWith(child.to))) {
-          setOpenGroups((current) => ({ ...current, [item.id]: true }))
+        if (!item.children?.length) continue
+        const onChildRoute = item.children.some((child) =>
+          location.pathname.startsWith(child.to),
+        )
+        const onParentRoute =
+          location.pathname === item.to ||
+          location.pathname.startsWith(`${item.to}/`)
+
+        if (onChildRoute || onParentRoute) {
+          setOpenGroups((current) =>
+            current[item.id] ? current : { ...current, [item.id]: true },
+          )
         }
       }
     }
@@ -191,7 +203,6 @@ export function SideNavigation({
       aria-label="Side navigation"
       data-collapsed={collapsed}
     >
-      {/* Brand — height matches Last Sync top bar (shell-header) */}
       <div
         className={cn(
           'relative flex h-shell-header shrink-0 items-center overflow-visible border-b border-[#e4e4ea] px-3',
@@ -209,7 +220,6 @@ export function SideNavigation({
           )}
         />
 
-        {/* Expand/collapse — vertically centered on logo row */}
         <button
           type="button"
           onClick={() => setCollapsed(!collapsed)}
@@ -230,7 +240,6 @@ export function SideNavigation({
         </button>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 py-3">
         {NAV_SECTIONS.map((section, sectionIndex) => (
           <div key={section.id}>
@@ -251,98 +260,135 @@ export function SideNavigation({
               </p>
             ) : null}
 
-            <ul className={cn('flex flex-col', collapsed ? 'items-center gap-1' : 'gap-0.5')}>
+            <ul
+              className={cn(
+                'flex flex-col',
+                collapsed ? 'items-center gap-1' : 'gap-0.5',
+              )}
+            >
               {section.items.map((item) => {
                 const hasChildren = Boolean(item.children?.length)
-                const isGroupOpen = openGroups[item.id]
+                const isGroupOpen = Boolean(openGroups[item.id])
                 const childActive = item.children?.some((child) =>
                   location.pathname.startsWith(child.to),
                 )
-                const parentActive =
-                  childActive || location.pathname.startsWith(item.to)
+                const parentRouteActive =
+                  location.pathname === item.to ||
+                  location.pathname.startsWith(`${item.to}/`)
+                /** Selected look only when open (clicked) or a child/parent route is active */
+                const groupSelected =
+                  isGroupOpen || Boolean(childActive) || parentRouteActive
 
                 return (
-                  <li key={item.id} className={cn(collapsed && 'w-full flex justify-center')}>
+                  <li
+                    key={item.id}
+                    className={cn(collapsed && 'flex w-full justify-center')}
+                  >
                     {hasChildren ? (
-                      <>
+                      collapsed ? (
                         <button
                           type="button"
-                          title={collapsed ? item.label : undefined}
-                          onClick={() => {
-                            if (collapsed) {
-                              navigate(item.to)
-                              return
-                            }
-                            setOpenGroups((current) => ({
-                              ...current,
-                              [item.id]: !current[item.id],
-                            }))
-                          }}
+                          title={item.label}
+                          onClick={() => navigate(item.children![0].to)}
                           className={cn(
-                            navItemBaseClass(collapsed),
-                            parentActive && navItemActiveClass(collapsed),
+                            navItemBaseClass(true),
+                            groupSelected && navItemActiveClass(true),
                           )}
                         >
                           <span className="inline-flex size-[1.15rem] shrink-0 items-center justify-center">
                             {item.icon}
                           </span>
-                          {!collapsed ? (
-                            <>
-                              <span className="min-w-0 flex-1 truncate text-left">
-                                {item.label}
-                              </span>
-                              <ChevronDown
-                                className={cn(
-                                  'size-4 shrink-0 transition-transform duration-300',
-                                  isGroupOpen && 'rotate-180',
-                                )}
-                                aria-hidden="true"
-                              />
-                            </>
-                          ) : null}
                         </button>
+                      ) : (
+                        <div className="overflow-hidden rounded-lg">
+                          <button
+                            type="button"
+                            aria-expanded={isGroupOpen}
+                            onClick={() => {
+                              setOpenGroups((current) => ({
+                                ...current,
+                                [item.id]: !current[item.id],
+                              }))
+                            }}
+                            className={cn(
+                              'flex w-full min-h-10 items-center gap-2.5 px-2.5 py-2 text-[13px] font-medium transition-colors duration-200',
+                              groupSelected
+                                ? cn(
+                                    'bg-[#2D2061] text-white hover:bg-[#2D2061]',
+                                    isGroupOpen
+                                      ? 'rounded-t-lg rounded-b-none'
+                                      : 'rounded-lg',
+                                  )
+                                : cn(
+                                    'rounded-lg text-[#2D2061]',
+                                    'hover:bg-[#2D2061] hover:text-white',
+                                  ),
+                            )}
+                          >
+                            <span className="inline-flex size-[1.15rem] shrink-0 items-center justify-center">
+                              {item.icon}
+                            </span>
+                            <span className="min-w-0 flex-1 truncate text-left">
+                              {item.label}
+                            </span>
+                            <ChevronDown
+                              className={cn(
+                                'size-4 shrink-0 transition-transform duration-300',
+                                isGroupOpen && 'rotate-180',
+                              )}
+                              aria-hidden="true"
+                            />
+                          </button>
 
-                        {!collapsed ? (
                           <div
                             className={cn(
                               'grid transition-all duration-300 ease-out',
                               isGroupOpen
-                                ? 'mt-0.5 grid-rows-[1fr] opacity-100'
+                                ? 'grid-rows-[1fr] opacity-100'
                                 : 'grid-rows-[0fr] opacity-0',
                             )}
                           >
-                            <ul className="overflow-hidden pl-9">
-                              {item.children?.map((child) => (
-                                <li key={child.id}>
-                                  <NavLink
-                                    to={child.to}
-                                    className={({ isActive }) =>
-                                      cn(
-                                        'my-0.5 flex rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-brand-800/80 transition-colors',
-                                        'hover:bg-[#2D2061] hover:text-white',
-                                        isActive &&
-                                          'bg-[#2D2061] text-white hover:bg-[#2D2061] hover:text-white',
-                                      )
-                                    }
-                                  >
-                                    {child.label}
-                                  </NavLink>
-                                </li>
-                              ))}
-                            </ul>
+                            <div className="min-h-0 overflow-hidden">
+                              <ul className="rounded-b-lg bg-white pb-1.5 pt-0.5">
+                                {item.children?.map((child) => (
+                                  <li key={child.id}>
+                                    <NavLink
+                                      to={child.to}
+                                      title={child.label}
+                                      className={({ isActive }) =>
+                                        cn(
+                                          'flex min-h-9 items-center truncate py-2 pl-10 pr-3 text-[13px] transition-colors',
+                                          isActive
+                                            ? 'font-semibold text-[#2D2061]'
+                                            : 'font-medium text-[#6B7280] hover:text-[#2D2061]',
+                                        )
+                                      }
+                                    >
+                                      <span className="truncate">
+                                        {child.label}
+                                      </span>
+                                    </NavLink>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
                           </div>
-                        ) : null}
-                      </>
+                        </div>
+                      )
                     ) : (
                       <NavLink
                         to={item.to}
                         title={collapsed ? item.label : undefined}
-                        className={({ isActive }) =>
-                          cn(
+                        className={({ isActive }) => {
+                          const settingsActive =
+                            item.id === 'settings' &&
+                            location.pathname.startsWith('/settings')
+                          return cn(
                             navItemBaseClass(collapsed),
-                            isActive && navItemActiveClass(collapsed),
+                            (isActive || settingsActive) &&
+                              navItemActiveClass(collapsed),
                           )
-                        }
+                        }}
                       >
                         <span className="inline-flex size-[1.15rem] shrink-0 items-center justify-center">
                           {item.icon}
@@ -353,7 +399,7 @@ export function SideNavigation({
                               {item.label}
                             </span>
                             {item.badge ? (
-                              <span className="rounded-full bg-[#6d5efc] px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white">
+                              <span className="rounded bg-[#C44FA8] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
                                 {item.badge}
                               </span>
                             ) : null}
@@ -369,7 +415,6 @@ export function SideNavigation({
         ))}
       </nav>
 
-      {/* Footer actions */}
       <div
         className={cn(
           'flex flex-col gap-2 p-2.5',
@@ -433,9 +478,7 @@ function navItemBaseClass(collapsed: boolean) {
   return cn(
     'group flex items-center text-[13px] font-medium text-[#2D2061]',
     'transition-colors duration-200',
-    // Soft square ~8px radius (matches design selected state)
     'rounded-lg',
-    // Hover matches design navy
     'hover:bg-[#2D2061] hover:text-white',
     collapsed
       ? 'size-10 justify-center gap-0 p-0'

@@ -196,10 +196,19 @@ export function FilterSortPanel({
     onClose()
   }
 
+  function handleClearFilters() {
+    setDraft((current) => ({
+      ...emptyFilterSortValues,
+      sortBy: current.sortBy,
+    }))
+  }
+
   function handleApply() {
     onApply?.(draft)
     onClose()
   }
+
+  const hasDraftFilters = countActiveFilters(draft) > 0
 
   return (
     <SidePanel
@@ -207,22 +216,33 @@ export function FilterSortPanel({
       onClose={onClose}
       title="Filter & Sort"
       widthClassName="w-full max-w-[34rem]"
+      footerClassName="justify-between"
       footer={
         <>
           <button
             type="button"
-            onClick={handleCancel}
-            className="inline-flex h-10 min-w-[5.5rem] items-center justify-center rounded-md border border-[#d5d2e2] bg-white px-4 text-sm font-medium text-[#2D2061] transition-colors hover:bg-[#f7f6fb]"
+            onClick={handleClearFilters}
+            disabled={!hasDraftFilters}
+            className="inline-flex h-10 min-w-[5.5rem] items-center justify-center rounded-md px-3 text-sm font-medium text-[#2D2061] transition-colors hover:bg-[#f7f6fb] disabled:cursor-not-allowed disabled:text-[#A0A0B2] disabled:hover:bg-transparent"
           >
-            Cancel
+            Clear filters
           </button>
-          <button
-            type="button"
-            onClick={handleApply}
-            className="inline-flex h-10 min-w-[6.5rem] items-center justify-center rounded-md bg-[#2D2061] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#241a52]"
-          >
-            Apply Now
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="inline-flex h-10 min-w-[5.5rem] items-center justify-center rounded-md border border-[#d5d2e2] bg-white px-4 text-sm font-medium text-[#2D2061] transition-colors hover:bg-[#f7f6fb]"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleApply}
+              className="inline-flex h-10 min-w-[6.5rem] items-center justify-center rounded-md bg-[#2D2061] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#241a52]"
+            >
+              Apply Now
+            </button>
+          </div>
         </>
       }
     >

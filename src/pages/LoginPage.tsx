@@ -117,15 +117,15 @@ export function LoginPage() {
     <>
       <AuthLayout marketing={<MarketingPanel />}>
         <div className="flex min-h-full flex-col px-6 py-5 sm:px-10 lg:px-16">
-          <div className="flex items-start justify-end">
+          <div className="flex items-center justify-between gap-4">
+            <BrandLogo className="justify-start" imgClassName="h-8 sm:h-9" />
             <HelpButton onClick={() => setIsHelpOpen(true)} />
           </div>
 
           <div className="mx-auto flex w-full max-w-[22.5rem] flex-1 flex-col justify-center py-8">
             {showRoleChrome ? (
-              <div className="mb-8 flex flex-col items-center gap-6">
+              <div className="mb-8 flex justify-center">
                 <RoleToggle value={role} onChange={handleRoleChange} />
-                <BrandLogo />
               </div>
             ) : null}
 

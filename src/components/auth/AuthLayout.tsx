@@ -11,7 +11,7 @@ export function AuthLayout({ marketing, children, className }: AuthLayoutProps) 
   return (
     <div
       className={cn(
-        'grid min-h-full w-full grid-cols-1 lg:grid-cols-2',
+        'grid h-full min-h-0 w-full grid-cols-1 overflow-y-auto lg:grid-cols-2',
         className,
       )}
     >
