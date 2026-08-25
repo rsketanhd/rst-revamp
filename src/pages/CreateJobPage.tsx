@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import {
   AppTopBar,
@@ -13,6 +13,7 @@ import {
   defaultCreateJobForm,
   type CreateJobFormState,
 } from '../components/jobs/create/types'
+import type { AiCreateJobNavState } from '../components/jobs/create/aiCreateJobData'
 import { StepCreateJob } from '../components/jobs/create/StepCreateJob'
 import { StepJobDetails } from '../components/jobs/create/StepJobDetails'
 import { StepJobAnalyzer } from '../components/jobs/create/StepJobAnalyzer'
@@ -22,11 +23,29 @@ import { StepReview } from '../components/jobs/create/StepReview'
 
 const LAST_STEP = CREATE_JOB_STEPS.length - 1
 
+function formFromAiNavState(
+  state: AiCreateJobNavState | null,
+): CreateJobFormState {
+  if (!state) return defaultCreateJobForm
+
+  return {
+    ...defaultCreateJobForm,
+    method: state.similarJobTitle ? 'copy' : 'scratch',
+    jobTitle: state.similarJobTitle ?? '',
+    jobDescription: state.aiPrompt ?? '',
+  }
+}
+
 export function CreateJobPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const aiNavState = (location.state as AiCreateJobNavState | null) ?? null
+
   const [step, setStep] = useState(0)
   const [maxReached, setMaxReached] = useState(0)
-  const [form, setForm] = useState<CreateJobFormState>(defaultCreateJobForm)
+  const [form, setForm] = useState<CreateJobFormState>(() =>
+    formFromAiNavState(aiNavState),
+  )
   const [success, setSuccess] = useState(false)
 
   function patchForm(patch: Partial<CreateJobFormState>) {

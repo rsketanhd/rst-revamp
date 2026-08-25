@@ -126,10 +126,13 @@ export function StepJobDetails({ value, onChange }: Props) {
             />
             <RangeSlider
               label="Experience"
+              valueLabel=""
               value={[value.experienceMin, value.experienceMax]}
               min={0}
               max={20}
               step={1}
+              showInputs
+              accent="brand"
               onChange={([experienceMin, experienceMax]) =>
                 onChange({ experienceMin, experienceMax })
               }

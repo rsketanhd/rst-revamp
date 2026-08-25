@@ -36,6 +36,7 @@ import {
   type JobCardActionId,
 } from '../components/ui'
 import { JobViewEditPanel } from '../components/jobs/JobViewEditPanel'
+import { AiCreateJobFlow } from '../components/jobs/create/AiCreateJobFlow'
 import { applyCreateFormToListing } from '../components/jobs/create/jobListingToForm'
 import { PageHeader } from '../components/layout'
 
@@ -60,6 +61,7 @@ export function JobsPage() {
     JOBS.map((job) => ({ ...job, metrics: job.metrics.map((m) => ({ ...m })) })),
   )
   const [detailJob, setDetailJob] = useState<JobListing | null>(null)
+  const [aiCreateOpen, setAiCreateOpen] = useState(false)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [loadingMore, setLoadingMore] = useState(false)
   const loadMoreRef = useRef<HTMLDivElement>(null)
@@ -232,7 +234,7 @@ export function JobsPage() {
           actions={
             <button
               type="button"
-              onClick={() => navigate('/jobs/new')}
+              onClick={() => setAiCreateOpen(true)}
               className="inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-md bg-[#2D2061] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#241a52] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D2061]/30 sm:w-auto"
             >
               <Sparkles className="size-4" aria-hidden="true" />
@@ -566,6 +568,11 @@ export function JobsPage() {
             title: 'Job updated',
           })
         }}
+      />
+
+      <AiCreateJobFlow
+        open={aiCreateOpen}
+        onClose={() => setAiCreateOpen(false)}
       />
     </div>
   )

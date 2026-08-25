@@ -166,8 +166,8 @@ export function SidePanel({
         {footer ? (
           <footer
             className={cn(
-              'flex shrink-0 justify-end gap-3 border-t border-[#eceaf3] bg-white px-5 py-4 sm:px-6',
-              footerClassName,
+              'flex shrink-0 gap-3 border-t border-[#eceaf3] bg-white px-5 py-4 sm:px-6',
+              footerClassName ?? 'justify-end',
             )}
           >
             {footer}
