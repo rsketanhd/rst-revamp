@@ -50,10 +50,6 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
     title: 'Interview Feedback',
     subtitle: 'Capture and review interview feedback.',
   },
-  '/reports': {
-    title: 'Reports',
-    subtitle: 'Track recruitment metrics and performance reports.',
-  },
   '/settings': {
     title: 'Settings',
     subtitle: 'Track credit balance, usage, and purchase history.',

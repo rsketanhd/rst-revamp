@@ -29,12 +29,14 @@ import {
   AppTopBar,
   SegmentedControl,
   Tooltip,
+  toast,
   countActiveFilters,
   emptyFilterSortValues,
   type FilterSortValues,
   type JobCardActionId,
 } from '../components/ui'
 import { JobViewEditPanel } from '../components/jobs/JobViewEditPanel'
+import { applyCreateFormToListing } from '../components/jobs/create/jobListingToForm'
 import { PageHeader } from '../components/layout'
 
 type JobScope = 'my' | 'all'
@@ -54,6 +56,9 @@ export function JobsPage() {
   const [appliedFilters, setAppliedFilters] = useState<FilterSortValues>(
     emptyFilterSortValues,
   )
+  const [jobs, setJobs] = useState<JobListing[]>(() =>
+    JOBS.map((job) => ({ ...job, metrics: job.metrics.map((m) => ({ ...m })) })),
+  )
   const [detailJob, setDetailJob] = useState<JobListing | null>(null)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -63,15 +68,15 @@ export function JobsPage() {
   const activeFilterCount = countActiveFilters(appliedFilters)
 
   const scopeJobs = useMemo(
-    () => JOBS.filter((job) => (scope === 'my' ? job.isMine : true)),
-    [scope],
+    () => jobs.filter((job) => (scope === 'my' ? job.isMine : true)),
+    [jobs, scope],
   )
 
   const stats = useMemo(() => computeJobStats(scopeJobs), [scopeJobs])
 
   const filteredJobs = useMemo(
     () =>
-      filterJobs(JOBS, {
+      filterJobs(jobs, {
         status,
         scope,
         recruiterQuery,
@@ -95,6 +100,7 @@ export function JobsPage() {
       postedOn,
       updatedOn,
       appliedFilters,
+      jobs,
     ],
   )
 
@@ -181,9 +187,13 @@ export function JobsPage() {
     )
   }
 
+  function openJobDetail(job: JobListing) {
+    setDetailJob(job)
+  }
+
   function handleJobAction(jobCode: string, action: JobCardActionId) {
     if (action === 'viewEdit') {
-      const job = JOBS.find((item) => item.code === jobCode) ?? null
+      const job = jobs.find((item) => item.code === jobCode) ?? null
       setDetailJob(job)
       return
     }
@@ -410,8 +420,19 @@ export function JobsPage() {
                     aria-label={`Select ${job.code}`}
                   />
 
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-sm font-bold text-[#2D2061] sm:truncate sm:text-base">
+                  <div
+                    className="min-w-0 flex-1 cursor-pointer rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[#2D2061]/25"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openJobDetail(job)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        openJobDetail(job)
+                      }
+                    }}
+                  >
+                    <h2 className="text-sm font-bold text-[#2D2061] transition-colors hover:text-[#241a52] hover:underline sm:truncate sm:text-base">
                       {job.code} - {job.title}
                     </h2>
 
@@ -536,7 +557,14 @@ export function JobsPage() {
         job={detailJob}
         onClose={() => setDetailJob(null)}
         onSave={(job, form) => {
-          console.info('saved job details', job.code, form.jobTitle)
+          const next = applyCreateFormToListing(job, form)
+          setJobs((current) =>
+            current.map((item) => (item.id === next.id ? next : item)),
+          )
+          setDetailJob(next)
+          toast.success(`“${next.title}” was saved.`, {
+            title: 'Job updated',
+          })
         }}
       />
     </div>

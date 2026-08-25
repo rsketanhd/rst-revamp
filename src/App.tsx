@@ -14,7 +14,13 @@ import { CreateOneWayInterviewPage } from './pages/CreateOneWayInterviewPage'
 import { InterviewSchedulerPage } from './pages/InterviewSchedulerPage'
 import { OneWayInterviewDetailPage } from './pages/OneWayInterviewDetailPage'
 import { OneWayInterviewsPage } from './pages/OneWayInterviewsPage'
+import { ReportsPage } from './pages/ReportsPage'
+import { JobStatisticsOverviewPage } from './pages/JobStatisticsOverviewPage'
+import { HiringStageTimeAnalyticsPage } from './pages/HiringStageTimeAnalyticsPage'
+import { OfferHiredDistributionPage } from './pages/OfferHiredDistributionPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { ClientsPage } from './pages/ClientsPage'
+import { CreateClientPage } from './pages/CreateClientPage'
 
 export default function App() {
   return (
@@ -42,7 +48,11 @@ export default function App() {
               path="/candidate-discovery"
               element={<CandidateDiscoveryPage />}
             />
-            <Route path="/client-management" element={<ModulePage />} />
+            <Route path="/client-management" element={<ClientsPage />} />
+            <Route
+              path="/client-management/new"
+              element={<CreateClientPage />}
+            />
             <Route path="/talent-crm" element={<ModulePage />} />
             <Route path="/jeeves-ai" element={<JeevesAiPage />} />
             <Route path="/e2e-interviews" element={<ModulePage />} />
@@ -68,7 +78,19 @@ export default function App() {
               element={<InterviewSchedulerPage />}
             />
             <Route path="/e2e-interviews/feedback" element={<ModulePage />} />
-            <Route path="/reports" element={<ModulePage />} />
+            <Route path="/reports" element={<ReportsPage />} />
+            <Route
+              path="/reports/job-statistics-overview"
+              element={<JobStatisticsOverviewPage />}
+            />
+            <Route
+              path="/reports/hiring-stage-time-analytics"
+              element={<HiringStageTimeAnalyticsPage />}
+            />
+            <Route
+              path="/reports/offer-hired-distribution"
+              element={<OfferHiredDistributionPage />}
+            />
             <Route path="/settings/:sectionId" element={<SettingsPage />} />
             <Route
               path="/settings"

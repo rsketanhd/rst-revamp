@@ -2,6 +2,12 @@ export { SettingsNav } from './SettingsNav'
 export type { SettingsNavProps } from './SettingsNav'
 export { SettingsPanel, SettingsBlock } from './SettingsPanel'
 export type { SettingsPanelProps, SettingsBlockProps } from './SettingsPanel'
+export { JobsModulePanel } from './JobsModulePanel'
+export { AddNewFieldPanel } from './AddNewFieldPanel'
+export type {
+  AddNewFieldPanelProps,
+  AddNewFieldFormValues,
+} from './AddNewFieldPanel'
 export { RecruiterProfilePanel } from './RecruiterProfilePanel'
 export { CompanyBrandingPanel } from './CompanyBrandingPanel'
 export { NotificationConfigPanel } from './NotificationConfigPanel'

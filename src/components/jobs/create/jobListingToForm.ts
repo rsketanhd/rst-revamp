@@ -67,3 +67,28 @@ Lead Recruiter: ${job.recruiter}`,
     locations: [job.location],
   }
 }
+
+/** Apply View/Edit form fields back onto the jobs-list card. */
+export function applyCreateFormToListing(
+  job: JobListing,
+  form: CreateJobFormState,
+): JobListing {
+  const location =
+    [form.primaryCity, form.primaryState, form.primaryCountry]
+      .filter(Boolean)
+      .join(', ') || job.location
+
+  return {
+    ...job,
+    code: form.jobReqId.trim() || job.code,
+    title: form.jobTitle.trim() || job.title,
+    location,
+    department: form.department.trim() || job.department,
+    recruiter: form.supportRecruiter.trim() || job.recruiter,
+    client: form.client.trim() || job.client,
+    project: form.project.trim() || job.project,
+    jobType: form.jobType.trim() || job.jobType,
+    jobCategory: form.jobCategory.trim() || job.jobCategory,
+    jobSubCategory: form.jobSubCategory.trim() || job.jobSubCategory,
+  }
+}

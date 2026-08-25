@@ -6,10 +6,12 @@ import {
   AdminPanel,
   CompanyBrandingPanel,
   EmailConfigPanel,
+  JobsModulePanel,
   NotificationConfigPanel,
   RecruiterProfilePanel,
   RoleManagementPanel,
   SettingsNav,
+  SettingsPlaceholderPanel,
   UserManagementPanel,
   type SettingsSectionId,
 } from '../components/settings'
@@ -52,6 +54,17 @@ function SettingsSectionContent({
   sectionId: SettingsSectionId
 }) {
   switch (sectionId) {
+    case 'jobs':
+      return <JobsModulePanel />
+    case 'candidates':
+    case 'pipeline':
+    case 'talent-crm':
+    case 'campaigns':
+    case 'reports':
+    case 'client-management':
+    case 'one-way-interview':
+    case 'two-way-interview':
+      return <SettingsPlaceholderPanel sectionId={sectionId} />
     case 'recruiter-profile':
       return <RecruiterProfilePanel />
     case 'company-branding':

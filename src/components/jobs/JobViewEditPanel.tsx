@@ -45,7 +45,8 @@ export function JobViewEditPanel({
     setForm(seeded)
     setBaseline(seeded)
     setMode('view')
-  }, [open, job])
+    // Seed once per open job; keep in-panel edits if parent refreshes the same record.
+  }, [open, job?.id])
 
   function patchForm(patch: Partial<CreateJobFormState>) {
     setForm((current) => ({ ...current, ...patch }))

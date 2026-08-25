@@ -1,4 +1,13 @@
 export type SettingsSectionId =
+  | 'jobs'
+  | 'candidates'
+  | 'pipeline'
+  | 'talent-crm'
+  | 'campaigns'
+  | 'reports'
+  | 'client-management'
+  | 'one-way-interview'
+  | 'two-way-interview'
   | 'recruiter-profile'
   | 'company-branding'
   | 'notification-config'
@@ -8,7 +17,7 @@ export type SettingsSectionId =
   | 'admin-panel'
 
 export type SettingsNavItem = {
-  id: SettingsSectionId
+  id: string
   label: string
 }
 
@@ -18,8 +27,26 @@ export type SettingsNavGroup = {
   items: SettingsNavItem[]
 }
 
-/** Secondary settings navigation — Settings Hub + Platform Administration. */
+/**
+ * Secondary settings navigation —
+ * Module Configuration + Settings Hub + Platform Administration.
+ */
 export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
+  {
+    id: 'module-configuration',
+    title: 'Module Configuration',
+    items: [
+      { id: 'jobs', label: 'Jobs' },
+      { id: 'candidates', label: 'Candidates' },
+      { id: 'pipeline', label: 'Pipeline' },
+      { id: 'talent-crm', label: 'Talent CRM' },
+      { id: 'campaigns', label: 'Campaigns' },
+      { id: 'reports', label: 'Reports' },
+      { id: 'client-management', label: 'Client Management' },
+      { id: 'one-way-interview', label: '1 Way Interview' },
+      { id: 'two-way-interview', label: '2 Way Interview' },
+    ],
+  },
   {
     id: 'settings-hub',
     title: 'Settings Hub',

@@ -42,6 +42,7 @@ import {
 } from '../components/applications/applicantRowActions'
 import { CandidatesFiltersBar } from '../components/candidates/CandidatesFiltersBar'
 import { CandidatesMoreFiltersPanel } from '../components/candidates/CandidatesMoreFiltersPanel'
+import { ImportCandidatesPanel } from '../components/candidates/ImportCandidatesPanel'
 import { getCandidateBulkActions } from '../components/candidates/candidateBulkActions'
 
 const DEFAULT_CANDIDATE_COLUMNS: TableColumnConfig[] = [
@@ -74,6 +75,7 @@ export function CandidatesPage() {
   const [cvRelevancy, setCvRelevancy] = useState(0)
   const [suitability, setSuitability] = useState<[number, number]>([0, 95])
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const [moreFilters, setMoreFilters] = useState<CandidatesMoreFilters>(
     emptyCandidatesMoreFilters,
   )
@@ -271,6 +273,7 @@ export function CandidatesPage() {
             type="button"
             variant="outline"
             size="md"
+            onClick={() => setImportOpen(true)}
             className="!h-10 w-full shrink-0 !rounded-md border-[#d5d2e2] bg-white px-4 text-sm font-semibold text-[#2D2061] hover:bg-[#f7f6fb] sm:w-auto"
           >
             <Upload className="size-4" strokeWidth={2} aria-hidden="true" />
@@ -426,6 +429,11 @@ export function CandidatesPage() {
         onClose={() => setColumnsOpen(false)}
         columns={columns}
         onApply={setColumns}
+      />
+
+      <ImportCandidatesPanel
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
       />
     </PageContainer>
   )
