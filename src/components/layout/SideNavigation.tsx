@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
   FileBarChart2,
   LayoutGrid,
   LogOut,
@@ -18,6 +19,7 @@ import {
   Users,
 } from 'lucide-react'
 import logo from '../../assets/Logo.png'
+import { getUserRole, setAuthenticated } from '../../lib/auth'
 import { cn } from '../../lib/cn'
 
 export type SideNavigationProps = {
@@ -42,7 +44,7 @@ type NavSection = {
   items: NavItem[]
 }
 
-const NAV_SECTIONS: NavSection[] = [
+const RECRUITER_NAV_SECTIONS: NavSection[] = [
   {
     id: 'main',
     items: [
@@ -146,6 +148,38 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ]
 
+const CANDIDATE_NAV_SECTIONS: NavSection[] = [
+  {
+    id: 'main',
+    items: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        to: '/dashboard',
+        icon: <LayoutGrid className="size-[1.15rem]" strokeWidth={1.75} />,
+      },
+      {
+        id: 'my-applications',
+        label: 'My Applications',
+        to: '/my-applications',
+        icon: <ClipboardList className="size-[1.15rem]" strokeWidth={1.75} />,
+      },
+      {
+        id: 'my-jobs',
+        label: 'My Jobs',
+        to: '/my-jobs',
+        icon: <Briefcase className="size-[1.15rem]" strokeWidth={1.75} />,
+      },
+      {
+        id: 'settings',
+        label: 'Settings',
+        to: '/settings/account-settings',
+        icon: <Settings className="size-[1.15rem]" strokeWidth={1.75} />,
+      },
+    ],
+  },
+]
+
 export function SideNavigation({
   className,
   defaultCollapsed = false,
@@ -157,6 +191,10 @@ export function SideNavigation({
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
   const location = useLocation()
   const navigate = useNavigate()
+  const userRole = getUserRole()
+  const navSections =
+    userRole === 'candidate' ? CANDIDATE_NAV_SECTIONS : RECRUITER_NAV_SECTIONS
+  const showAiCopilot = userRole !== 'candidate'
 
   const collapsed = controlledCollapsed ?? uncontrolledCollapsed
 
@@ -168,7 +206,7 @@ export function SideNavigation({
   }
 
   useEffect(() => {
-    for (const section of NAV_SECTIONS) {
+    for (const section of navSections) {
       for (const item of section.items) {
         if (!item.children?.length) continue
         const onChildRoute = item.children.some((child) =>
@@ -185,10 +223,10 @@ export function SideNavigation({
         }
       }
     }
-  }, [location.pathname])
+  }, [location.pathname, navSections])
 
   function handleLogout() {
-    sessionStorage.removeItem('rst_auth')
+    setAuthenticated(false)
     navigate('/login', { replace: true })
   }
 
@@ -241,7 +279,7 @@ export function SideNavigation({
       </div>
 
       <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 py-3">
-        {NAV_SECTIONS.map((section, sectionIndex) => (
+        {navSections.map((section, sectionIndex) => (
           <div key={section.id}>
             {sectionIndex > 0 ? (
               collapsed ? (
@@ -424,28 +462,30 @@ export function SideNavigation({
         {collapsed ? (
           <div className="mb-0.5 h-px w-8 bg-[#d8d8e0]" aria-hidden="true" />
         ) : null}
-        <button
-          type="button"
-          title={collapsed ? 'AI Copilot' : undefined}
-          className={cn(
-            'inline-flex items-center text-sm font-semibold text-white shadow-sm',
-            'rounded-lg bg-gradient-to-r from-[#7c5cff] to-[#3b82f6]',
-            'transition-all duration-300 hover:brightness-105',
-            collapsed
-              ? 'size-10 justify-center gap-0 p-0'
-              : 'h-11 w-full justify-center gap-2.5 px-3',
-          )}
-        >
-          <span
+        {showAiCopilot ? (
+          <button
+            type="button"
+            title={collapsed ? 'AI Copilot' : undefined}
             className={cn(
-              'inline-flex shrink-0 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold tracking-wide',
-              collapsed ? 'size-5' : 'size-6',
+              'inline-flex items-center text-sm font-semibold text-white shadow-sm',
+              'rounded-lg bg-gradient-to-r from-[#7c5cff] to-[#3b82f6]',
+              'transition-all duration-300 hover:brightness-105',
+              collapsed
+                ? 'size-10 justify-center gap-0 p-0'
+                : 'h-11 w-full justify-center gap-2.5 px-3',
             )}
           >
-            AI
-          </span>
-          {!collapsed ? <span className="truncate">AI Copilot</span> : null}
-        </button>
+            <span
+              className={cn(
+                'inline-flex shrink-0 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold tracking-wide',
+                collapsed ? 'size-5' : 'size-6',
+              )}
+            >
+              AI
+            </span>
+            {!collapsed ? <span className="truncate">AI Copilot</span> : null}
+          </button>
+        ) : null}
 
         <button
           type="button"

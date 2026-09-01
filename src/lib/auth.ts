@@ -1,10 +1,18 @@
 const EMAIL_PATTERN =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/
 
+export type UserRole = 'recruiter' | 'candidate'
+
 /** Demo sign-in credentials for local auth check */
 export const DEMO_CREDENTIALS = {
   email: 'ketan@recruitmentsmart.com',
   password: 'ketan@12345',
+} as const
+
+/** Demo candidate account used in Account Settings */
+export const CANDIDATE_DEMO_CREDENTIALS = {
+  email: 'john.doe@email.com',
+  password: DEMO_CREDENTIALS.password,
 } as const
 
 export function validateEmail(email: string): string | null {
@@ -194,24 +202,55 @@ export function validateSignUpFields(values: {
 }
 
 export function authenticate(email: string, password: string): boolean {
+  const normalized = email.trim().toLowerCase()
+  const raw =
+    typeof sessionStorage !== 'undefined'
+      ? sessionStorage.getItem('rst_account_settings')
+      : null
+
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as {
+        email?: string
+        passwordOverride?: string | null
+      }
+      if (parsed.email?.trim().toLowerCase() === normalized) {
+        const expected = parsed.passwordOverride ?? DEMO_CREDENTIALS.password
+        return password === expected
+      }
+    } catch {
+      // Fall through to default demo credentials.
+    }
+  }
+
   return (
-    email.trim().toLowerCase() === DEMO_CREDENTIALS.email.toLowerCase() &&
-    password === DEMO_CREDENTIALS.password
+    (normalized === DEMO_CREDENTIALS.email.toLowerCase() &&
+      password === DEMO_CREDENTIALS.password) ||
+    (normalized === CANDIDATE_DEMO_CREDENTIALS.email.toLowerCase() &&
+      password === CANDIDATE_DEMO_CREDENTIALS.password)
   )
 }
 
 const AUTH_STORAGE_KEY = 'rst_auth'
+const AUTH_ROLE_KEY = 'rst_auth_role'
 
-export function setAuthenticated(value: boolean) {
+export function setAuthenticated(value: boolean, role: UserRole = 'recruiter') {
   if (value) {
     sessionStorage.setItem(AUTH_STORAGE_KEY, '1')
+    sessionStorage.setItem(AUTH_ROLE_KEY, role)
   } else {
     sessionStorage.removeItem(AUTH_STORAGE_KEY)
+    sessionStorage.removeItem(AUTH_ROLE_KEY)
   }
 }
 
 export function isAuthenticated(): boolean {
   return sessionStorage.getItem(AUTH_STORAGE_KEY) === '1'
+}
+
+export function getUserRole(): UserRole {
+  const role = sessionStorage.getItem(AUTH_ROLE_KEY)
+  return role === 'candidate' ? 'candidate' : 'recruiter'
 }
 
 export const INVALID_CREDENTIALS_MESSAGE =

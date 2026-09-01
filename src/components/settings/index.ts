@@ -3,11 +3,35 @@ export type { SettingsNavProps } from './SettingsNav'
 export { SettingsPanel, SettingsBlock } from './SettingsPanel'
 export type { SettingsPanelProps, SettingsBlockProps } from './SettingsPanel'
 export { JobsModulePanel } from './JobsModulePanel'
+export { CampaignSettingsPanel } from './CampaignSettingsPanel'
+export { AddSmsPhonePanel } from './AddSmsPhonePanel'
+export type {
+  AddSmsPhonePanelProps,
+  AddSmsPhonePayload,
+} from './AddSmsPhonePanel'
+export { AddEmailAddressPanel } from './AddEmailAddressPanel'
+export type {
+  AddEmailAddressPanelProps,
+  AddEmailAddressPayload,
+  EmailAddressKind,
+} from './AddEmailAddressPanel'
+export { ColumnFilterVisibilityPanel } from './ColumnFilterVisibilityPanel'
+export { TalentCrmPanel } from './TalentCrmPanel'
+export { SettingsPointerTabs } from './SettingsPointerTabs'
+export type { SettingsPointerTabsProps } from './SettingsPointerTabs'
+export { SettingsUnderlineTabs } from './SettingsUnderlineTabs'
+export type { SettingsUnderlineTabsProps } from './SettingsUnderlineTabs'
+export { EditBadgeRulePanel } from './EditBadgeRulePanel'
+export type { EditBadgeRulePanelProps } from './EditBadgeRulePanel'
 export { AddNewFieldPanel } from './AddNewFieldPanel'
 export type {
   AddNewFieldPanelProps,
   AddNewFieldFormValues,
 } from './AddNewFieldPanel'
+export { AccountSettingsPanel } from './AccountSettingsPanel'
+export { NotificationPreferencesPanel } from './NotificationPreferencesPanel'
+export { SettingsPreferenceCard } from './SettingsPreferenceCard'
+export type { SettingsPreferenceCardProps } from './SettingsPreferenceCard'
 export { RecruiterProfilePanel } from './RecruiterProfilePanel'
 export { CompanyBrandingPanel } from './CompanyBrandingPanel'
 export { NotificationConfigPanel } from './NotificationConfigPanel'
@@ -24,10 +48,19 @@ export { ClientModuleConfigPanel } from './ClientModuleConfigPanel'
 export { SettingsPlaceholderPanel } from './SettingsPlaceholderPanel'
 export {
   SETTINGS_NAV_GROUPS,
+  CANDIDATE_SETTINGS_NAV_GROUPS,
+  TALENT_CRM_NAV_CHILDREN,
   DEFAULT_SETTINGS_SECTION,
+  DEFAULT_CANDIDATE_SETTINGS_SECTION,
+  DEFAULT_TALENT_CRM_SECTION,
   isSettingsSectionId,
+  isSettingsSectionIdForRole,
+  getDefaultSettingsSectionForRole,
+  getSettingsNavGroupsForRole,
   getSettingsSectionLabel,
   getSettingsSectionPath,
+  resolveSettingsSectionId,
+  flattenSettingsNavItems,
 } from './settingsNavConfig'
 export type {
   SettingsSectionId,

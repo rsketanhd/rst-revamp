@@ -10,6 +10,9 @@ import { JobsPage } from './pages/JobsPage'
 import { JeevesAiPage } from './pages/JeevesAiPage'
 import { LoginPage } from './pages/LoginPage'
 import { ModulePage } from './pages/ModulePage'
+import { MyApplicationsPage } from './pages/MyApplicationsPage'
+import { MyJobsPage } from './pages/MyJobsPage'
+import { MyProfilePage } from './pages/MyProfilePage'
 import { CreateOneWayInterviewPage } from './pages/CreateOneWayInterviewPage'
 import { InterviewSchedulerPage } from './pages/InterviewSchedulerPage'
 import { OneWayInterviewDetailPage } from './pages/OneWayInterviewDetailPage'
@@ -37,6 +40,9 @@ export default function App() {
             }
           >
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/my-applications" element={<MyApplicationsPage />} />
+            <Route path="/my-jobs" element={<MyJobsPage />} />
+            <Route path="/my-profile" element={<MyProfilePage />} />
             <Route path="/jobs" element={<JobsPage />} />
             <Route path="/jobs/new" element={<CreateJobPage />} />
             <Route

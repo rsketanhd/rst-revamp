@@ -20,6 +20,7 @@ import {
   setAuthenticated,
   validateEmail,
 } from '../lib/auth'
+import { reactivateAccountOnLogin } from '../data/accountSettings'
 
 type AuthView = 'sign-in' | 'sign-up' | 'forgot-password' | 'check-mail'
 
@@ -45,7 +46,11 @@ export function LoginPage() {
         return
       }
 
-      setAuthenticated(true)
+      if (values.role === 'candidate') {
+        reactivateAccountOnLogin()
+      }
+
+      setAuthenticated(true, values.role)
       navigate('/dashboard', { replace: true })
     } finally {
       setIsSubmitting(false)

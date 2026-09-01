@@ -8,8 +8,7 @@ import {
   type AppNotification,
 } from './NotificationsPanel'
 import { ProfileMenu, type ProfileMenuItemId } from './ProfileMenu'
-import { toast } from './Toast'
-import { setAuthenticated } from '../../lib/auth'
+import { getUserRole, setAuthenticated } from '../../lib/auth'
 
 export type AppTopBarProps = {
   /** ISO or display string, e.g. `"08/14/2023 9:23 PM"` */
@@ -90,17 +89,25 @@ export function AppTopBar({
   }
 
   function handleProfileItem(id: ProfileMenuItemId) {
+    const role = getUserRole()
+
     switch (id) {
       case 'myProfile':
-        navigate('/settings/recruiter-profile')
+        navigate(role === 'candidate' ? '/my-profile' : '/settings/recruiter-profile')
         return
       case 'changePassword':
-        toast.success('Change password will open here.', {
-          title: 'Change Password',
-        })
+        navigate(
+          role === 'candidate'
+            ? '/settings/account-settings'
+            : '/settings/recruiter-profile',
+        )
         return
       case 'settings':
-        navigate('/settings')
+        navigate(
+          role === 'candidate'
+            ? '/settings/account-settings'
+            : '/settings/recruiter-profile',
+        )
         return
       case 'logout':
         setAuthenticated(false)

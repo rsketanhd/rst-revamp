@@ -28,6 +28,12 @@ export type SidePanelProps = {
   width?: number | string
   /** Classes for the header (default brand navy) */
   headerClassName?: string
+  /** Classes for the title text (default white for navy header) */
+  titleClassName?: string
+  /** Classes for the close button */
+  closeButtonClassName?: string
+  /** Optional controls rendered before the close button (e.g. Help) */
+  headerActions?: ReactNode
   /** Classes for the scrollable body */
   bodyClassName?: string
   /** Classes for the footer row */
@@ -48,6 +54,9 @@ export function SidePanel({
   widthClassName = DEFAULT_WIDTH_CLASS,
   width,
   headerClassName,
+  titleClassName,
+  closeButtonClassName,
+  headerActions,
   bodyClassName,
   footerClassName,
 }: SidePanelProps) {
@@ -140,18 +149,28 @@ export function SidePanel({
         >
           <h2
             id={titleId}
-            className="text-base font-semibold tracking-tight text-white"
+            className={cn(
+              'min-w-0 flex-1 truncate text-base font-semibold tracking-tight',
+              titleClassName ?? 'text-white',
+            )}
           >
             {title}
           </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="inline-flex size-8 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <X className="size-5" aria-hidden="true" />
-          </button>
+          <div className="flex shrink-0 items-center gap-0.5">
+            {headerActions}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className={cn(
+                'inline-flex size-8 items-center justify-center rounded-full transition-colors',
+                closeButtonClassName ??
+                  'text-white/90 hover:bg-white/10 hover:text-white',
+              )}
+            >
+              <X className="size-5" aria-hidden="true" />
+            </button>
+          </div>
         </header>
 
         <div

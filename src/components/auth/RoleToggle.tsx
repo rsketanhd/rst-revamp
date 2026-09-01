@@ -1,6 +1,5 @@
 import { cn } from '../../lib/cn'
-
-export type UserRole = 'recruiter' | 'candidate'
+import type { UserRole } from '../../lib/auth'
 
 export type RoleToggleProps = {
   value: UserRole

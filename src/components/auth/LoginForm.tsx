@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Button, Checkbox, Input } from '../ui'
 import { validateLoginFields } from '../../lib/auth'
 import { cn } from '../../lib/cn'
-import type { UserRole } from './RoleToggle'
+import type { UserRole } from '../../lib/auth'
 
 export type LoginFormValues = {
   email: string
