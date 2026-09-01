@@ -6,6 +6,7 @@ import {
   Checkbox,
   DEFAULT_COUNTRIES,
   Input,
+  PasswordInput,
   PhoneInput,
 } from '../ui'
 import {
@@ -196,9 +197,8 @@ export function SignUpForm({
           }}
         />
 
-        <Input
+        <PasswordInput
           name="password"
-          type="password"
           autoComplete="new-password"
           label="Password"
           placeholder="Password"
@@ -212,9 +212,8 @@ export function SignUpForm({
           }}
         />
 
-        <Input
+        <PasswordInput
           name="confirmPassword"
-          type="password"
           autoComplete="new-password"
           label="Confirm Password"
           placeholder="Confirm Password"

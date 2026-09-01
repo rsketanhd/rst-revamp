@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react'
 import { useState } from 'react'
-import { Button, Checkbox, Input } from '../ui'
+import { Button, Checkbox, Input, PasswordInput } from '../ui'
 import { validateLoginFields } from '../../lib/auth'
 import { cn } from '../../lib/cn'
 import type { UserRole } from '../../lib/auth'
@@ -119,9 +119,8 @@ export function LoginForm({
           }}
         />
 
-        <Input
+        <PasswordInput
           name="password"
-          type="password"
           autoComplete="current-password"
           label="Password"
           placeholder="Password"

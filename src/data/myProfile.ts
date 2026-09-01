@@ -281,6 +281,18 @@ export function addEducation(entry: Omit<EducationEntry, 'id'>): MyProfileState 
   })
 }
 
+export function getProfileDesignation(state: MyProfileState): string {
+  const latestJob = state.jobInformation.find(
+    (entry) => entry.currentTitle.trim().length > 0,
+  )
+
+  if (latestJob?.currentTitle.trim()) {
+    return latestJob.currentTitle.trim()
+  }
+
+  return 'Candidate'
+}
+
 export function getProfileDisplayName(state: MyProfileState): string {
   return state.personalInfo.fullName.trim() || 'Your Name'
 }

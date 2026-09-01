@@ -2,6 +2,8 @@ export { Button } from './Button'
 export type { ButtonProps } from './Button'
 export { Input } from './Input'
 export type { InputProps } from './Input'
+export { PasswordInput } from './PasswordInput'
+export type { PasswordInputProps } from './PasswordInput'
 export { Textarea } from './Textarea'
 export type { TextareaProps } from './Textarea'
 export { Select } from './Select'
@@ -29,7 +31,7 @@ export type { StepsWizardProps, WizardStep } from './StepsWizard'
 export { AppTopBar } from './AppTopBar'
 export type { AppTopBarProps } from './AppTopBar'
 export { ProfileMenu } from './ProfileMenu'
-export type { ProfileMenuProps, ProfileMenuItemId } from './ProfileMenu'
+export type { ProfileMenuProps, ProfileMenuItemId, ProfileMenuCandidateSummary } from './ProfileMenu'
 export {
   NotificationsPanel,
   DEFAULT_NOTIFICATIONS,

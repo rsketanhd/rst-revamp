@@ -15,6 +15,7 @@ import {
   Settings,
   Sparkles,
   SquareUser,
+  UserRound,
   UserRoundCog,
   Users,
 } from 'lucide-react'
@@ -169,6 +170,12 @@ const CANDIDATE_NAV_SECTIONS: NavSection[] = [
         label: 'My Jobs',
         to: '/my-jobs',
         icon: <Briefcase className="size-[1.15rem]" strokeWidth={1.75} />,
+      },
+      {
+        id: 'my-profile',
+        label: 'My Profile',
+        to: '/my-profile',
+        icon: <UserRound className="size-[1.15rem]" strokeWidth={1.75} />,
       },
       {
         id: 'settings',

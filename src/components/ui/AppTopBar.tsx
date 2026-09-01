@@ -1,6 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, RefreshCw } from 'lucide-react'
+import {
+  getMyProfile,
+  getProfileDesignation,
+  getProfileDisplayName,
+  getProfileInitials,
+} from '../../data/myProfile'
 import { cn } from '../../lib/cn'
 import {
   DEFAULT_NOTIFICATIONS,
@@ -54,6 +60,22 @@ export function AppTopBar({
   const bellRef = useRef<HTMLButtonElement>(null)
   const profileRef = useRef<HTMLButtonElement>(null)
   const syncing = syncingProp ?? internalSyncing
+  const userRole = getUserRole()
+  const candidateSummary = useMemo(() => {
+    if (userRole !== 'candidate') return undefined
+
+    const profile = getMyProfile()
+    return {
+      name: getProfileDisplayName(profile),
+      designation: getProfileDesignation(profile),
+      initials: getProfileInitials(profile),
+    }
+  }, [userRole, profileOpen])
+
+  const topBarInitials =
+    userRole === 'candidate'
+      ? candidateSummary?.initials ?? profileInitials
+      : profileInitials
 
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.read).length,
@@ -182,7 +204,7 @@ export function AppTopBar({
           className="size-7 overflow-hidden rounded-full bg-[#C9C4DE] shadow-[0_0_0_1px_rgba(45,32,97,0.08)] transition-opacity hover:opacity-90"
         >
           <span className="flex h-full w-full items-center justify-center text-[10px] font-bold text-[#2D2061]">
-            {profileInitials}
+            {topBarInitials}
           </span>
         </button>
 
@@ -190,7 +212,13 @@ export function AppTopBar({
           open={profileOpen}
           onClose={() => setProfileOpen(false)}
           anchorRef={profileRef}
-          onItemSelect={handleProfileItem}
+          onItemSelect={userRole === 'candidate' ? undefined : handleProfileItem}
+          onViewProfile={
+            userRole === 'candidate'
+              ? () => navigate('/my-profile')
+              : undefined
+          }
+          candidateSummary={candidateSummary}
         />
       </div>
     </div>

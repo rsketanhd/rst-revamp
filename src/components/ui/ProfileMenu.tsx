@@ -14,11 +14,19 @@ export type ProfileMenuItemId =
   | 'settings'
   | 'logout'
 
+export type ProfileMenuCandidateSummary = {
+  name: string
+  designation: string
+  initials?: string
+}
+
 export type ProfileMenuProps = {
   open: boolean
   onClose: () => void
   anchorRef: RefObject<HTMLElement | null>
-  onItemSelect: (id: ProfileMenuItemId) => void
+  onItemSelect?: (id: ProfileMenuItemId) => void
+  onViewProfile?: () => void
+  candidateSummary?: ProfileMenuCandidateSummary
   className?: string
 }
 
@@ -40,18 +48,21 @@ const ITEMS: Array<{
 ]
 
 /**
- * Top-bar profile avatar dropdown — My Profile, Change Password, Settings, Logout.
+ * Top-bar profile dropdown — recruiter menu or candidate profile summary.
  */
 export function ProfileMenu({
   open,
   onClose,
   anchorRef,
   onItemSelect,
+  onViewProfile,
+  candidateSummary,
   className,
 }: ProfileMenuProps) {
   const panelId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   const [coords, setCoords] = useState<Coords | null>(null)
+  const isCandidateSummary = Boolean(candidateSummary)
 
   function updatePosition() {
     const anchor = anchorRef.current
@@ -89,7 +100,7 @@ export function ProfileMenu({
       window.removeEventListener('resize', onReposition)
       window.removeEventListener('scroll', onReposition, true)
     }
-  }, [open])
+  }, [open, isCandidateSummary, candidateSummary?.name, candidateSummary?.designation])
 
   useEffect(() => {
     if (!open) return
@@ -115,50 +126,87 @@ export function ProfileMenu({
 
   if (!open || typeof document === 'undefined') return null
 
+  function handleViewProfile() {
+    onViewProfile?.()
+    onClose()
+  }
+
   return createPortal(
     <div
       ref={panelRef}
       id={panelId}
-      role="menu"
-      aria-label="Account menu"
+      role={isCandidateSummary ? 'dialog' : 'menu'}
+      aria-label={isCandidateSummary ? 'Profile summary' : 'Account menu'}
       style={
         coords
           ? { top: coords.top, left: coords.left }
           : { top: -9999, left: -9999, visibility: 'hidden' as const }
       }
       className={cn(
-        'fixed z-[110] min-w-[13.5rem] overflow-hidden rounded-lg border border-[#E4E1EE] bg-white py-1.5',
+        'fixed z-[110] min-w-[14rem] overflow-hidden rounded-lg border border-[#E4E1EE] bg-white',
+        isCandidateSummary ? 'px-4 py-4' : 'py-1.5',
         'shadow-[0_8px_28px_rgba(26,22,56,0.14)]',
         className,
       )}
     >
-      {ITEMS.map((item) => {
-        const Icon = item.icon
-        return (
-          <button
-            key={item.id}
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              onItemSelect(item.id)
-              onClose()
-            }}
-            className={cn(
-              'flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm font-medium transition-colors',
-              item.destructive
-                ? 'text-[#DC2626] hover:bg-[#FEF2F2]'
-                : 'text-[#2D2061] hover:bg-[#F7F6FB]',
+      {isCandidateSummary && candidateSummary ? (
+        <div className="flex items-center gap-3">
+          <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[#C9C4DE] text-[#2D2061]">
+            {candidateSummary.initials ? (
+              <span className="text-sm font-bold">{candidateSummary.initials}</span>
+            ) : (
+              <UserRound className="size-5" strokeWidth={1.75} aria-hidden="true" />
             )}
-          >
-            <Icon
-              className="size-4 shrink-0 opacity-80"
-              strokeWidth={1.75}
-              aria-hidden="true"
-            />
-            {item.label}
-          </button>
-        )
-      })}
+          </span>
+          <div className="min-w-0">
+            <button
+              type="button"
+              onClick={handleViewProfile}
+              className="block max-w-full truncate text-left text-sm font-semibold text-[#2D2061] transition-colors hover:text-[#241a52] hover:underline"
+            >
+              {candidateSummary.name}
+            </button>
+            <p className="truncate text-xs text-[#8B8B9E]">
+              {candidateSummary.designation}
+            </p>
+            <button
+              type="button"
+              onClick={handleViewProfile}
+              className="mt-1 text-left text-[11px] font-medium text-[#2D2061] transition-colors hover:text-[#241a52] hover:underline"
+            >
+              View Profile
+            </button>
+          </div>
+        </div>
+      ) : (
+        ITEMS.map((item) => {
+          const Icon = item.icon
+          return (
+            <button
+              key={item.id}
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                onItemSelect?.(item.id)
+                onClose()
+              }}
+              className={cn(
+                'flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm font-medium transition-colors',
+                item.destructive
+                  ? 'text-[#DC2626] hover:bg-[#FEF2F2]'
+                  : 'text-[#2D2061] hover:bg-[#F7F6FB]',
+              )}
+            >
+              <Icon
+                className="size-4 shrink-0 opacity-80"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
+              {item.label}
+            </button>
+          )
+        })
+      )}
     </div>,
     document.body,
   )
