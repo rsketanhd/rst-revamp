@@ -30,12 +30,12 @@ export function MyApplicationDetailsPanel({
       open={open && Boolean(application)}
       onClose={onClose}
       title={application?.jobTitle ?? 'Application Details'}
-      widthClassName="w-full max-w-full sm:max-w-[min(100%,44rem)] lg:max-w-[55vw]"
-      bodyClassName="bg-white p-0"
+      widthClassName="w-full max-w-[38rem] min-w-0 overflow-hidden"
+      bodyClassName="overflow-x-hidden bg-white p-0"
     >
       {application ? (
-        <div className="flex min-h-full flex-col bg-white lg:flex-row">
-          <section className="min-w-0 flex-1 border-b border-[#ECEAF3] p-5 sm:p-6 lg:border-b-0 lg:border-r">
+        <div className="flex h-full min-h-full min-w-0 bg-white">
+          <section className="min-w-0 flex-1 border-r border-[#ECEAF3] p-5">
             <div className="min-w-0">
               <h2 className="text-lg font-bold text-[#2D2061]">
                 {application.jobTitle}
@@ -50,7 +50,7 @@ export function MyApplicationDetailsPanel({
               </p>
             </div>
 
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="mt-6 grid grid-cols-1 gap-4">
               <MyApplicationMetaField label="Job Type" value={application.jobType} />
               <MyApplicationMetaField
                 label="Experience"
@@ -71,7 +71,7 @@ export function MyApplicationDetailsPanel({
             </div>
           </section>
 
-          <aside className="w-full shrink-0 bg-[#F8F9FB] p-5 sm:p-6 lg:w-[17.5rem] xl:w-[19rem]">
+          <aside className="w-[15rem] shrink-0 bg-[#F8F9FB] p-5">
             <ApplicationStatusTimeline stages={timeline} />
           </aside>
         </div>

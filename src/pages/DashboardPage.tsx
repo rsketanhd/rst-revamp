@@ -11,7 +11,9 @@ import {
 import { PageContainer, PageHeader } from '../components/layout'
 import { Button } from '../components/ui'
 import { computeJobStats, formatStat, JOBS } from '../data/jobs'
+import { getUserRole } from '../lib/auth'
 import { cn } from '../lib/cn'
+import { CandidateDashboardPage } from './CandidateDashboardPage'
 
 const QUICK_LINKS = [
   {
@@ -47,9 +49,23 @@ const QUICK_LINKS = [
 ] as const
 
 /**
- * Home overview — separate from the Jobs module list.
+ * Home overview — recruiter stats or candidate dashboard by role.
  */
 export function DashboardPage() {
+  const role = getUserRole()
+  switch (role) {
+    case 'candidate':
+      return <CandidateDashboardPage />
+    case 'recruiter':
+      return <RecruiterDashboardPage />
+    default: {
+      const _exhaustive: never = role
+      return _exhaustive
+    }
+  }
+}
+
+function RecruiterDashboardPage() {
   const navigate = useNavigate()
   const stats = useMemo(() => computeJobStats(JOBS), [])
   const recentJobs = useMemo(

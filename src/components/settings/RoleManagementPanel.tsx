@@ -26,7 +26,7 @@ import {
   type PlatformRole,
   type RolePermissionMatrix,
 } from '../../data/rolePermissions'
-import { Button, ThreeDotsMenu, Tooltip, toast } from '../ui'
+import { Button, ConfirmDeleteModal, ThreeDotsMenu, Tooltip, toast } from '../ui'
 import { SettingsPanel } from './SettingsPanel'
 
 const PERM_COL_WIDTH = 17.5 // rem
@@ -56,6 +56,7 @@ export function RoleManagementPanel() {
   const [highlightRoleId, setHighlightRoleId] = useState<string | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<PlatformRole | null>(null)
 
   const filteredCategories = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -273,6 +274,12 @@ export function RoleManagementPanel() {
       })
       return
     }
+    setPendingDelete(role)
+  }
+
+  function confirmDeleteRole() {
+    if (!pendingDelete) return
+    const role = pendingDelete
     setRoles((current) => current.filter((entry) => entry.id !== role.id))
     setMatrix((current) => {
       const next: RolePermissionMatrix = {}
@@ -287,6 +294,7 @@ export function RoleManagementPanel() {
     toast.success(`Deleted “${role.name.trim() || 'Untitled Role'}”.`, {
       title: 'Role deleted',
     })
+    setPendingDelete(null)
   }
 
   function handleSave() {
@@ -306,6 +314,7 @@ export function RoleManagementPanel() {
   }
 
   return (
+    <>
     <SettingsPanel
       title="Role Permissions"
       description="Assign granular permissions across roles. Expand categories, toggle access, and manage custom roles."
@@ -627,6 +636,15 @@ export function RoleManagementPanel() {
         </div>
       </div>
     </SettingsPanel>
+
+    <ConfirmDeleteModal
+      open={Boolean(pendingDelete)}
+      title="Delete Role"
+      itemName={pendingDelete?.name.trim() || 'Untitled Role'}
+      onClose={() => setPendingDelete(null)}
+      onConfirm={confirmDeleteRole}
+    />
+    </>
   )
 }
 

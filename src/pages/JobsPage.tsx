@@ -230,7 +230,7 @@ export function JobsPage() {
         <PageHeader
           className="mb-5 sm:mb-6"
           title="Job Management"
-          subtitle="Monitor and optimize your job postings performance"
+          subtitle="Monitor and optimize your job postings performance."
           actions={
             <button
               type="button"

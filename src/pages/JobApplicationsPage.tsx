@@ -9,7 +9,7 @@ import {
   UserPlus,
   X,
 } from 'lucide-react'
-import { PageContainer } from '../components/layout'
+import { PageContainer, PageHeader } from '../components/layout'
 import {
   APPLICANT_STATUS_META,
   APPLICANT_STATUS_OPTIONS,
@@ -287,7 +287,7 @@ export function JobApplicationsPage() {
   return (
     <PageContainer contentClassName="gap-4 sm:gap-5">
       {/* Header */}
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <button
             type="button"
@@ -301,9 +301,11 @@ export function JobApplicationsPage() {
             />
             Back to Jobs
           </button>
-          <h1 className="mt-1 text-[1.25rem] font-bold leading-tight tracking-tight text-[#2D2061] sm:text-[1.375rem] lg:text-[1.5rem]">
-            {job.title} Applications
-          </h1>
+          <PageHeader
+            className="mt-1"
+            title={`${job.title} Applications`}
+            subtitle="Review applicants and manage this job's hiring pipeline."
+          />
           <dl className="mt-2 flex flex-col gap-1 text-sm text-[#6B6B80] sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1 sm:gap-y-1">
             <div className="min-w-0">
               <dt className="inline">Job ID : </dt>
@@ -370,7 +372,7 @@ export function JobApplicationsPage() {
             ))}
           </div>
         </div>
-      </header>
+      </div>
 
       <PipelineFunnel
         stages={pipeline}

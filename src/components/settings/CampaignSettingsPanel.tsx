@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
-import { Button, Modal, toast } from '../ui'
+import { Button, ConfirmDeleteModal, toast } from '../ui'
 import { SettingsPanel } from './SettingsPanel'
 import { SettingsUnderlineTabs } from './SettingsUnderlineTabs'
 import { SettingsPointerTabs } from './SettingsPointerTabs'
@@ -282,37 +282,13 @@ export function CampaignSettingsPanel() {
         onSave={handleSaveEmailAddress}
       />
 
-      <Modal
+      <ConfirmDeleteModal
         open={Boolean(pendingDelete)}
-        onClose={() => setPendingDelete(null)}
         title={pendingDelete ? DELETE_TITLES[pendingDelete.kind] : 'Delete'}
-        className="max-w-md"
-      >
-        <p className="text-sm leading-relaxed text-[#4A4A5A]">
-          Are you sure you want to delete{' '}
-          <span className="font-semibold text-[#2D2061]">
-            “{pendingDelete?.label}”
-          </span>
-          ? This action cannot be undone.
-        </p>
-        <div className="mt-6 flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setPendingDelete(null)}
-            className="!h-10 !rounded-md !border-[#2D2061] !px-5 !text-[#2D2061] hover:!bg-[#F7F6FA]"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            onClick={confirmDelete}
-            className="!h-10 !rounded-md !bg-[#E53935] !px-5 text-sm font-semibold text-white hover:!bg-[#C62828]"
-          >
-            Delete
-          </Button>
-        </div>
-      </Modal>
+        itemName={pendingDelete?.label}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+      />
     </>
   )
 }

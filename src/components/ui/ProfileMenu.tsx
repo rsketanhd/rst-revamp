@@ -14,6 +14,13 @@ export type ProfileMenuItemId =
   | 'settings'
   | 'logout'
 
+export type ProfileMenuItem = {
+  id: string
+  label: string
+  icon: typeof UserRound
+  destructive?: boolean
+}
+
 export type ProfileMenuCandidateSummary = {
   name: string
   designation: string
@@ -24,9 +31,10 @@ export type ProfileMenuProps = {
   open: boolean
   onClose: () => void
   anchorRef: RefObject<HTMLElement | null>
-  onItemSelect?: (id: ProfileMenuItemId) => void
+  onItemSelect?: (id: string) => void
   onViewProfile?: () => void
   candidateSummary?: ProfileMenuCandidateSummary
+  items?: ProfileMenuItem[]
   className?: string
 }
 
@@ -35,12 +43,7 @@ type Coords = { top: number; left: number }
 const PANEL_GAP = 8
 const VIEWPORT_PAD = 8
 
-const ITEMS: Array<{
-  id: ProfileMenuItemId
-  label: string
-  icon: typeof UserRound
-  destructive?: boolean
-}> = [
+const ITEMS: ProfileMenuItem[] = [
   { id: 'myProfile', label: 'My Profile', icon: UserRound },
   { id: 'changePassword', label: 'Change Password', icon: KeyRound },
   { id: 'settings', label: 'Settings', icon: Settings },
@@ -57,6 +60,7 @@ export function ProfileMenu({
   onItemSelect,
   onViewProfile,
   candidateSummary,
+  items = ITEMS,
   className,
 }: ProfileMenuProps) {
   const panelId = useId()
@@ -179,7 +183,7 @@ export function ProfileMenu({
           </div>
         </div>
       ) : (
-        ITEMS.map((item) => {
+        items.map((item) => {
           const Icon = item.icon
           return (
             <button

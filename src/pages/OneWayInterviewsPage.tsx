@@ -128,7 +128,7 @@ export function OneWayInterviewsPage() {
     <PageContainer contentClassName="gap-5">
       <PageHeader
         title="One-Way Interviews"
-        subtitle="Manage and track all one-way interviews"
+        subtitle="Manage and track all one-way interviews."
         actions={
           <>
             <Button

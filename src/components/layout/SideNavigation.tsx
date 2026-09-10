@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
+  type LucideIcon,
   Briefcase,
   Building2,
   ChevronDown,
@@ -9,6 +10,9 @@ import {
   ChevronRight,
   ClipboardList,
   FileBarChart2,
+  FileSignature,
+  Files,
+  Folder,
   LayoutGrid,
   LogOut,
   Search,
@@ -20,17 +24,10 @@ import {
   Users,
 } from 'lucide-react'
 import logo from '../../assets/Logo.png'
-import { getUserRole, setAuthenticated } from '../../lib/auth'
+import { getUserRole, setAuthenticated, type UserRole } from '../../lib/auth'
 import { cn } from '../../lib/cn'
 
-export type SideNavigationProps = {
-  className?: string
-  defaultCollapsed?: boolean
-  collapsed?: boolean
-  onCollapsedChange?: (collapsed: boolean) => void
-}
-
-type NavItem = {
+export type NavItem = {
   id: string
   label: string
   to: string
@@ -39,10 +36,19 @@ type NavItem = {
   children?: Array<{ id: string; label: string; to: string }>
 }
 
-type NavSection = {
+export type NavSection = {
   id: string
   title?: string
   items: NavItem[]
+}
+
+export type SideNavigationProps = {
+  className?: string
+  defaultCollapsed?: boolean
+  collapsed?: boolean
+  onCollapsedChange?: (collapsed: boolean) => void
+  sections?: NavSection[]
+  showAiCopilot?: boolean
 }
 
 const RECRUITER_NAV_SECTIONS: NavSection[] = [
@@ -53,7 +59,7 @@ const RECRUITER_NAV_SECTIONS: NavSection[] = [
         id: 'dashboard',
         label: 'Dashboard',
         to: '/dashboard',
-        icon: <LayoutGrid className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(LayoutGrid),
       },
     ],
   },
@@ -65,25 +71,25 @@ const RECRUITER_NAV_SECTIONS: NavSection[] = [
         id: 'jobs',
         label: 'Jobs',
         to: '/jobs',
-        icon: <Briefcase className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(Briefcase),
       },
       {
         id: 'candidates',
         label: 'Candidates',
         to: '/candidates',
-        icon: <Users className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(Users),
       },
       {
         id: 'candidate-discovery',
         label: 'Candidate Discovery',
         to: '/candidate-discovery',
-        icon: <Search className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(Search),
       },
       {
         id: 'client-management',
         label: 'Client Management',
         to: '/client-management',
-        icon: <Building2 className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(Building2),
       },
     ],
   },
@@ -95,20 +101,20 @@ const RECRUITER_NAV_SECTIONS: NavSection[] = [
         id: 'talent-crm',
         label: 'Talent CRM',
         to: '/talent-crm',
-        icon: <UserRoundCog className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(UserRoundCog),
       },
       {
         id: 'jeeves-ai',
         label: 'Jeeves AI',
         to: '/jeeves-ai',
-        icon: <Sparkles className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(Sparkles),
         badge: 'PRO',
       },
       {
         id: 'e2e-interviews',
         label: 'E2E Interviews',
         to: '/e2e-interviews',
-        icon: <SquareUser className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(SquareUser),
         children: [
           {
             id: 'one-way',
@@ -127,6 +133,12 @@ const RECRUITER_NAV_SECTIONS: NavSection[] = [
           },
         ],
       },
+      {
+        id: 'offer-management',
+        label: 'Offer Management',
+        to: '/offer-management',
+        icon: navIcon(FileSignature),
+      },
     ],
   },
   {
@@ -137,13 +149,13 @@ const RECRUITER_NAV_SECTIONS: NavSection[] = [
         id: 'reports',
         label: 'Reports',
         to: '/reports',
-        icon: <FileBarChart2 className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(FileBarChart2),
       },
       {
         id: 'settings',
         label: 'Settings',
         to: '/settings/recruiter-profile',
-        icon: <Settings className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(Settings),
       },
     ],
   },
@@ -157,31 +169,37 @@ const CANDIDATE_NAV_SECTIONS: NavSection[] = [
         id: 'dashboard',
         label: 'Dashboard',
         to: '/dashboard',
-        icon: <LayoutGrid className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(LayoutGrid),
       },
       {
         id: 'my-applications',
         label: 'My Applications',
         to: '/my-applications',
-        icon: <ClipboardList className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(ClipboardList),
       },
       {
-        id: 'my-jobs',
-        label: 'My Jobs',
+        id: 'all-jobs',
+        label: 'All Jobs',
         to: '/my-jobs',
-        icon: <Briefcase className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(Folder),
       },
       {
         id: 'my-profile',
         label: 'My Profile',
         to: '/my-profile',
-        icon: <UserRound className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(UserRound),
+      },
+      {
+        id: 'my-documents',
+        label: 'My Documents',
+        to: '/my-documents',
+        icon: navIcon(Files),
       },
       {
         id: 'settings',
         label: 'Settings',
         to: '/settings/account-settings',
-        icon: <Settings className="size-[1.15rem]" strokeWidth={1.75} />,
+        icon: navIcon(Settings),
       },
     ],
   },
@@ -192,17 +210,17 @@ export function SideNavigation({
   defaultCollapsed = false,
   collapsed: controlledCollapsed,
   onCollapsedChange,
+  sections,
+  showAiCopilot,
 }: SideNavigationProps) {
   const [uncontrolledCollapsed, setUncontrolledCollapsed] =
     useState(defaultCollapsed)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
-  const location = useLocation()
+  const { pathname } = useLocation()
   const navigate = useNavigate()
   const userRole = getUserRole()
-  const navSections =
-    userRole === 'candidate' ? CANDIDATE_NAV_SECTIONS : RECRUITER_NAV_SECTIONS
-  const showAiCopilot = userRole !== 'candidate'
-
+  const navSections = sections ?? navSectionsForRole(userRole)
+  const aiCopilotVisible = showAiCopilot ?? true
   const collapsed = controlledCollapsed ?? uncontrolledCollapsed
 
   function setCollapsed(next: boolean) {
@@ -216,21 +234,17 @@ export function SideNavigation({
     for (const section of navSections) {
       for (const item of section.items) {
         if (!item.children?.length) continue
-        const onChildRoute = item.children.some((child) =>
-          location.pathname.startsWith(child.to),
+        if (!isGroupRouteActive(item, pathname)) continue
+        setOpenGroups((current) =>
+          current[item.id] ? current : { ...current, [item.id]: true },
         )
-        const onParentRoute =
-          location.pathname === item.to ||
-          location.pathname.startsWith(`${item.to}/`)
-
-        if (onChildRoute || onParentRoute) {
-          setOpenGroups((current) =>
-            current[item.id] ? current : { ...current, [item.id]: true },
-          )
-        }
       }
     }
-  }, [location.pathname, navSections])
+  }, [pathname, navSections])
+
+  function toggleGroup(id: string) {
+    setOpenGroups((current) => ({ ...current, [id]: !current[id] }))
+  }
 
   function handleLogout() {
     setAuthenticated(false)
@@ -289,14 +303,7 @@ export function SideNavigation({
         {navSections.map((section, sectionIndex) => (
           <div key={section.id}>
             {sectionIndex > 0 ? (
-              collapsed ? (
-                <div
-                  className="mx-auto my-2.5 h-px w-8 bg-[#d8d8e0]"
-                  aria-hidden="true"
-                />
-              ) : (
-                <div className="mt-3" />
-              )
+              <SectionDivider collapsed={collapsed} />
             ) : null}
 
             {section.title && !collapsed ? (
@@ -311,150 +318,17 @@ export function SideNavigation({
                 collapsed ? 'items-center gap-1' : 'gap-0.5',
               )}
             >
-              {section.items.map((item) => {
-                const hasChildren = Boolean(item.children?.length)
-                const isGroupOpen = Boolean(openGroups[item.id])
-                const childActive = item.children?.some((child) =>
-                  location.pathname.startsWith(child.to),
-                )
-                const parentRouteActive =
-                  location.pathname === item.to ||
-                  location.pathname.startsWith(`${item.to}/`)
-                /** Selected look only when open (clicked) or a child/parent route is active */
-                const groupSelected =
-                  isGroupOpen || Boolean(childActive) || parentRouteActive
-
-                return (
-                  <li
-                    key={item.id}
-                    className={cn(collapsed && 'flex w-full justify-center')}
-                  >
-                    {hasChildren ? (
-                      collapsed ? (
-                        <button
-                          type="button"
-                          title={item.label}
-                          onClick={() => navigate(item.children![0].to)}
-                          className={cn(
-                            navItemBaseClass(true),
-                            groupSelected && navItemActiveClass(true),
-                          )}
-                        >
-                          <span className="inline-flex size-[1.15rem] shrink-0 items-center justify-center">
-                            {item.icon}
-                          </span>
-                        </button>
-                      ) : (
-                        <div className="overflow-hidden rounded-lg">
-                          <button
-                            type="button"
-                            aria-expanded={isGroupOpen}
-                            onClick={() => {
-                              setOpenGroups((current) => ({
-                                ...current,
-                                [item.id]: !current[item.id],
-                              }))
-                            }}
-                            className={cn(
-                              'flex w-full min-h-10 items-center gap-2.5 px-2.5 py-2 text-[13px] font-medium transition-colors duration-200',
-                              groupSelected
-                                ? cn(
-                                    'bg-[#2D2061] text-white hover:bg-[#2D2061]',
-                                    isGroupOpen
-                                      ? 'rounded-t-lg rounded-b-none'
-                                      : 'rounded-lg',
-                                  )
-                                : cn(
-                                    'rounded-lg text-[#2D2061]',
-                                    'hover:bg-[#2D2061] hover:text-white',
-                                  ),
-                            )}
-                          >
-                            <span className="inline-flex size-[1.15rem] shrink-0 items-center justify-center">
-                              {item.icon}
-                            </span>
-                            <span className="min-w-0 flex-1 truncate text-left">
-                              {item.label}
-                            </span>
-                            <ChevronDown
-                              className={cn(
-                                'size-4 shrink-0 transition-transform duration-300',
-                                isGroupOpen && 'rotate-180',
-                              )}
-                              aria-hidden="true"
-                            />
-                          </button>
-
-                          <div
-                            className={cn(
-                              'grid transition-all duration-300 ease-out',
-                              isGroupOpen
-                                ? 'grid-rows-[1fr] opacity-100'
-                                : 'grid-rows-[0fr] opacity-0',
-                            )}
-                          >
-                            <div className="min-h-0 overflow-hidden">
-                              <ul className="rounded-b-lg bg-white pb-1.5 pt-0.5">
-                                {item.children?.map((child) => (
-                                  <li key={child.id}>
-                                    <NavLink
-                                      to={child.to}
-                                      title={child.label}
-                                      className={({ isActive }) =>
-                                        cn(
-                                          'flex min-h-9 items-center truncate py-2 pl-10 pr-3 text-[13px] transition-colors',
-                                          isActive
-                                            ? 'font-semibold text-[#2D2061]'
-                                            : 'font-medium text-[#6B7280] hover:text-[#2D2061]',
-                                        )
-                                      }
-                                    >
-                                      <span className="truncate">
-                                        {child.label}
-                                      </span>
-                                    </NavLink>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    ) : (
-                      <NavLink
-                        to={item.to}
-                        title={collapsed ? item.label : undefined}
-                        className={({ isActive }) => {
-                          const settingsActive =
-                            item.id === 'settings' &&
-                            location.pathname.startsWith('/settings')
-                          return cn(
-                            navItemBaseClass(collapsed),
-                            (isActive || settingsActive) &&
-                              navItemActiveClass(collapsed),
-                          )
-                        }}
-                      >
-                        <span className="inline-flex size-[1.15rem] shrink-0 items-center justify-center">
-                          {item.icon}
-                        </span>
-                        {!collapsed ? (
-                          <>
-                            <span className="min-w-0 flex-1 truncate">
-                              {item.label}
-                            </span>
-                            {item.badge ? (
-                              <span className="rounded bg-[#C44FA8] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
-                                {item.badge}
-                              </span>
-                            ) : null}
-                          </>
-                        ) : null}
-                      </NavLink>
-                    )}
-                  </li>
-                )
-              })}
+              {section.items.map((item) => (
+                <SideNavItem
+                  key={item.id}
+                  item={item}
+                  collapsed={collapsed}
+                  pathname={pathname}
+                  isGroupOpen={Boolean(openGroups[item.id])}
+                  onToggleGroup={toggleGroup}
+                  onNavigate={navigate}
+                />
+              ))}
             </ul>
           </div>
         ))}
@@ -469,7 +343,7 @@ export function SideNavigation({
         {collapsed ? (
           <div className="mb-0.5 h-px w-8 bg-[#d8d8e0]" aria-hidden="true" />
         ) : null}
-        {showAiCopilot ? (
+        {aiCopilotVisible ? (
           <button
             type="button"
             title={collapsed ? 'AI Copilot' : undefined}
@@ -500,7 +374,8 @@ export function SideNavigation({
           title={collapsed ? 'Logout' : undefined}
           className={cn(
             'inline-flex items-center text-sm font-semibold text-white',
-            'rounded-lg bg-[#6b5b95] transition-all duration-300 hover:bg-[#5d4f84]',
+            'rounded-lg transition-all duration-300',
+            logoutToneClass(userRole),
             collapsed
               ? 'size-10 justify-center gap-0 p-0'
               : 'h-11 w-full justify-center gap-2.5 px-3',
@@ -521,7 +396,44 @@ export function SideNavigation({
   )
 }
 
-function navItemBaseClass(collapsed: boolean) {
+function navIcon(Icon: LucideIcon): ReactNode {
+  return <Icon className="size-[1.15rem]" strokeWidth={1.75} />
+}
+
+function navSectionsForRole(role: UserRole): NavSection[] {
+  switch (role) {
+    case 'candidate':
+      return CANDIDATE_NAV_SECTIONS
+    case 'recruiter':
+      return RECRUITER_NAV_SECTIONS
+    default: {
+      const _exhaustive: never = role
+      return _exhaustive
+    }
+  }
+}
+
+function logoutToneClass(role: UserRole): string {
+  switch (role) {
+    case 'candidate':
+      return 'bg-[#C44B7A] hover:bg-[#B03F6C]'
+    case 'recruiter':
+      return 'bg-[#6b5b95] hover:bg-[#5d4f84]'
+    default: {
+      const _exhaustive: never = role
+      return _exhaustive
+    }
+  }
+}
+
+function isGroupRouteActive(item: NavItem, pathname: string): boolean {
+  if (item.children?.some((child) => pathname.startsWith(child.to))) {
+    return true
+  }
+  return pathname === item.to || pathname.startsWith(`${item.to}/`)
+}
+
+function navItemBaseClass(collapsed: boolean): string {
   return cn(
     'group flex items-center text-[13px] font-medium text-[#2D2061]',
     'transition-colors duration-200',
@@ -533,10 +445,208 @@ function navItemBaseClass(collapsed: boolean) {
   )
 }
 
-function navItemActiveClass(collapsed: boolean) {
+function navItemActiveClass(collapsed: boolean): string {
   return cn(
     'bg-[#2D2061] text-white shadow-none',
     'hover:bg-[#2D2061] hover:text-white',
     collapsed && 'size-10',
+  )
+}
+
+function groupTriggerClass(selected: boolean, open: boolean): string {
+  if (selected) {
+    return cn(
+      'bg-[#2D2061] text-white hover:bg-[#2D2061]',
+      open ? 'rounded-t-lg rounded-b-none' : 'rounded-lg',
+    )
+  }
+  return cn('rounded-lg text-[#2D2061]', 'hover:bg-[#2D2061] hover:text-white')
+}
+
+function NavItemGlyph({ icon }: { icon: ReactNode }) {
+  return (
+    <span className="inline-flex size-[1.15rem] shrink-0 items-center justify-center">
+      {icon}
+    </span>
+  )
+}
+
+function SectionDivider({ collapsed }: { collapsed: boolean }) {
+  if (collapsed) {
+    return (
+      <div
+        className="mx-auto my-2.5 h-px w-8 bg-[#d8d8e0]"
+        aria-hidden="true"
+      />
+    )
+  }
+  return <div className="mt-3" />
+}
+
+type SideNavItemProps = {
+  item: NavItem
+  collapsed: boolean
+  pathname: string
+  isGroupOpen: boolean
+  onToggleGroup: (id: string) => void
+  onNavigate: (to: string) => void
+}
+
+function SideNavItem({
+  item,
+  collapsed,
+  pathname,
+  isGroupOpen,
+  onToggleGroup,
+  onNavigate,
+}: SideNavItemProps) {
+  const hasChildren = Boolean(item.children?.length)
+  const groupSelected = isGroupOpen || isGroupRouteActive(item, pathname)
+
+  return (
+    <li className={cn(collapsed && 'flex w-full justify-center')}>
+      {hasChildren ? (
+        <NavGroupItem
+          item={item}
+          collapsed={collapsed}
+          isGroupOpen={isGroupOpen}
+          groupSelected={groupSelected}
+          onToggleGroup={onToggleGroup}
+          onNavigate={onNavigate}
+        />
+      ) : (
+        <NavLeafLink item={item} collapsed={collapsed} pathname={pathname} />
+      )}
+    </li>
+  )
+}
+
+type NavGroupItemProps = {
+  item: NavItem
+  collapsed: boolean
+  isGroupOpen: boolean
+  groupSelected: boolean
+  onToggleGroup: (id: string) => void
+  onNavigate: (to: string) => void
+}
+
+function NavGroupItem({
+  item,
+  collapsed,
+  isGroupOpen,
+  groupSelected,
+  onToggleGroup,
+  onNavigate,
+}: NavGroupItemProps) {
+  if (collapsed) {
+    const firstChildTo = item.children?.[0]?.to
+    return (
+      <button
+        type="button"
+        title={item.label}
+        onClick={() => {
+          if (firstChildTo) onNavigate(firstChildTo)
+        }}
+        className={cn(
+          navItemBaseClass(true),
+          groupSelected && navItemActiveClass(true),
+        )}
+      >
+        <NavItemGlyph icon={item.icon} />
+      </button>
+    )
+  }
+
+  return (
+    <div className="overflow-hidden rounded-lg">
+      <button
+        type="button"
+        aria-expanded={isGroupOpen}
+        onClick={() => onToggleGroup(item.id)}
+        className={cn(
+          'flex w-full min-h-10 items-center gap-2.5 px-2.5 py-2 text-[13px] font-medium transition-colors duration-200',
+          groupTriggerClass(groupSelected, isGroupOpen),
+        )}
+      >
+        <NavItemGlyph icon={item.icon} />
+        <span className="min-w-0 flex-1 truncate text-left">{item.label}</span>
+        <ChevronDown
+          className={cn(
+            'size-4 shrink-0 transition-transform duration-300',
+            isGroupOpen && 'rotate-180',
+          )}
+          aria-hidden="true"
+        />
+      </button>
+
+      <div
+        className={cn(
+          'grid transition-all duration-300 ease-out',
+          isGroupOpen
+            ? 'grid-rows-[1fr] opacity-100'
+            : 'grid-rows-[0fr] opacity-0',
+        )}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <ul className="rounded-b-lg bg-white pb-1.5 pt-0.5">
+            {item.children?.map((child) => (
+              <li key={child.id}>
+                <NavLink
+                  to={child.to}
+                  title={child.label}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex min-h-9 items-center truncate py-2 pl-10 pr-3 text-[13px] transition-colors',
+                      isActive
+                        ? 'font-semibold text-[#2D2061]'
+                        : 'font-medium text-[#6B7280] hover:text-[#2D2061]',
+                    )
+                  }
+                >
+                  <span className="truncate">{child.label}</span>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function NavLeafLink({
+  item,
+  collapsed,
+  pathname,
+}: {
+  item: NavItem
+  collapsed: boolean
+  pathname: string
+}) {
+  return (
+    <NavLink
+      to={item.to}
+      title={collapsed ? item.label : undefined}
+      className={({ isActive }) => {
+        const settingsActive =
+          item.id === 'settings' && pathname.startsWith('/settings')
+        return cn(
+          navItemBaseClass(collapsed),
+          (isActive || settingsActive) && navItemActiveClass(collapsed),
+        )
+      }}
+    >
+      <NavItemGlyph icon={item.icon} />
+      {!collapsed ? (
+        <>
+          <span className="min-w-0 flex-1 truncate">{item.label}</span>
+          {item.badge ? (
+            <span className="rounded bg-[#C44FA8] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+              {item.badge}
+            </span>
+          ) : null}
+        </>
+      ) : null}
+    </NavLink>
   )
 }

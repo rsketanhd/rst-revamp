@@ -12,6 +12,10 @@ export { MyJobsListPanel } from './MyJobsListPanel'
 export type { MyJobsListPanelProps } from './MyJobsListPanel'
 export { MyJobsSearchBar } from './MyJobsSearchBar'
 export type { MyJobsSearchBarProps } from './MyJobsSearchBar'
+export { RecommendedJobCard } from './RecommendedJobCard'
+export type { RecommendedJobCardProps } from './RecommendedJobCard'
+export { RecommendedJobsSection } from './RecommendedJobsSection'
+export type { RecommendedJobsSectionProps } from './RecommendedJobsSection'
 export { ResumeUploadSection } from './ResumeUploadSection'
 export type {
   ResumeUploadSectionHandle,

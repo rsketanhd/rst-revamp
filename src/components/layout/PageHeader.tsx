@@ -4,8 +4,8 @@ import { cn } from '../../lib/cn'
 export type PageHeaderProps = {
   /** Main page title (h1) */
   title: string
-  /** Supporting line under the title */
-  subtitle?: string
+  /** Supporting line under the title — required on every page */
+  subtitle: string
   /** Optional CTAs or trailing controls (right-aligned on larger screens) */
   actions?: ReactNode
   className?: string
@@ -43,16 +43,14 @@ export function PageHeader({
         >
           {title}
         </h1>
-        {subtitle ? (
-          <p
-            className={cn(
-              'mt-0.5 text-sm font-normal text-[#8B8B9E]',
-              subtitleClassName,
-            )}
-          >
-            {subtitle}
-          </p>
-        ) : null}
+        <p
+          className={cn(
+            'mt-0.5 text-sm font-normal text-[#8B8B9E]',
+            subtitleClassName,
+          )}
+        >
+          {subtitle}
+        </p>
       </div>
 
       {actions ? (

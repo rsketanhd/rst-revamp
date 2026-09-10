@@ -178,7 +178,7 @@ export function OfferHiredDistributionPage() {
 
       <PageHeader
         title="Offer & Hired Distribution"
-        subtitle="Agency · Candidate Forwarding Intelligence"
+        subtitle="View offer and hired distribution across agencies and candidates."
         actions={
           <Button
             type="button"

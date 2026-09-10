@@ -11,6 +11,8 @@ export type ModalProps = {
   children: ReactNode
   className?: string
   contentClassName?: string
+  /** Overlay z-index class. Defaults to `z-50`. */
+  zClassName?: string
 }
 
 export function Modal({
@@ -20,6 +22,7 @@ export function Modal({
   children,
   className,
   contentClassName,
+  zClassName = 'z-50',
 }: ModalProps) {
   useEffect(() => {
     if (!open) return
@@ -45,7 +48,12 @@ export function Modal({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className={cn(
+        'fixed inset-0 flex items-center justify-center p-4',
+        zClassName,
+      )}
+    >
       <button
         type="button"
         aria-label="Close dialog backdrop"

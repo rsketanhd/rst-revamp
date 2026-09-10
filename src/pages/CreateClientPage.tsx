@@ -99,7 +99,7 @@ export function CreateClientPage() {
               <PageHeader
                 className="mt-1"
                 title="Create New Client"
-                subtitle="Create New Client"
+                subtitle="Add a client account with contacts, branding, and access."
               />
             </header>
 

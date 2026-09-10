@@ -16,10 +16,16 @@ export type SettingsSectionId =
   | 'recruiter-profile'
   | 'company-branding'
   | 'notification-config'
-  | 'email-config'
+  | 'templates'
+  | 'triggers'
+  | 'approvals'
   | 'user-management'
   | 'role-management'
   | 'admin-panel'
+  | 'domain-rules'
+  | 'candidate-privacy'
+  | 'data-retention'
+  | 'audit-activity'
   | 'account-settings'
   | 'notification-preferences'
 
@@ -46,7 +52,7 @@ export const TALENT_CRM_NAV_CHILDREN: SettingsNavItem[] = [
 
 /**
  * Secondary settings navigation —
- * Module Configuration + Settings Hub + Platform Administration.
+ * Module Configuration + Settings Hub + Platform Administration + Security & Privacy.
  */
 export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
   {
@@ -75,7 +81,9 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
       { id: 'recruiter-profile', label: 'Recruiter Profile' },
       { id: 'company-branding', label: 'Company & Branding' },
       { id: 'notification-config', label: 'Notification Config' },
-      { id: 'email-config', label: 'Email Config' },
+      { id: 'templates', label: 'Templates' },
+      { id: 'triggers', label: 'Triggers' },
+      { id: 'approvals', label: 'Approvals' },
     ],
   },
   {
@@ -85,6 +93,16 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
       { id: 'user-management', label: 'User Management' },
       { id: 'role-management', label: 'Role Management' },
       { id: 'admin-panel', label: 'Admin Panel' },
+    ],
+  },
+  {
+    id: 'security-privacy',
+    title: 'Security & Privacy',
+    items: [
+      { id: 'domain-rules', label: 'Domain Rules' },
+      { id: 'candidate-privacy', label: 'Candidate Privacy' },
+      { id: 'data-retention', label: 'Data Retention' },
+      { id: 'audit-activity', label: 'Audit & Activity' },
     ],
   },
 ]

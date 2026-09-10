@@ -6,4 +6,8 @@ export { PageHeader } from './PageHeader'
 export type { PageHeaderProps } from './PageHeader'
 export { RequireAuth } from './RequireAuth'
 export { SideNavigation } from './SideNavigation'
-export type { SideNavigationProps } from './SideNavigation'
+export type {
+  NavItem,
+  NavSection,
+  SideNavigationProps,
+} from './SideNavigation'

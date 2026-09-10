@@ -124,32 +124,35 @@ const SHARED_DESCRIPTION: MyJobDescriptionSection[] = [
     id: 'what-youll-do',
     title: "What you'll do",
     items: [
-      'Design and deliver high-quality UI/UX solutions for web and mobile products.',
-      'Collaborate with product managers, engineers, and stakeholders to define user requirements.',
-      'Create wireframes, prototypes, and visual designs that align with brand guidelines.',
-      'Conduct user research and usability testing to validate design decisions.',
-      'Maintain design systems and ensure consistency across product experiences.',
+      'Responsible for setting the wholesale commercial strategies for all countries and accounts in the designated Region.',
+      'Set the cost targets into managed markets and establish cost baseline rates and floor prices for monthly pricing and target sell rates.',
+      'Provide commercial support and oversight to all wholesale services, like voice, roaming and IPX in the region and for the designated accounts.',
+      'Manage the routing of traffic to optimise quality for our customers, fulfil all deal commitments.',
+      'Own and drive profitable business growth and International Services evolution products',
+      'Delivery of margin goal for designated region and services',
     ],
   },
   {
     id: 'what-you-bring',
     title: 'What you will bring to the team',
     items: [
-      'Strong portfolio demonstrating UI/UX design expertise.',
-      'Proficiency in Figma, Sketch, or similar design tools.',
-      'Experience with user-centered design methodologies.',
-      'Excellent communication and collaboration skills.',
-      'Ability to translate complex requirements into intuitive interfaces.',
+      'At least 10 years experience in international voice/roaming /IPX/wholesale services',
+      'Background in voice, roaming and IPX negotiations and delivery of cost and margin targets',
+      'Knowledge of sanctions, regulatory and tax framework as it applies to international wholesale services',
+      'Intermediate People Manager Skills',
+      'Strong resilience and Proactive',
+      'Business or Mathematics Degree',
     ],
   },
   {
     id: 'what-you-bring-2',
     title: 'What you will bring to the team',
     items: [
-      'Knowledge of accessibility standards (WCAG) and responsive design principles.',
-      'Experience working in agile development environments.',
-      'Understanding of front-end technologies (HTML, CSS) is a plus.',
-      'Passion for creating delightful user experiences.',
+      'At least 10 years experience in international voice/roaming /IPX/wholesale services',
+      'Background in voice, roaming and IPX negotiations and delivery of cost and margin targets',
+      'Knowledge of sanctions, regulatory and tax framework as it applies to international wholesale services',
+      'Strong resilience and Proactive',
+      'Business or Mathematics Degree',
     ],
   },
 ]
@@ -271,10 +274,10 @@ export const MY_JOBS: MyJob[] = [
     id: 'job-2',
     title: 'Junior Product Designer',
     company: 'AMAZON INDIA LTD',
-    jobType: 'Full Time',
-    workMode: 'On Site',
-    experience: '2-5 Years',
-    location: 'Ahmedabad, Gujrat, India',
+    jobType: 'Part Time',
+    workMode: 'Remote',
+    experience: '0-2 Years',
+    location: 'Bangalore, Karnataka, India',
     postedAgo: 'Posted 3 Days ago',
     companySize: '10000+',
     salaryRange: '6-12 LPA',
@@ -288,10 +291,10 @@ export const MY_JOBS: MyJob[] = [
     title: 'Product Designer (UI)',
     company: 'AMAZON INDIA LTD',
     jobType: 'Full Time',
-    workMode: 'On Site',
-    experience: '5-10 Years',
-    location: 'Ahmedabad, Gujrat, India',
-    postedAgo: 'Posted 5 Days ago',
+    workMode: 'Hybrid',
+    experience: '3-5 Years',
+    location: 'Hyderabad, Telangana, India',
+    postedAgo: 'Posted 1 Week ago',
     companySize: '10000+',
     salaryRange: '12-20 LPA',
     relevanceScore: 90,
@@ -301,51 +304,51 @@ export const MY_JOBS: MyJob[] = [
   },
   {
     id: 'job-4',
-    title: 'UX Researcher',
-    company: 'FLIPKART INTERNET PVT LTD',
-    jobType: 'Full Time',
-    workMode: 'Hybrid',
-    experience: '3-5 Years',
-    location: 'Bangalore, Karnataka, India',
-    postedAgo: 'Posted 2 Days ago',
-    companySize: '5000-10000',
-    salaryRange: '10-18 LPA',
-    relevanceScore: 75,
-    resumeMatchScore: 70,
-    descriptionSections: SHARED_DESCRIPTION,
-    fitCriteria: JUNIOR_PRODUCT_FIT,
-  },
-  {
-    id: 'job-5',
-    title: 'Visual Designer',
-    company: 'SWIGGY',
+    title: 'Lead Product Designer',
+    company: 'AMAZON INDIA LTD',
     jobType: 'Contract',
-    workMode: 'Remote',
-    experience: '2-5 Years',
-    location: 'Remote',
-    postedAgo: 'Posted 4 Days ago',
-    companySize: '1000-5000',
-    salaryRange: '8-14 LPA',
-    relevanceScore: 68,
-    resumeMatchScore: 52,
-    descriptionSections: SHARED_DESCRIPTION,
-    fitCriteria: PRODUCT_UI_FIT,
-  },
-  {
-    id: 'job-6',
-    title: 'Lead UI/UX Designer',
-    company: 'INFOSYS LTD',
-    jobType: 'Full Time',
     workMode: 'On Site',
-    experience: '8-12 Years',
-    location: 'Pune, Maharashtra, India',
-    postedAgo: 'Posted 1 Week ago',
+    experience: '7+ Years',
+    location: 'Bengaluru, Karnataka, India',
+    postedAgo: 'Posted 2 Weeks ago',
     companySize: '10000+',
     salaryRange: '20-30 LPA',
     relevanceScore: 85,
     resumeMatchScore: 80,
     descriptionSections: SHARED_DESCRIPTION,
     fitCriteria: SR_PRODUCT_FIT,
+  },
+  {
+    id: 'job-5',
+    title: 'UX Design Intern',
+    company: 'AMAZON INDIA LTD',
+    jobType: 'Internship',
+    workMode: 'Remote',
+    experience: '0-2 Years',
+    location: 'Remote',
+    postedAgo: 'Posted 4 Days ago',
+    companySize: '10000+',
+    salaryRange: '3-6 LPA',
+    relevanceScore: 68,
+    resumeMatchScore: 62,
+    descriptionSections: SHARED_DESCRIPTION,
+    fitCriteria: JUNIOR_PRODUCT_FIT,
+  },
+  {
+    id: 'job-6',
+    title: 'Junior UX Designer',
+    company: 'AMAZON INDIA LTD',
+    jobType: 'Full Time',
+    workMode: 'Hybrid',
+    experience: '1 Year',
+    location: 'Hyderabad, Telangana, India',
+    postedAgo: 'Posted 5 Days ago',
+    companySize: '10000+',
+    salaryRange: '6-12 LPA',
+    relevanceScore: 74,
+    resumeMatchScore: 71,
+    descriptionSections: SHARED_DESCRIPTION,
+    fitCriteria: JUNIOR_PRODUCT_FIT,
   },
 ]
 
@@ -354,7 +357,15 @@ export const MY_JOBS_FILTER_OPTIONS = {
   companySize: ['1-50', '51-200', '201-1000', '1000-5000', '5000-10000', '10000+'],
   salaryRange: ['3-6 LPA', '6-12 LPA', '12-20 LPA', '15-25 LPA', '20-30 LPA', '30+ LPA'],
   workMode: ['On Site', 'Remote', 'Hybrid'],
-  experience: ['0-2 Years', '2-5 Years', '3-5 Years', '5-10 Years', '8-12 Years'],
+  experience: [
+    '1 Year',
+    '0-2 Years',
+    '2-5 Years',
+    '3-5 Years',
+    '5-10 Years',
+    '7+ Years',
+    '8-12 Years',
+  ],
 }
 
 export const MY_JOBS_SORT_OPTIONS: Array<{ id: MyJobsSortOption; label: string }> =
@@ -486,4 +497,29 @@ export function getSuggestedJobs(
   limit = 3,
 ): MyJob[] {
   return jobs.filter((job) => job.id !== selectedJobId).slice(0, limit)
+}
+
+export const RECOMMENDED_MATCH_TOTAL = 24
+
+export const DEFAULT_RECOMMENDED_MATCH_SUMMARY =
+  'Matches 5 of 6 skills · Riyadh · your preferred salary band'
+
+const RECOMMENDED_JOB_IDS = [
+  'job-1',
+  'job-2',
+  'job-3',
+  'job-4',
+  'job-6',
+] as const
+
+export type RecommendedJob = MyJob & {
+  matchSummary: string
+}
+
+export function getRecommendedJobs(jobs: MyJob[]): RecommendedJob[] {
+  return RECOMMENDED_JOB_IDS.flatMap((id) => {
+    const job = jobs.find((item) => item.id === id)
+    if (!job) return []
+    return [{ ...job, matchSummary: DEFAULT_RECOMMENDED_MATCH_SUMMARY }]
+  })
 }

@@ -6,7 +6,7 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react'
-import { Modal, Switch, toast } from '../ui'
+import { ConfirmDeleteModal, Switch, toast } from '../ui'
 import { SettingsPanel } from './SettingsPanel'
 import { SettingsUnderlineTabs } from './SettingsUnderlineTabs'
 import { EditBadgeRulePanel } from './EditBadgeRulePanel'
@@ -335,36 +335,13 @@ export function TalentCrmPanel() {
         onSave={handleSaveRule}
       />
 
-      <Modal
+      <ConfirmDeleteModal
         open={Boolean(pendingDelete)}
-        onClose={() => setPendingDelete(null)}
         title="Delete Badge Rule"
-        className="max-w-md"
-      >
-        <p className="text-sm leading-relaxed text-[#4A4A5A]">
-          Are you sure you want to delete{' '}
-          <span className="font-semibold text-[#2D2061]">
-            “{pendingDelete?.badge}”
-          </span>
-          ? This action cannot be undone.
-        </p>
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => setPendingDelete(null)}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-[#2D2061] px-5 text-sm font-medium text-[#2D2061] hover:bg-[#F7F6FA]"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={confirmDelete}
-            className="inline-flex h-10 items-center justify-center rounded-md bg-[#E53935] px-5 text-sm font-semibold text-white hover:bg-[#C62828]"
-          >
-            Delete
-          </button>
-        </div>
-      </Modal>
+        itemName={pendingDelete?.badge}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+      />
     </>
   )
 }

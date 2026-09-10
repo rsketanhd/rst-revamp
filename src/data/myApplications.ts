@@ -37,6 +37,15 @@ export const APPLICATION_PIPELINE_STAGES: Array<{
   { id: 'hired', label: 'Hired' },
 ]
 
+export function applicationStageLabel(
+  stageId: ApplicationPipelineStageId,
+): string {
+  return (
+    APPLICATION_PIPELINE_STAGES.find((stage) => stage.id === stageId)?.label ??
+    stageId
+  )
+}
+
 const STAGE_DATES: Record<ApplicationPipelineStageId, string> = {
   submitted: 'Feb 2, 2019',
   'under-review': 'Feb 5, 2019',
@@ -55,7 +64,7 @@ export const MY_APPLICATIONS: MyApplication[] = [
     department: 'Support',
     dateApplied: 'Feb 2, 2019',
     lastUpdated: '3 days ago',
-    currentStageId: 'under-review',
+    currentStageId: 'submitted',
   },
   {
     id: 'app-2',
@@ -66,18 +75,18 @@ export const MY_APPLICATIONS: MyApplication[] = [
     department: 'UI/UX Design',
     dateApplied: 'Feb 2, 2019',
     lastUpdated: '3 days ago',
-    currentStageId: 'interview',
+    currentStageId: 'under-review',
   },
   {
     id: 'app-3',
     jobTitle: 'Data Scientist',
-    location: 'New York, NY',
+    location: 'Washington',
     jobType: 'Full Time',
     experience: '0-2 Years',
     department: 'Data Science',
     dateApplied: 'Feb 2, 2019',
     lastUpdated: '3 days ago',
-    currentStageId: 'submitted',
+    currentStageId: 'interview',
   },
 ]
 
@@ -97,10 +106,7 @@ export function buildApplicationTimeline(
   )
 
   return APPLICATION_PIPELINE_STAGES.map((stage, index) => {
-    let status: ApplicationTimelineStatus = 'upcoming'
-    if (index < currentIndex) status = 'completed'
-    else if (index === currentIndex) status = 'current'
-
+    const status = timelineStatusForIndex(index, currentIndex)
     return {
       id: stage.id,
       label: stage.label,
@@ -111,6 +117,15 @@ export function buildApplicationTimeline(
           : undefined,
     }
   })
+}
+
+function timelineStatusForIndex(
+  index: number,
+  currentIndex: number,
+): ApplicationTimelineStatus {
+  if (index < currentIndex) return 'completed'
+  if (index === currentIndex) return 'current'
+  return 'upcoming'
 }
 
 export function filterMyApplications(

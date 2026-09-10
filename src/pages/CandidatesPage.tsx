@@ -267,7 +267,7 @@ export function CandidatesPage() {
     <PageContainer contentClassName="gap-5">
       <PageHeader
         title="Candidates"
-        subtitle="Monitor and optimize your job postings performance."
+        subtitle="Browse and manage candidates across your hiring pipeline."
         actions={
           <Button
             type="button"

@@ -126,7 +126,11 @@ export function CreateOneWayInterviewPage() {
                 Go Back
               </button>
 
-              <PageHeader className="mt-1" title="Create Interview" />
+              <PageHeader
+                className="mt-1"
+                title="Create Interview"
+                subtitle="Configure questions, branding, and invite settings for this interview."
+              />
             </header>
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:flex-row">

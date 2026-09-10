@@ -14,6 +14,7 @@ export type SelectProps = Omit<
   label?: string
   requiredMark?: boolean
   error?: string
+  helperText?: string
   options: Array<SelectOption | string>
   placeholder?: string
 }
@@ -36,6 +37,7 @@ export function Select({
   label,
   requiredMark = false,
   error,
+  helperText,
   options,
   placeholder = 'Select',
   className,
@@ -91,6 +93,8 @@ export function Select({
         <p id={`${selectId}-error`} className="text-xs text-[#E53935]">
           {error}
         </p>
+      ) : helperText ? (
+        <p className="text-xs italic text-[#8B8B9E]">{helperText}</p>
       ) : null}
     </div>
   )

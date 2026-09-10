@@ -147,7 +147,7 @@ export function HiringStageTimeAnalyticsPage() {
 
       <PageHeader
         title="Hiring Stage Time Analytics"
-        subtitle="Trends in Accuracy and Quality of Predictions and the Impact of Data Cleaning Filters on AI Model Performance"
+        subtitle="Trends in accuracy and quality of predictions and the impact of data cleaning filters on AI model performance."
         actions={
           <Button
             type="button"

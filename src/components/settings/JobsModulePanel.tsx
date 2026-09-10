@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
-import { Button, Modal, Switch, toast } from '../ui'
+import { Button, ConfirmDeleteModal, Switch, toast } from '../ui'
 import {
   AddNewFieldPanel,
   type AddNewFieldFormValues,
@@ -289,37 +289,13 @@ export function JobsModulePanel() {
         onSubmit={handleFieldSubmit}
       />
 
-      <Modal
+      <ConfirmDeleteModal
         open={Boolean(pendingDelete)}
-        onClose={() => setPendingDelete(null)}
         title="Delete Field"
-        className="max-w-md"
-      >
-        <p className="text-sm leading-relaxed text-[#4A4A5A]">
-          Are you sure you want to delete{' '}
-          <span className="font-semibold text-[#2D2061]">
-            “{pendingDelete?.name}”
-          </span>
-          ? This action cannot be undone.
-        </p>
-        <div className="mt-6 flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setPendingDelete(null)}
-            className="!h-10 !rounded-md !border-[#2D2061] !px-5 !text-[#2D2061] hover:!bg-[#F7F6FA]"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            onClick={confirmDelete}
-            className="!h-10 !rounded-md !bg-[#E53935] !px-5 text-sm font-semibold text-white hover:!bg-[#C62828]"
-          >
-            Delete
-          </Button>
-        </div>
-      </Modal>
+        itemName={pendingDelete?.name}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+      />
     </SettingsPanel>
   )
 }

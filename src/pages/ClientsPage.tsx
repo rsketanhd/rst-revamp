@@ -267,7 +267,7 @@ export function ClientsPage() {
       <PageHeader
         className="mb-5 sm:mb-6"
         title="Clients"
-        subtitle="Active clients"
+        subtitle="Manage client accounts, contacts, and relationships."
       />
 
       <div className="mb-5 grid grid-cols-1 gap-2.5 sm:mb-6 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">

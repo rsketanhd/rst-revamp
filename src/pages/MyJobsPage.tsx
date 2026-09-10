@@ -1,73 +1,67 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { PageContainer, PageHeader } from '../components/layout'
 import {
   MyJobDetailsSection,
-  MyJobFitCriteriaPanel,
   MyJobsFiltersBar,
   MyJobsFiltersPanel,
   MyJobsListPanel,
   MyJobsSearchBar,
-  ResumeUploadSection,
-  type ResumeUploadSectionHandle,
+  RecommendedJobsSection,
 } from '../components/my-jobs'
 import {
   countMyJobsFilters,
   emptyMyJobsFilters,
   filterMyJobs,
   getMyJobs,
-  getSuggestedJobs,
+  getRecommendedJobs,
+  RECOMMENDED_MATCH_TOTAL,
   MY_JOBS_FILTER_OPTIONS,
-  sortMyJobs,
   type MyJob,
   type MyJobsFilters,
-  type MyJobsSortOption,
 } from '../data/myJobs'
 
 const DEMO_TOTAL_JOBS = 1045
 
 /**
- * Candidate portal — My Jobs browse with resume-based matching.
+ * Candidate portal — All Jobs browse.
  */
 export function MyJobsPage() {
   const allJobs = useMemo(() => getMyJobs(), [])
-  const resumeUploadRef = useRef<ResumeUploadSectionHandle>(null)
-  const [resumeFileName, setResumeFileName] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [locationQuery, setLocationQuery] = useState('')
   const [appliedQuery, setAppliedQuery] = useState('')
   const [appliedLocationQuery, setAppliedLocationQuery] = useState('')
   const [filters, setFilters] = useState<MyJobsFilters>(emptyMyJobsFilters)
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [sortBy, setSortBy] = useState<MyJobsSortOption>('relevance')
+  const [showRecommended, setShowRecommended] = useState(false)
+  const [savedJobIds, setSavedJobIds] = useState<string[]>([])
+  const [appliedJobIds, setAppliedJobIds] = useState<string[]>([])
   const [selectedJobId, setSelectedJobId] = useState<string | null>(
     () => allJobs[0]?.id ?? null,
   )
 
-  const hasResume = resumeFileName !== null
   const activeFilterCount = countMyJobsFilters(filters)
 
-  const filteredJobs = useMemo(() => {
-    const results = filterMyJobs(
-      allJobs,
-      appliedQuery,
-      appliedLocationQuery,
-      filters,
-      hasResume,
-    )
-    return sortMyJobs(results, sortBy)
-  }, [allJobs, appliedQuery, appliedLocationQuery, filters, hasResume, sortBy])
+  const filteredJobs = useMemo(
+    () =>
+      filterMyJobs(
+        allJobs,
+        appliedQuery,
+        appliedLocationQuery,
+        filters,
+        false,
+      ),
+    [allJobs, appliedQuery, appliedLocationQuery, filters],
+  )
 
   const selectedJob = useMemo(
     () => filteredJobs.find((job) => job.id === selectedJobId) ?? null,
     [filteredJobs, selectedJobId],
   )
 
-  const suggestedJobs = useMemo(
-    () =>
-      selectedJob
-        ? getSuggestedJobs(filteredJobs, selectedJob.id)
-        : [],
-    [filteredJobs, selectedJob],
+  const recommendedJobs = useMemo(
+    () => getRecommendedJobs(allJobs),
+    [allJobs],
   )
 
   useEffect(() => {
@@ -81,14 +75,6 @@ export function MyJobsPage() {
       setSelectedJobId(filteredJobs[0]?.id ?? null)
     }
   }, [filteredJobs, selectedJobId])
-
-  function handleResumeUpload(file: File) {
-    setResumeFileName(file.name)
-  }
-
-  function handleResumeRemove() {
-    setResumeFileName(null)
-  }
 
   function handleSearch() {
     setAppliedQuery(query)
@@ -107,6 +93,22 @@ export function MyJobsPage() {
     setSelectedJobId(job.id)
   }
 
+  function handleToggleSave(job: MyJob) {
+    setSavedJobIds((current) =>
+      current.includes(job.id)
+        ? current.filter((id) => id !== job.id)
+        : [...current, job.id],
+    )
+  }
+
+  function handleToggleApply(job: MyJob) {
+    setAppliedJobIds((current) =>
+      current.includes(job.id)
+        ? current.filter((id) => id !== job.id)
+        : [...current, job.id],
+    )
+  }
+
   return (
     <>
       <PageContainer
@@ -114,19 +116,11 @@ export function MyJobsPage() {
         contentClassName="flex min-h-0 flex-1 flex-col gap-0 overflow-hidden"
       >
         <PageHeader
-          title="My Jobs"
+          title="All Jobs"
           subtitle="Browse and manage jobs relevant to your profile."
         />
 
-        <ResumeUploadSection
-          ref={resumeUploadRef}
-          className="mt-5 shrink-0"
-          fileName={resumeFileName}
-          onUpload={handleResumeUpload}
-          onRemove={handleResumeRemove}
-        />
-
-        <div className="mt-3 shrink-0 space-y-2.5 rounded-lg bg-[#F5F6FF] p-3 sm:p-4">
+        <div className="mt-5 shrink-0 space-y-2.5">
           <MyJobsSearchBar
             query={query}
             locationQuery={locationQuery}
@@ -157,29 +151,32 @@ export function MyJobsPage() {
           />
         </div>
 
-        <div className="mt-3 grid min-h-0 flex-1 grid-cols-1 gap-0 overflow-hidden rounded-lg border border-[#E8E6F0] bg-white lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)_minmax(280px,340px)]">
+        <RecommendedJobsSection
+          className="mt-4 shrink-0"
+          expanded={showRecommended}
+          onExpandedChange={setShowRecommended}
+          jobs={recommendedJobs}
+          totalMatchCount={RECOMMENDED_MATCH_TOTAL}
+          onSelectJob={handleSelectJob}
+        />
+
+        <div className="mt-4 grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-[minmax(240px,280px)_minmax(0,1fr)]">
           <MyJobsListPanel
             className="max-h-[28rem] lg:max-h-none"
             jobs={filteredJobs}
             selectedJobId={selectedJobId}
+            appliedJobIds={appliedJobIds}
             totalCount={DEMO_TOTAL_JOBS}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
             onSelectJob={handleSelectJob}
           />
 
           <MyJobDetailsSection
-            className="max-h-[28rem] border-t border-[#E8E6F0] lg:max-h-none lg:border-t-0"
+            className="max-h-[28rem] lg:max-h-none"
             job={selectedJob}
-            suggestedJobs={suggestedJobs}
-            onSelectJob={handleSelectJob}
-          />
-
-          <MyJobFitCriteriaPanel
-            className="max-h-[28rem] border-t border-[#E8E6F0] lg:max-h-none lg:border-t-0"
-            job={selectedJob}
-            hasResume={hasResume}
-            onUploadResume={() => resumeUploadRef.current?.openFilePicker()}
+            saved={selectedJob ? savedJobIds.includes(selectedJob.id) : false}
+            applied={selectedJob ? appliedJobIds.includes(selectedJob.id) : false}
+            onToggleSave={handleToggleSave}
+            onToggleApply={handleToggleApply}
           />
         </div>
       </PageContainer>

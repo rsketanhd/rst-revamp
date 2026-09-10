@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Copy, Files, Plus, Search, SquarePen, Trash2 } from 'lucide-react'
-import { Button, Checkbox, ThreeDotsMenu, toast } from '../../ui'
+import { Button, Checkbox, ConfirmDeleteModal, ThreeDotsMenu, toast } from '../../ui'
 import { cn } from '../../../lib/cn'
 import type { TemplateQuestion } from './CreateTemplatePanel'
 import type { CreateOneWayInterviewForm } from './types'
@@ -39,6 +39,8 @@ export function StepInterviewTemplate({
   onCreateTemplate,
 }: Props) {
   const [query, setQuery] = useState('')
+  const [pendingDelete, setPendingDelete] =
+    useState<InterviewTemplateOption | null>(null)
   const isEmpty = templates.length === 0
 
   const defaultLanguage =
@@ -100,16 +102,23 @@ export function StepInterviewTemplate({
       return
     }
     if (action === 'delete') {
-      const next = templates.filter((t) => t.id !== id)
-      onTemplatesChange(next)
-      if (value.templateId === id) {
-        onChange({ templateId: next[0]?.id ?? '' })
-      }
-      toast.success(`Removed “${template.name}”.`, { title: 'Delete' })
+      setPendingDelete(template)
     }
   }
 
+  function confirmDelete() {
+    if (!pendingDelete) return
+    const next = templates.filter((t) => t.id !== pendingDelete.id)
+    onTemplatesChange(next)
+    if (value.templateId === pendingDelete.id) {
+      onChange({ templateId: next[0]?.id ?? '' })
+    }
+    toast.success(`Removed “${pendingDelete.name}”.`, { title: 'Delete' })
+    setPendingDelete(null)
+  }
+
   return (
+    <>
     <div className="flex min-h-full flex-col">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
@@ -301,6 +310,15 @@ export function StepInterviewTemplate({
         </div>
       )}
     </div>
+
+    <ConfirmDeleteModal
+      open={Boolean(pendingDelete)}
+      title="Delete Template"
+      itemName={pendingDelete?.name}
+      onClose={() => setPendingDelete(null)}
+      onConfirm={confirmDelete}
+    />
+    </>
   )
 }
 

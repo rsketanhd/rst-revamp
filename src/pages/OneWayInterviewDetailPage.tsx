@@ -10,7 +10,7 @@ import {
   Search,
   SlidersHorizontal,
 } from 'lucide-react'
-import { PageContainer } from '../components/layout'
+import { PageContainer, PageHeader } from '../components/layout'
 import { GetPublicLinkPanel } from '../components/interviews/GetPublicLinkPanel'
 import {
   getOneWayInterviewById,
@@ -320,32 +320,33 @@ export function OneWayInterviewDetailPage() {
         Back to Interviews
       </button>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <h1 className="text-[1.375rem] font-bold leading-tight tracking-tight text-[#2D2061] sm:text-[1.5rem]">
-          Interview for {interview.title}
-        </h1>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setPublicLinkOpen(true)}
-            className="!h-10 !rounded-md border-[#2D2061] bg-white px-4 text-sm font-semibold text-[#2D2061] hover:bg-[#f7f6fb]"
-          >
-            Get Public Link
-          </Button>
-          <Button
-            type="button"
-            onClick={() =>
-              toast.success('Invite flow will open here.', {
-                title: 'Invite Candidates',
-              })
-            }
-            className="!h-10 !rounded-md !bg-[#2D2061] px-4 text-sm font-semibold text-white hover:!bg-[#241a52]"
-          >
-            Invite Candidates
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title={`Interview for ${interview.title}`}
+        subtitle="Review invited candidates and interview progress."
+        actions={
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPublicLinkOpen(true)}
+              className="!h-10 !rounded-md border-[#2D2061] bg-white px-4 text-sm font-semibold text-[#2D2061] hover:bg-[#f7f6fb]"
+            >
+              Get Public Link
+            </Button>
+            <Button
+              type="button"
+              onClick={() =>
+                toast.success('Invite flow will open here.', {
+                  title: 'Invite Candidates',
+                })
+              }
+              className="!h-10 !rounded-md !bg-[#2D2061] px-4 text-sm font-semibold text-white hover:!bg-[#241a52]"
+            >
+              Invite Candidates
+            </Button>
+          </div>
+        }
+      />
 
       {/* Status tabs — full-width equal segments */}
       <div

@@ -105,7 +105,10 @@ export function MyProfilePage() {
   return (
     <>
       <PageContainer contentClassName="gap-0">
-        <PageHeader title="My Profile" />
+        <PageHeader
+          title="My Profile"
+          subtitle="Keep your resume, skills, and experience up to date."
+        />
 
         <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[21rem_minmax(0,1fr)] xl:items-start">
           <aside className="xl:sticky xl:top-0">

@@ -3,17 +3,12 @@ import { PageContainer, PageHeader } from '../components/layout'
 import {
   MyApplicationCard,
   MyApplicationDetailsPanel,
-  MyApplicationsFiltersPanel,
   MyApplicationsSearchBar,
 } from '../components/my-applications'
 import {
-  countMyApplicationFilters,
-  emptyMyApplicationFilters,
   filterMyApplications,
-  getMyApplicationFilterOptions,
   getMyApplications,
   type MyApplication,
-  type MyApplicationFilters,
 } from '../data/myApplications'
 
 /**
@@ -21,40 +16,25 @@ import {
  */
 export function MyApplicationsPage() {
   const [query, setQuery] = useState('')
-  const [filters, setFilters] = useState<MyApplicationFilters>(
-    emptyMyApplicationFilters,
-  )
-  const [filtersOpen, setFiltersOpen] = useState(false)
   const [selectedApplication, setSelectedApplication] =
     useState<MyApplication | null>(null)
   const applications = useMemo(() => getMyApplications(), [])
-  const filterOptions = useMemo(
-    () => getMyApplicationFilterOptions(applications),
-    [applications],
-  )
-  const activeFilterCount = countMyApplicationFilters(filters)
 
   const filtered = useMemo(
-    () => filterMyApplications(applications, query, filters),
-    [applications, query, filters],
+    () => filterMyApplications(applications, query),
+    [applications, query],
   )
 
   return (
     <>
-      <PageContainer contentClassName="gap-0">
+      <PageContainer contentClassName="gap-5">
         <PageHeader
           title="My Applications"
-          subtitle="Track jobs you have applied to and your application status."
+          subtitle="Track the status of jobs you have applied to."
         />
-        <MyApplicationsSearchBar
-          className="mt-5 border-b border-[#E8E6F0] pb-5"
-          value={query}
-          onChange={setQuery}
-          activeFilterCount={activeFilterCount}
-          onFilterClick={() => setFiltersOpen(true)}
-        />
+        <MyApplicationsSearchBar value={query} onChange={setQuery} />
 
-        <div className="flex flex-col gap-3 pt-5">
+        <div className="flex flex-col gap-3">
           {filtered.map((application) => (
             <MyApplicationCard
               key={application.id}
@@ -69,20 +49,12 @@ export function MyApplicationsPage() {
                 No applications found
               </p>
               <p className="mt-1 text-sm text-[#8B8B9E]">
-                Try adjusting your search or filter criteria.
+                Try a different search term.
               </p>
             </div>
           ) : null}
         </div>
       </PageContainer>
-
-      <MyApplicationsFiltersPanel
-        open={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
-        value={filters}
-        options={filterOptions}
-        onApply={setFilters}
-      />
 
       <MyApplicationDetailsPanel
         open={selectedApplication !== null}

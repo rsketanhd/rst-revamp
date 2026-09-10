@@ -7,7 +7,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { cn } from '../../lib/cn'
-import { Button, Select, SidePanel, Textarea } from '../ui'
+import { Button, ConfirmDeleteModal, Select, SidePanel, Textarea } from '../ui'
 
 export type JeevesAiConfigPanelProps = {
   open: boolean
@@ -117,6 +117,7 @@ export function JeevesAiConfigPanel({
   const [questions, setQuestions] = useState<ChatQuestion[]>(() =>
     cloneQuestions(INITIAL_QUESTIONS),
   )
+  const [pendingDelete, setPendingDelete] = useState<ChatQuestion | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -128,6 +129,7 @@ export function JeevesAiConfigPanel({
       'A recruiter will review your profile and get in touch with you shortly.',
     )
     setQuestions(cloneQuestions(INITIAL_QUESTIONS))
+    setPendingDelete(null)
   }, [open])
 
   function updateQuestion(id: string, patch: Partial<ChatQuestion>) {
@@ -145,7 +147,17 @@ export function JeevesAiConfigPanel({
   }
 
   function deleteQuestion(id: string) {
-    setQuestions((current) => current.filter((q) => q.id !== id))
+    const question = questions.find((entry) => entry.id === id)
+    if (!question) return
+    setPendingDelete(question)
+  }
+
+  function confirmDeleteQuestion() {
+    if (!pendingDelete) return
+    setQuestions((current) =>
+      current.filter((q) => q.id !== pendingDelete.id),
+    )
+    setPendingDelete(null)
   }
 
   function addQuestion() {
@@ -200,6 +212,7 @@ export function JeevesAiConfigPanel({
   }
 
   return (
+    <>
     <SidePanel
       open={open}
       onClose={onClose}
@@ -529,6 +542,15 @@ export function JeevesAiConfigPanel({
         </section>
       </div>
     </SidePanel>
+
+    <ConfirmDeleteModal
+      open={Boolean(pendingDelete)}
+      title="Delete Question"
+      itemName={pendingDelete?.title}
+      onClose={() => setPendingDelete(null)}
+      onConfirm={confirmDeleteQuestion}
+    />
+    </>
   )
 }
 

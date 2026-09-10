@@ -46,10 +46,16 @@ export function DataTable({
   )
 }
 
-export function DataTableHead({ children }: { children: ReactNode }) {
+export function DataTableHead({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
   return (
     <thead>
-      <tr className="border-b border-[#E8E6F0]">{children}</tr>
+      <tr className={cn('border-b border-[#E8E6F0]', className)}>{children}</tr>
     </thead>
   )
 }

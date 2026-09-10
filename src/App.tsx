@@ -11,6 +11,7 @@ import { JeevesAiPage } from './pages/JeevesAiPage'
 import { LoginPage } from './pages/LoginPage'
 import { ModulePage } from './pages/ModulePage'
 import { MyApplicationsPage } from './pages/MyApplicationsPage'
+import { MyDocumentsPage } from './pages/MyDocumentsPage'
 import { MyJobsPage } from './pages/MyJobsPage'
 import { MyProfilePage } from './pages/MyProfilePage'
 import { CreateOneWayInterviewPage } from './pages/CreateOneWayInterviewPage'
@@ -21,6 +22,8 @@ import { ReportsPage } from './pages/ReportsPage'
 import { JobStatisticsOverviewPage } from './pages/JobStatisticsOverviewPage'
 import { HiringStageTimeAnalyticsPage } from './pages/HiringStageTimeAnalyticsPage'
 import { OfferHiredDistributionPage } from './pages/OfferHiredDistributionPage'
+import { CreateOfferPage } from './pages/CreateOfferPage'
+import { OfferManagementPage } from './pages/OfferManagementPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { ClientsPage } from './pages/ClientsPage'
 import { CreateClientPage } from './pages/CreateClientPage'
@@ -41,6 +44,7 @@ export default function App() {
           >
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/my-applications" element={<MyApplicationsPage />} />
+            <Route path="/my-documents" element={<MyDocumentsPage />} />
             <Route path="/my-jobs" element={<MyJobsPage />} />
             <Route path="/my-profile" element={<MyProfilePage />} />
             <Route path="/jobs" element={<JobsPage />} />
@@ -84,6 +88,8 @@ export default function App() {
               element={<InterviewSchedulerPage />}
             />
             <Route path="/e2e-interviews/feedback" element={<ModulePage />} />
+            <Route path="/offer-management" element={<OfferManagementPage />} />
+            <Route path="/offer-management/new" element={<CreateOfferPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route
               path="/reports/job-statistics-overview"

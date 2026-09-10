@@ -30,7 +30,7 @@ export function MyJobsSearchBar({
     <form
       onSubmit={handleSubmit}
       className={cn(
-        'grid grid-cols-1 gap-2.5 sm:grid-cols-[minmax(0,1fr)_minmax(9rem,13rem)_auto] sm:items-center',
+        'grid grid-cols-1 gap-2.5 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,16rem)_auto] sm:items-center',
         className,
       )}
     >
@@ -47,7 +47,7 @@ export function MyJobsSearchBar({
           placeholder="Describe your ideal job or skills"
           aria-label="Search jobs by skills"
           className={cn(
-            'h-10 w-full rounded-md border border-[#E0DDEA] bg-white pl-9 pr-3 text-sm text-[#2D2061]',
+            'h-10 w-full rounded-[5px] border border-[#E0DDEA] bg-white pl-9 pr-3 text-sm text-[#2D2061]',
             'placeholder:text-[#A0A0B2]',
             'transition-colors focus:border-[#2D2061] focus:outline-none focus:ring-2 focus:ring-[#2D2061]/10',
           )}
@@ -67,7 +67,7 @@ export function MyJobsSearchBar({
           placeholder="Location or Remote"
           aria-label="Filter by location"
           className={cn(
-            'h-10 w-full rounded-md border border-[#E0DDEA] bg-white pl-9 pr-3 text-sm text-[#2D2061]',
+            'h-10 w-full rounded-[5px] border border-[#E0DDEA] bg-white pl-9 pr-3 text-sm text-[#2D2061]',
             'placeholder:text-[#A0A0B2]',
             'transition-colors focus:border-[#2D2061] focus:outline-none focus:ring-2 focus:ring-[#2D2061]/10',
           )}

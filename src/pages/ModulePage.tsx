@@ -8,7 +8,7 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
   },
   '/candidates': {
     title: 'Candidates',
-    subtitle: 'Monitor and optimize your job postings performance.',
+    subtitle: 'Browse and manage candidates across your hiring pipeline.',
   },
   '/candidate-discovery': {
     title: 'Candidate Discovery',
@@ -50,8 +50,12 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
     title: 'Interview Feedback',
     subtitle: 'Capture and review interview feedback.',
   },
+  '/offer-management': {
+    title: 'Offer Management',
+    subtitle: 'Create, track, and manage candidate offers.',
+  },
   '/my-jobs': {
-    title: 'My Jobs',
+    title: 'All Jobs',
     subtitle: 'Browse and manage jobs relevant to your profile.',
   },
   '/settings': {

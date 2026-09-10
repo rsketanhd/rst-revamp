@@ -1,69 +1,45 @@
-import { ChevronDown } from 'lucide-react'
-import type { MyJob, MyJobsSortOption } from '../../data/myJobs'
-import { MY_JOBS_SORT_OPTIONS } from '../../data/myJobs'
+import type { MyJob } from '../../data/myJobs'
 import { cn } from '../../lib/cn'
 import { MyJobCard } from './MyJobCard'
 
 export type MyJobsListPanelProps = {
   jobs: MyJob[]
   selectedJobId: string | null
+  appliedJobIds?: string[]
   totalCount: number
-  sortBy: MyJobsSortOption
-  onSortChange: (value: MyJobsSortOption) => void
   onSelectJob: (job: MyJob) => void
   className?: string
 }
 
 /**
- * My Jobs — scrollable left column job list.
+ * All Jobs — scrollable left-column listing.
  */
 export function MyJobsListPanel({
   jobs,
   selectedJobId,
+  appliedJobIds = [],
   totalCount,
-  sortBy,
-  onSortChange,
   onSelectJob,
   className,
 }: MyJobsListPanelProps) {
   return (
     <aside
       className={cn(
-        'flex min-h-0 min-w-0 flex-col border-r border-[#E8E6F0] bg-white',
+        'flex min-h-0 min-w-0 flex-col rounded-xl bg-[#F4F5F8] p-3',
         className,
       )}
     >
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[#E8E6F0] px-4 py-3">
-        <p className="text-sm font-semibold text-[#2D2061]">
-          Total {totalCount.toLocaleString()} Jobs
-        </p>
+      <p className="shrink-0 px-1 pb-2.5 text-xs font-semibold text-[#8B8B9E]">
+        Total {totalCount} Jobs
+      </p>
 
-        <div className="relative">
-          <select
-            value={sortBy}
-            onChange={(event) =>
-              onSortChange(event.target.value as MyJobsSortOption)
-            }
-            aria-label="Sort jobs"
-            className="h-8 appearance-none rounded-md border border-[#E0DDEA] bg-white pl-2.5 pr-7 text-xs font-medium text-[#2D2061] focus:border-[#2D2061] focus:outline-none focus:ring-2 focus:ring-[#2D2061]/10"
-          >
-            {MY_JOBS_SORT_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            className="pointer-events-none absolute right-2 top-1/2 size-3 -translate-y-1/2 text-[#8B8B9E]"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-        </div>
-      </div>
-
-      <div className="min-h-0 flex-1 overflow-y-auto p-3">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {jobs.length === 0 ? (
-          <EmptyListState message="No jobs match your search or filters." />
+          <div className="rounded-lg border border-dashed border-[#E0DDEA] bg-white px-4 py-10 text-center">
+            <p className="text-sm text-[#8B8B9E]">
+              No jobs match your search or filters.
+            </p>
+          </div>
         ) : (
           <ul className="flex flex-col gap-2.5">
             {jobs.map((job) => (
@@ -71,6 +47,7 @@ export function MyJobsListPanel({
                 <MyJobCard
                   job={job}
                   selected={job.id === selectedJobId}
+                  applied={appliedJobIds.includes(job.id)}
                   onSelect={onSelectJob}
                 />
               </li>
@@ -79,13 +56,5 @@ export function MyJobsListPanel({
         )}
       </div>
     </aside>
-  )
-}
-
-function EmptyListState({ message }: { message: string }) {
-  return (
-    <div className="rounded-lg border border-dashed border-[#E0DDEA] bg-[#FAFAFC] px-4 py-10 text-center">
-      <p className="text-sm text-[#8B8B9E]">{message}</p>
-    </div>
   )
 }

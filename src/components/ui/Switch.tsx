@@ -14,6 +14,7 @@ export type SwitchProps = {
    * Use for danger/magenta accents (e.g. team panel loops).
    */
   checkedTrackClassName?: string
+  'aria-label'?: string
 }
 
 /**
@@ -28,6 +29,7 @@ export function Switch({
   className,
   id,
   checkedTrackClassName = 'bg-[#2D2061]',
+  'aria-label': ariaLabel,
 }: SwitchProps) {
   const autoId = useId()
   const switchId = id ?? autoId
@@ -62,6 +64,7 @@ export function Switch({
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-label={ariaLabel}
         disabled={disabled}
         onClick={() => onCheckedChange(!checked)}
         className={cn(

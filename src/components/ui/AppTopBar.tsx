@@ -13,7 +13,7 @@ import {
   NotificationsPanel,
   type AppNotification,
 } from './NotificationsPanel'
-import { ProfileMenu, type ProfileMenuItemId } from './ProfileMenu'
+import { ProfileMenu, type ProfileMenuItemId, type ProfileMenuProps } from './ProfileMenu'
 import { getUserRole, setAuthenticated } from '../../lib/auth'
 
 export type AppTopBarProps = {
@@ -32,6 +32,9 @@ export type AppTopBarProps = {
   hasNotifications?: boolean
   /** Initial / controlled notification list for the dropdown */
   notifications?: AppNotification[]
+  /** When set, used instead of the built-in profile navigation. */
+  onItemSelect?: (id: string) => void
+  profileMenuItems?: ProfileMenuProps['items']
 }
 
 /**
@@ -49,6 +52,8 @@ export function AppTopBar({
   className,
   hasNotifications,
   notifications: notificationsProp,
+  onItemSelect,
+  profileMenuItems,
 }: AppTopBarProps) {
   const navigate = useNavigate()
   const [internalSyncing, setInternalSyncing] = useState(false)
@@ -110,10 +115,15 @@ export function AppTopBar({
     onProfileClick?.()
   }
 
-  function handleProfileItem(id: ProfileMenuItemId) {
+  function handleProfileItem(id: string) {
+    if (onItemSelect) {
+      onItemSelect(id)
+      return
+    }
+
     const role = getUserRole()
 
-    switch (id) {
+    switch (id as ProfileMenuItemId) {
       case 'myProfile':
         navigate(role === 'candidate' ? '/my-profile' : '/settings/recruiter-profile')
         return
@@ -135,10 +145,8 @@ export function AppTopBar({
         setAuthenticated(false)
         navigate('/login', { replace: true })
         return
-      default: {
-        const _exhaustive: never = id
-        return _exhaustive
-      }
+      default:
+        return
     }
   }
 
@@ -212,13 +220,14 @@ export function AppTopBar({
           open={profileOpen}
           onClose={() => setProfileOpen(false)}
           anchorRef={profileRef}
-          onItemSelect={userRole === 'candidate' ? undefined : handleProfileItem}
+          items={profileMenuItems}
+          onItemSelect={userRole === 'candidate' && !onItemSelect ? undefined : handleProfileItem}
           onViewProfile={
-            userRole === 'candidate'
+            userRole === 'candidate' && !onItemSelect
               ? () => navigate('/my-profile')
               : undefined
           }
-          candidateSummary={candidateSummary}
+          candidateSummary={onItemSelect ? undefined : candidateSummary}
         />
       </div>
     </div>
