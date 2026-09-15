@@ -35,6 +35,8 @@ export type AppTopBarProps = {
   /** When set, used instead of the built-in profile navigation. */
   onItemSelect?: (id: string) => void
   profileMenuItems?: ProfileMenuProps['items']
+  profileSummary?: ProfileMenuProps['candidateSummary']
+  onViewProfile?: () => void
 }
 
 /**
@@ -54,6 +56,8 @@ export function AppTopBar({
   notifications: notificationsProp,
   onItemSelect,
   profileMenuItems,
+  profileSummary,
+  onViewProfile,
 }: AppTopBarProps) {
   const navigate = useNavigate()
   const [internalSyncing, setInternalSyncing] = useState(false)
@@ -78,9 +82,10 @@ export function AppTopBar({
   }, [userRole, profileOpen])
 
   const topBarInitials =
-    userRole === 'candidate'
+    profileSummary?.initials ??
+    (userRole === 'candidate'
       ? candidateSummary?.initials ?? profileInitials
-      : profileInitials
+      : profileInitials)
 
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.read).length,
@@ -221,13 +226,17 @@ export function AppTopBar({
           onClose={() => setProfileOpen(false)}
           anchorRef={profileRef}
           items={profileMenuItems}
+          keepMenuItems={Boolean(profileSummary)}
           onItemSelect={userRole === 'candidate' && !onItemSelect ? undefined : handleProfileItem}
           onViewProfile={
-            userRole === 'candidate' && !onItemSelect
+            onViewProfile ??
+            (userRole === 'candidate' && !onItemSelect
               ? () => navigate('/my-profile')
-              : undefined
+              : undefined)
           }
-          candidateSummary={onItemSelect ? undefined : candidateSummary}
+          candidateSummary={
+            profileSummary ?? (onItemSelect ? undefined : candidateSummary)
+          }
         />
       </div>
     </div>
