@@ -7,13 +7,19 @@ import {
   AI_SUGGESTED_PROMPTS,
 } from './aiCreateJobData'
 
+const outlineBtnClass =
+  '!h-10 !rounded-md !border-[#2D2061]/40 !px-4 !text-[#2D2061] hover:!bg-[#F7F6FA]'
+const primaryBtnClass =
+  '!h-10 !rounded-md !bg-[#2D2061] !px-5 text-sm font-semibold text-white hover:!bg-[#241a52]'
+
 export type AiCreateJobPromptPanelProps = {
   open: boolean
   onClose: () => void
-  /** Skip AI flow and open the manual create wizard at step 1 */
-  onSkipToManual: () => void
+  /** Skip AI flow and open the manual wizard with the current prompt */
+  onSkipToManual: (prompt: string) => void
   /** Continue with the current prompt into duplicate detection */
   onContinue: (prompt: string) => void
+  onSaveDraft: (prompt: string) => void
 }
 
 /**
@@ -24,6 +30,7 @@ export function AiCreateJobPromptPanel({
   onClose,
   onSkipToManual,
   onContinue,
+  onSaveDraft,
 }: AiCreateJobPromptPanelProps) {
   const [prompt, setPrompt] = useState('')
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null)
@@ -66,8 +73,8 @@ export function AiCreateJobPromptPanel({
           <Button
             type="button"
             variant="outline"
-            onClick={onSkipToManual}
-            className="!h-10 !rounded-md !border-[#2D2061]/40 !px-4 !text-[#2D2061] hover:!bg-[#F7F6FA]"
+            onClick={() => onSkipToManual(prompt.trim())}
+            className={outlineBtnClass}
           >
             Skip to Manual
           </Button>
@@ -75,15 +82,23 @@ export function AiCreateJobPromptPanel({
             <Button
               type="button"
               variant="outline"
+              onClick={() => onSaveDraft(prompt)}
+              className={outlineBtnClass}
+            >
+              Save as Draft
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
               onClick={onClose}
-              className="!h-10 !rounded-md !border-[#2D2061]/40 !px-4 !text-[#2D2061] hover:!bg-[#F7F6FA]"
+              className={outlineBtnClass}
             >
               Cancel
             </Button>
             <Button
               type="button"
               onClick={handleContinue}
-              className="!h-10 !rounded-md !bg-[#2D2061] !px-5 text-sm font-semibold text-white hover:!bg-[#241a52]"
+              className={primaryBtnClass}
             >
               Continue
             </Button>

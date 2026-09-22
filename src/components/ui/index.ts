@@ -71,8 +71,22 @@ export type {
   ActionMenuProps,
   ActionMenuItem,
 } from './ThreeDotsMenu'
-export { JobCardMenu, JOB_CARD_ACTIONS } from './JobCardMenu'
+export {
+  JobCardMenu,
+  JOB_CARD_ACTIONS,
+  jobCardActionsForStatus,
+} from './JobCardMenu'
 export type { JobCardMenuProps, JobCardActionId } from './JobCardMenu'
+export {
+  ChangeStatusPopover,
+  JOB_CHANGE_STATUS_OPTIONS,
+  jobChangeStatusLabel,
+  jobChangeStatusOption,
+} from './ChangeStatusPopover'
+export type {
+  ChangeStatusPopoverProps,
+  ChangeableJobStatus,
+} from './ChangeStatusPopover'
 export { ShareJobPopover } from './ShareJobPopover'
 export type {
   ShareJobPopoverProps,
@@ -123,7 +137,7 @@ export type {
   ConfigureColumnsPanelProps,
   TableColumnConfig,
 } from './ConfigureColumnsPanel'
-export { StatusPillSelect } from './StatusPillSelect'
+export { StatusPillSelect, StatusPillBadge } from './StatusPillSelect'
 export type {
   StatusPillSelectProps,
   StatusPillOption,

@@ -1,20 +1,17 @@
 import { useMemo, useState } from 'react'
-import { Upload } from 'lucide-react'
+import { Search, Send, SlidersHorizontal, Upload } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { PageContainer, PageHeader } from '../components/layout'
 import {
-  CANDIDATE_SOURCE_OPTIONS,
-  CANDIDATE_STATUS_META,
-  CANDIDATE_STATUS_OPTIONS,
-  CANDIDATE_TAG_OPTIONS,
+  countCandidateFilters,
   emptyCandidatesMoreFilters,
   getCandidates,
-  getCandidatesPipelineStages,
+  PORTAL_ACCESS_META,
+  portalAccessLabel,
   type Candidate,
   type CandidateScope,
   type CandidatesMoreFilters,
 } from '../data/candidates'
-import type { ApplicantStatus, PipelineStageId } from '../data/applications'
 import {
   BulkActionsBar,
   Button,
@@ -31,125 +28,162 @@ import {
   DataTableTh,
   getVisibleTableColumns,
   Pagination,
-  StarRating,
-  StatusPillSelect,
+  StatusPillBadge,
   ThreeDotsMenu,
   type TableColumnConfig,
 } from '../components/ui'
-import { PipelineFunnel } from '../components/applications/PipelineFunnel'
-import {
-  getApplicantRowMenuItems,
-} from '../components/applications/applicantRowActions'
-import { CandidatesFiltersBar } from '../components/candidates/CandidatesFiltersBar'
+import { getApplicantRowMenuItems } from '../components/applications/applicantRowActions'
 import { CandidatesMoreFiltersPanel } from '../components/candidates/CandidatesMoreFiltersPanel'
 import { ImportCandidatesPanel } from '../components/candidates/ImportCandidatesPanel'
+import { ProfileCompletionCell } from '../components/candidates/ProfileCompletionCell'
 import { getCandidateBulkActions } from '../components/candidates/candidateBulkActions'
 
-const DEFAULT_CANDIDATE_COLUMNS: TableColumnConfig[] = [
-  { id: 'name', label: 'Name', visible: true, required: true },
-  { id: 'reqId', label: 'Req ID', visible: true },
-  { id: 'status', label: 'Status', visible: true },
-  { id: 'updated', label: 'Updated', visible: true },
-  { id: 'source', label: 'Source', visible: true },
-  { id: 'suitability', label: 'Suitability', visible: true },
-  { id: 'cvRelevancy', label: 'CV Relevancy', visible: true },
-  { id: 'profileLinks', label: 'Profile Links', visible: true },
+type CandidateColumnId =
+  | 'candidateId'
+  | 'name'
+  | 'email'
+  | 'phone'
+  | 'linkedin'
+  | 'country'
+  | 'city'
+  | 'designation'
+  | 'source'
+  | 'createdBy'
+  | 'skills'
+  | 'experience'
+  | 'profileCompleted'
+  | 'portalAccess'
+  | 'associatedJob'
+
+const DEFAULT_CANDIDATE_COLUMNS: Array<
+  TableColumnConfig & { id: CandidateColumnId }
+> = [
+  { id: 'candidateId', label: 'Candidate ID', visible: true },
+  { id: 'name', label: 'Name', visible: true },
+  { id: 'email', label: 'Email', visible: true },
+  { id: 'phone', label: 'Phone', visible: true },
+  { id: 'linkedin', label: 'LinkedIn', visible: true },
+  { id: 'country', label: 'Country', visible: true },
+  { id: 'city', label: 'City', visible: true },
+  { id: 'designation', label: 'Designation', visible: true },
+  { id: 'source', label: 'Source', visible: false },
+  { id: 'createdBy', label: 'Created By', visible: false },
+  { id: 'skills', label: 'Skills', visible: false },
+  { id: 'experience', label: 'Experience (Total)', visible: false },
+  { id: 'profileCompleted', label: 'Profile (%)', visible: true },
+  { id: 'portalAccess', label: 'Candidate Portal Access', visible: true },
+  { id: 'associatedJob', label: 'Associated to Job', visible: false },
 ]
 
 /**
- * Candidates list — same patterns as Applications with design-specific columns / filters.
+ * Candidates list — search, scope, and the design table columns.
  */
 export function CandidatesPage() {
   const allCandidates = useMemo(() => getCandidates(), [])
-  const pipeline = useMemo(() => getCandidatesPipelineStages(), [])
 
   const [columns, setColumns] = useState<TableColumnConfig[]>(
     DEFAULT_CANDIDATE_COLUMNS,
   )
   const [columnsOpen, setColumnsOpen] = useState(false)
-  const [activeStage, setActiveStage] =
-    useState<PipelineStageId>('clientEndorsement')
   const [scope, setScope] = useState<CandidateScope>('my')
-  const [source, setSource] = useState('')
-  const [tag, setTag] = useState('')
-  const [cvRelevancy, setCvRelevancy] = useState(0)
-  const [suitability, setSuitability] = useState<[number, number]>([0, 95])
+  const [query, setQuery] = useState('')
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
   const [moreFilters, setMoreFilters] = useState<CandidatesMoreFilters>(
     emptyCandidatesMoreFilters,
   )
   const [selected, setSelected] = useState<Record<string, boolean>>({})
-  const [statuses, setStatuses] = useState<Record<string, ApplicantStatus>>({})
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const filtered = useMemo(() => {
-    const barSource = source || moreFilters.source
-    const barTag = tag || moreFilters.tag
+    const needle = query.trim().toLowerCase()
 
     return allCandidates.filter((candidate) => {
       if (scope === 'my' && !candidate.isMine) return false
-      if (barSource && candidate.source !== barSource) return false
-      if (barTag && !candidate.tags.includes(barTag)) return false
-      if (cvRelevancy > 0 && candidate.cvRelevancy < cvRelevancy) return false
       if (
-        candidate.suitability < suitability[0] ||
-        candidate.suitability > suitability[1]
+        candidate.experienceYears < moreFilters.experience[0] ||
+        candidate.experienceYears > moreFilters.experience[1]
       ) {
         return false
       }
-      if (moreFilters.cvScore) {
-        const min = Number(moreFilters.cvScore)
-        if (Number.isFinite(min) && candidate.cvRelevancy < min) return false
-      }
-      const resolvedStatus = statuses[candidate.id] ?? candidate.status
-      if (moreFilters.status && resolvedStatus !== moreFilters.status) {
+      if (moreFilters.source && candidate.source !== moreFilters.source) {
         return false
       }
-      return true
+      if (
+        moreFilters.createdBy &&
+        candidate.createdBy !== moreFilters.createdBy
+      ) {
+        return false
+      }
+      if (moreFilters.skills && candidate.skills !== moreFilters.skills) {
+        return false
+      }
+      if (moreFilters.companies) {
+        const matchesCurrent =
+          moreFilters.companyCurrent &&
+          candidate.currentCompany === moreFilters.companies
+        const matchesPast =
+          moreFilters.companyPast &&
+          candidate.pastCompany === moreFilters.companies
+        if (!matchesCurrent && !matchesPast) return false
+      }
+      if (
+        moreFilters.tags.length > 0 &&
+        !moreFilters.tags.some((tag) => candidate.tags.includes(tag))
+      ) {
+        return false
+      }
+      if (moreFilters.job) {
+        const matchesCurrent =
+          moreFilters.jobCurrent && candidate.currentJob === moreFilters.job
+        const matchesPast =
+          moreFilters.jobPast && candidate.pastJob === moreFilters.job
+        if (!matchesCurrent && !matchesPast) return false
+      }
+      if (
+        moreFilters.applicationStatus &&
+        candidate.applicationStatus !== moreFilters.applicationStatus
+      ) {
+        return false
+      }
+      if (!needle) return true
+      const haystack = [
+        candidate.candidateId,
+        candidate.name,
+        candidate.email,
+        candidate.phone,
+        candidate.linkedin,
+        candidate.country,
+        candidate.city,
+        candidate.designation,
+        candidate.source,
+        candidate.skills,
+        portalAccessLabel(candidate.portalAccess),
+      ]
+        .join(' ')
+        .toLowerCase()
+      return haystack.includes(needle)
     })
-  }, [
-    allCandidates,
-    scope,
-    source,
-    tag,
-    cvRelevancy,
-    suitability,
-    moreFilters,
-    statuses,
-  ])
+  }, [allCandidates, scope, query, moreFilters])
 
-  const stageScoped = useMemo(() => {
-    const matched = filtered.filter((c) => c.stage === activeStage)
-    return matched.length > 0 ? matched : filtered
-  }, [filtered, activeStage])
-
-  const totalFound = stageScoped.length
+  const totalFound = filtered.length
   const totalPages = Math.max(1, Math.ceil(totalFound / rowsPerPage))
   const currentPage = Math.min(page, totalPages)
-  const pageRows = stageScoped.slice(
+  const pageRows = filtered.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage,
   )
 
-  const pageIds = pageRows.map((r) => r.id)
+  const pageIds = pageRows.map((row) => row.id)
   const allPageSelected =
     pageIds.length > 0 && pageIds.every((id) => selected[id])
   const somePageSelected =
     pageIds.some((id) => selected[id]) && !allPageSelected
   const selectedIds = Object.keys(selected).filter((id) => selected[id])
   const selectedCount = selectedIds.length
-  /** Bulk bar once any candidates are selected on this page */
   const showBulkActions = selectedCount > 0
-
-  function getStatus(candidate: Candidate): ApplicantStatus {
-    return statuses[candidate.id] ?? candidate.status
-  }
-
-  function setStatus(id: string, status: ApplicantStatus) {
-    setStatuses((prev) => ({ ...prev, [id]: status }))
-  }
+  const filterCount = countCandidateFilters(moreFilters)
 
   function clearSelection() {
     setSelected({})
@@ -179,87 +213,80 @@ export function CandidatesPage() {
     console.info('candidate bulk action', actionId, selectedIds)
   }
 
-  const tableSources = useMemo(() => {
-    const set = new Set(allCandidates.map((c) => c.source))
-    return Array.from(set)
-  }, [allCandidates])
-
   const visibleColumns = useMemo(
     () => getVisibleTableColumns(columns),
     [columns],
   )
   const colSpan = 2 + visibleColumns.length
 
-  function renderHeader(column: TableColumnConfig) {
-    return (
-      <DataTableSortHeader
-        key={column.id}
-        label={column.label}
-        sortable={column.id !== 'profileLinks'}
-      />
-    )
-  }
-
-  function renderCell(candidate: Candidate, columnId: string) {
-    const status = getStatus(candidate)
+  function renderCell(candidate: Candidate, columnId: CandidateColumnId) {
     switch (columnId) {
+      case 'candidateId':
+        return <DataTableTd key={columnId}>{candidate.candidateId}</DataTableTd>
       case 'name':
-        return (
-          <DataTableTd key={columnId} strong>
-            {candidate.name}
-          </DataTableTd>
-        )
-      case 'reqId':
-        return <DataTableTd key={columnId}>{candidate.reqId}</DataTableTd>
-      case 'status':
-        return (
-          <DataTableTd key={columnId}>
-            <StatusPillSelect
-              value={status}
-              aria-label={`Status for ${candidate.name}`}
-              options={CANDIDATE_STATUS_OPTIONS.map((opt) => ({
-                value: opt,
-                label: CANDIDATE_STATUS_META[opt].label,
-                className: CANDIDATE_STATUS_META[opt].className,
-                dotClassName: CANDIDATE_STATUS_META[opt].dotClassName,
-              }))}
-              onChange={(next) =>
-                setStatus(candidate.id, next as ApplicantStatus)
-              }
-            />
-          </DataTableTd>
-        )
-      case 'updated':
-        return <DataTableTd key={columnId}>{candidate.updatedOn}</DataTableTd>
-      case 'source':
-        return <DataTableTd key={columnId}>{candidate.source}</DataTableTd>
-      case 'suitability':
-        return (
-          <DataTableTd key={columnId} className="font-semibold text-[#12B76A]">
-            {candidate.suitability}%
-          </DataTableTd>
-        )
-      case 'cvRelevancy':
-        return (
-          <DataTableTd key={columnId}>
-            <StarRating value={candidate.cvRelevancy} size="md" />
-          </DataTableTd>
-        )
-      case 'profileLinks':
+        return <DataTableTd key={columnId}>{candidate.name}</DataTableTd>
+      case 'email':
+        return <DataTableTd key={columnId}>{candidate.email}</DataTableTd>
+      case 'phone':
+        return <DataTableTd key={columnId}>{candidate.phone}</DataTableTd>
+      case 'linkedin':
         return (
           <DataTableTd key={columnId}>
             <a
-              href={candidate.profileLink}
+              href={candidate.linkedin}
               target="_blank"
               rel="noreferrer"
               className="text-[13px] font-medium text-[#1A6FD0] underline-offset-2 hover:underline"
             >
-              {candidate.profileLink}
+              {candidate.linkedin}
             </a>
           </DataTableTd>
         )
-      default:
-        return <DataTableTd key={columnId}>—</DataTableTd>
+      case 'country':
+        return <DataTableTd key={columnId}>{candidate.country}</DataTableTd>
+      case 'city':
+        return <DataTableTd key={columnId}>{candidate.city}</DataTableTd>
+      case 'designation':
+        return <DataTableTd key={columnId}>{candidate.designation}</DataTableTd>
+      case 'source':
+        return <DataTableTd key={columnId}>{candidate.source}</DataTableTd>
+      case 'createdBy':
+        return <DataTableTd key={columnId}>{candidate.createdBy}</DataTableTd>
+      case 'skills':
+        return <DataTableTd key={columnId}>{candidate.skills}</DataTableTd>
+      case 'experience':
+        return (
+          <DataTableTd key={columnId}>{candidate.experienceYears} yrs</DataTableTd>
+        )
+      case 'profileCompleted':
+        return (
+          <DataTableTd key={columnId}>
+            <ProfileCompletionCell
+              percent={candidate.profileCompletion}
+              incompleteFields={candidate.incompleteFields}
+            />
+          </DataTableTd>
+        )
+      case 'associatedJob':
+        return <DataTableTd key={columnId}>{candidate.associatedJob}</DataTableTd>
+      case 'portalAccess':
+        return (
+          <DataTableTd key={columnId}>
+            <StatusPillBadge
+              option={{
+                value: candidate.portalAccess,
+                label: portalAccessLabel(candidate.portalAccess),
+                className: PORTAL_ACCESS_META[candidate.portalAccess].className,
+                dotClassName:
+                  PORTAL_ACCESS_META[candidate.portalAccess].dotClassName,
+              }}
+            />
+          </DataTableTd>
+        )
+      default: {
+        const exhaustive: never = columnId
+        return <DataTableTd key={exhaustive}>—</DataTableTd>
+      }
     }
   }
 
@@ -267,7 +294,7 @@ export function CandidatesPage() {
     <PageContainer contentClassName="gap-5">
       <PageHeader
         title="Candidates"
-        subtitle="Browse and manage candidates across your hiring pipeline."
+        subtitle="Monitor and optimize your job postings performance"
         actions={
           <Button
             type="button"
@@ -282,40 +309,45 @@ export function CandidatesPage() {
         }
       />
 
-      <PipelineFunnel
-        stages={pipeline}
-        activeId={activeStage}
-        onChange={(id) => {
-          setActiveStage(id)
-          setPage(1)
-        }}
-      />
-
-      <CandidatesFiltersBar
-        source={source}
-        sourceOptions={tableSources.length > 0 ? tableSources : CANDIDATE_SOURCE_OPTIONS}
-        onSourceChange={(next) => {
-          setSource(next)
-          setPage(1)
-        }}
-        tag={tag}
-        tagOptions={CANDIDATE_TAG_OPTIONS}
-        onTagChange={(next) => {
-          setTag(next)
-          setPage(1)
-        }}
-        cvRelevancy={cvRelevancy}
-        onCvRelevancyChange={(next) => {
-          setCvRelevancy(next)
-          setPage(1)
-        }}
-        suitability={suitability}
-        onSuitabilityChange={(next) => {
-          setSuitability(next)
-          setPage(1)
-        }}
-        onMoreFilters={() => setMoreFiltersOpen(true)}
-      />
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="relative min-w-0 flex-1">
+          <Search
+            className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#8B8B9E]"
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value)
+              setPage(1)
+            }}
+            placeholder="Type here to search"
+            aria-label="Search candidates"
+            className="h-11 w-full rounded-[5px] border border-[#E0DDEA] bg-white py-2 pl-11 pr-12 text-sm text-[#2D2061] outline-none placeholder:text-[#A0A0B2] focus:border-[#2D2061] focus:ring-2 focus:ring-[#2D2061]/10"
+          />
+          <span
+            className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#5B8DEF]"
+            aria-hidden="true"
+          >
+            <Send className="size-4" strokeWidth={1.75} />
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setMoreFiltersOpen(true)}
+          className="relative inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#2D2061]/25 bg-white px-4 text-sm font-medium text-[#2D2061] shadow-[0_1px_2px_rgba(45,32,97,0.04)] transition-colors hover:bg-[#faf9fd]"
+        >
+          <SlidersHorizontal className="size-4 shrink-0" aria-hidden="true" />
+          Filter By
+          {filterCount > 0 ? (
+            <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#2D2061] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
+              {filterCount}
+            </span>
+          ) : null}
+        </button>
+      </div>
 
       <CandidatesMoreFiltersPanel
         open={moreFiltersOpen}
@@ -323,21 +355,21 @@ export function CandidatesPage() {
         value={moreFilters}
         onApply={(next) => {
           setMoreFilters(next)
-          if (next.source) setSource(next.source)
-          if (next.tag) setTag(next.tag)
           setPage(1)
         }}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-[#2D2061]">
-          <span className="font-bold tabular-nums">{totalFound}</span>{' '}
-          Candidates found
+          “<span className="font-bold tabular-nums">{totalFound}</span> Candidates found”
         </p>
-        <ScopeToggle value={scope} onChange={(next) => {
-          setScope(next)
-          setPage(1)
-        }} />
+        <ScopeToggle
+          value={scope}
+          onChange={(next) => {
+            setScope(next)
+            setPage(1)
+          }}
+        />
       </div>
 
       {showBulkActions ? (
@@ -358,12 +390,12 @@ export function CandidatesPage() {
       ) : null}
 
       <DataTable
-        minWidthClassName="min-w-[64rem]"
+        minWidthClassName="min-w-[72rem]"
         footer={
           <DataTablePaginationBar
             rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={(n) => {
-              setRowsPerPage(n)
+            onRowsPerPageChange={(next) => {
+              setRowsPerPage(next)
               setPage(1)
             }}
             pagination={
@@ -381,15 +413,23 @@ export function CandidatesPage() {
             <input
               type="checkbox"
               checked={allPageSelected}
-              onChange={(e) => toggleAll(e.target.checked)}
+              onChange={(event) => toggleAll(event.target.checked)}
               aria-label="Select all candidates on this page"
               className="size-4 shrink-0 rounded border-[#C8C5D6] accent-[#2D2061]"
             />
           </DataTableTh>
-          {visibleColumns.map(renderHeader)}
-          <DataTableActionsHeader
-            onSettingsClick={() => setColumnsOpen(true)}
-          />
+          {visibleColumns.map((column) => (
+            <DataTableSortHeader
+              key={column.id}
+              label={
+                column.id === 'portalAccess' ? 'Portal Access' : column.label
+              }
+              sortable={
+                column.id !== 'linkedin' && column.id !== 'portalAccess'
+              }
+            />
+          ))}
+          <DataTableActionsHeader onSettingsClick={() => setColumnsOpen(true)} />
         </DataTableHead>
         <DataTableBody>
           {pageRows.map((candidate) => (
@@ -404,7 +444,7 @@ export function CandidatesPage() {
                 />
               </DataTableTd>
               {visibleColumns.map((column) =>
-                renderCell(candidate, column.id),
+                renderCell(candidate, column.id as CandidateColumnId),
               )}
               <DataTableTd className="pr-1">
                 <ThreeDotsMenu

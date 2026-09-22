@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AiCreateJobPromptPanel } from './AiCreateJobPromptPanel'
-import { AiCreateJobDuplicatePanel } from './AiCreateJobDuplicatePanel'
+import { toast } from '../../ui'
+import { JOBS_DRAFT_NAV_STATE } from '../../../data/jobs'
 import type { AiCreateJobNavState, SimilarJobMatch } from './aiCreateJobData'
+import { AiCreateJobDuplicatePanel } from './AiCreateJobDuplicatePanel'
+import { AiCreateJobPromptPanel } from './AiCreateJobPromptPanel'
+import { persistDraftFromPrompt } from './jobListingToForm'
 
 export type AiCreateJobFlowProps = {
   open: boolean
@@ -30,21 +33,47 @@ export function AiCreateJobFlow({ open, onClose }: AiCreateJobFlowProps) {
     navigate('/jobs/new', { state })
   }
 
-  function handleSkipToManual() {
-    goToWizard()
+  function handleSkipFromPrompt(nextPrompt: string) {
+    const text = nextPrompt.trim()
+    goToWizard({
+      manualEntry: true,
+      aiPrompt: text || undefined,
+    })
+  }
+
+  function handleSkipFromDuplicates(selected: SimilarJobMatch | null) {
+    const text = prompt.trim()
+    goToWizard({
+      manualEntry: true,
+      aiPrompt: text || undefined,
+      similarJobId: selected?.id,
+      similarJobTitle: selected?.title,
+      similarJobDepartment: selected?.department,
+    })
   }
 
   function handlePromptContinue(nextPrompt: string) {
-    setPrompt(nextPrompt)
+    setPrompt(nextPrompt.trim())
     setStep('duplicates')
   }
 
   function handleSkipAndContinue(selected: SimilarJobMatch | null) {
     goToWizard({
+      aiContinue: true,
       aiPrompt: prompt,
       similarJobId: selected?.id,
       similarJobTitle: selected?.title,
+      similarJobDepartment: selected?.department,
     })
+  }
+
+  function handleSaveDraft(nextPrompt?: string) {
+    const listing = persistDraftFromPrompt(nextPrompt ?? prompt)
+    toast.success(`“${listing.title}” saved as draft.`, {
+      title: 'Draft saved',
+    })
+    resetAndClose()
+    navigate('/jobs', { state: JOBS_DRAFT_NAV_STATE })
   }
 
   return (
@@ -52,14 +81,16 @@ export function AiCreateJobFlow({ open, onClose }: AiCreateJobFlowProps) {
       <AiCreateJobPromptPanel
         open={open && step === 'prompt'}
         onClose={resetAndClose}
-        onSkipToManual={handleSkipToManual}
+        onSkipToManual={handleSkipFromPrompt}
         onContinue={handlePromptContinue}
+        onSaveDraft={handleSaveDraft}
       />
       <AiCreateJobDuplicatePanel
         open={open && step === 'duplicates'}
         onClose={resetAndClose}
-        onSkipToManual={handleSkipToManual}
+        onSkipToManual={handleSkipFromDuplicates}
         onSkipAndContinue={handleSkipAndContinue}
+        onSaveDraft={handleSaveDraft}
       />
     </>
   )

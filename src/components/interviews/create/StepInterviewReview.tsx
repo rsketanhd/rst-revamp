@@ -28,6 +28,7 @@ export function StepInterviewReview({
 }: Props) {
   const jobTitle = jobLabels.length > 0 ? jobLabels.join(', ') : '—'
   const description = value.description.trim() || '—'
+  const avatarStatus = value.avatarEnabled ? 'Enabled' : 'Disabled'
   const language = template?.language || 'English'
   const questions = template?.questions ?? []
   const questionCount = String(questions.length).padStart(2, '0')
@@ -76,6 +77,7 @@ export function StepInterviewReview({
             value={value.linkExpiration || '—'}
           />
           <DetailField label="Job Title" value={jobTitle} />
+          <DetailField label="Avatar" value={avatarStatus} />
         </div>
 
         <div className="mt-4 border-t border-[#F0EEF5] pt-4">

@@ -40,9 +40,14 @@ export const AI_SIMILAR_JOBS: SimilarJobMatch[] = [
 ]
 
 export type AiCreateJobNavState = {
+  /** Open the manual wizard (Skip to Manual) */
+  manualEntry?: boolean
+  /** Continue from the side panel into the provided-role job form */
+  aiContinue?: boolean
   /** Prompt used to seed the job description */
   aiPrompt?: string
   /** Selected similar/existing job to copy from */
   similarJobId?: string
   similarJobTitle?: string
+  similarJobDepartment?: string
 }

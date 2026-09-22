@@ -7,16 +7,22 @@ import {
   type SimilarJobMatch,
 } from './aiCreateJobData'
 
+const outlineBtnClass =
+  '!h-10 !rounded-md !border-[#2D2061]/40 !px-4 !text-[#2D2061] hover:!bg-[#F7F6FA]'
+const primaryBtnClass =
+  '!h-10 !rounded-md !bg-[#2D2061] !px-5 text-sm font-semibold text-white hover:!bg-[#241a52]'
+
 export type AiCreateJobDuplicatePanelProps = {
   open: boolean
   onClose: () => void
-  /** Skip AI flow and open the manual create wizard at step 1 */
-  onSkipToManual: () => void
+  /** Skip AI flow and open the manual wizard, keeping any selected job */
+  onSkipToManual: (selected: SimilarJobMatch | null) => void
   /**
    * Continue into the wizard. Passes the selected similar job when one
    * was chosen; otherwise continues without copying.
    */
   onSkipAndContinue: (selected: SimilarJobMatch | null) => void
+  onSaveDraft: () => void
   similarJobs?: SimilarJobMatch[]
 }
 
@@ -28,6 +34,7 @@ export function AiCreateJobDuplicatePanel({
   onClose,
   onSkipToManual,
   onSkipAndContinue,
+  onSaveDraft,
   similarJobs = AI_SIMILAR_JOBS,
 }: AiCreateJobDuplicatePanelProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -52,8 +59,8 @@ export function AiCreateJobDuplicatePanel({
           <Button
             type="button"
             variant="outline"
-            onClick={onSkipToManual}
-            className="!h-10 !rounded-md !border-[#2D2061]/40 !px-4 !text-[#2D2061] hover:!bg-[#F7F6FA]"
+            onClick={() => onSkipToManual(selected)}
+            className={outlineBtnClass}
           >
             Skip to Manual
           </Button>
@@ -61,15 +68,23 @@ export function AiCreateJobDuplicatePanel({
             <Button
               type="button"
               variant="outline"
+              onClick={() => onSaveDraft()}
+              className={outlineBtnClass}
+            >
+              Save as Draft
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
               onClick={onClose}
-              className="!h-10 !rounded-md !border-[#2D2061]/40 !px-4 !text-[#2D2061] hover:!bg-[#F7F6FA]"
+              className={outlineBtnClass}
             >
               Cancel
             </Button>
             <Button
               type="button"
               onClick={() => onSkipAndContinue(selected)}
-              className="!h-10 !rounded-md !bg-[#2D2061] !px-5 text-sm font-semibold text-white hover:!bg-[#241a52]"
+              className={primaryBtnClass}
             >
               Skip & Continue
             </Button>

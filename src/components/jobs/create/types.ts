@@ -7,7 +7,7 @@ export const CREATE_JOB_STEPS = [
   { id: 'review', label: 'Review' },
 ] as const
 
-export type CreateMethod = 'copy' | 'scratch'
+export type CreateMethod = 'copy' | 'scratch' | 'upload'
 
 export type AnalyzerSource = 'old' | 'new'
 
@@ -27,6 +27,12 @@ export type AnalyzerCriteria = {
 
 export type CreateJobFormState = {
   method: CreateMethod
+  /** Catalog job copied on step 1; empty until one is selected */
+  sourceJobId: string
+  /** Continue from the AI side panel — role banner plus the job form */
+  aiEntry: boolean
+  /** Prompt shown in “Your provided job role”; empty after Clear Search */
+  providedRole: string
   jobReqId: string
   jobTitle: string
   jobDescription: string
@@ -114,7 +120,10 @@ export const emptyLinkedInAllFilters: LinkedInAllFilters = {
 }
 
 export const defaultCreateJobForm: CreateJobFormState = {
-  method: 'scratch',
+  method: 'copy',
+  sourceJobId: '',
+  aiEntry: false,
+  providedRole: '',
   jobReqId: '',
   jobTitle: 'Head of Engineering',
   jobDescription: `Job Title: Head of Engineering

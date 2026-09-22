@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Briefcase,
   Building2,
@@ -14,26 +14,38 @@ import {
 } from 'lucide-react'
 import { cn } from '../lib/cn'
 import {
+  coerceJobStatus,
   computeJobStats,
   filterJobs,
   formatStat,
+  isJobStatusFilter,
   JOBS,
+  JOB_STATUS_FILTER_OPTIONS,
+  jobStatusPillOption,
   type JobListing,
-  type JobStatus,
+  type JobStatusFilter,
 } from '../data/jobs'
+import { getExtraJobs, patchExtraJob, removeExtraJob, upsertExtraJob } from '../data/jobStore'
 import {
   BulkActionsBar,
   FilterSortPanel,
   JobCardMenu,
   JOB_CARD_ACTIONS,
+  jobCardActionsForStatus,
   AppTopBar,
+  ConfirmDeleteModal,
   SegmentedControl,
   Tooltip,
   toast,
   countActiveFilters,
   emptyFilterSortValues,
+  ChangeStatusPopover,
+  JOB_CHANGE_STATUS_OPTIONS,
+  jobChangeStatusLabel,
+  StatusPillBadge,
   type FilterSortValues,
   type JobCardActionId,
+  type ChangeableJobStatus,
 } from '../components/ui'
 import { JobViewEditPanel } from '../components/jobs/JobViewEditPanel'
 import { AiCreateJobFlow } from '../components/jobs/create/AiCreateJobFlow'
@@ -45,9 +57,85 @@ type JobScope = 'my' | 'all'
 /** Jobs rendered per lazy-load page. */
 const PAGE_SIZE = 5
 
+function defaultStageStatus(jobId: string): ChangeableJobStatus {
+  const index = Math.max(0, Number.parseInt(jobId, 10) - 1)
+  return (
+    JOB_CHANGE_STATUS_OPTIONS[index % JOB_CHANGE_STATUS_OPTIONS.length]?.value ??
+    'new'
+  )
+}
+
+function stageStatusFor(
+  jobId: string,
+  overrides: Record<string, ChangeableJobStatus>,
+): ChangeableJobStatus {
+  return overrides[jobId] ?? defaultStageStatus(jobId)
+}
+
+function navStatusFilter(state: unknown): JobStatusFilter | undefined {
+  const status = (state as { status?: unknown } | null)?.status
+  return isJobStatusFilter(status) ? status : undefined
+}
+
+function jobsPhrase(count: number): string {
+  return `${count} ${count === 1 ? 'job' : 'jobs'}`
+}
+
+function reopenActionTitle(action: 'extendReopen' | 'reopen'): string {
+  switch (action) {
+    case 'extendReopen':
+      return 'Extended & reopened'
+    case 'reopen':
+      return 'Reopened'
+    default: {
+      const _exhaustive: never = action
+      return _exhaustive
+    }
+  }
+}
+
+function cloneJob(job: JobListing): JobListing {
+  return {
+    ...job,
+    status: coerceJobStatus(job.status),
+    metrics: job.metrics.map((metric) => ({ ...metric })),
+  }
+}
+
+function todayIsoDate(): string {
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${now.getFullYear()}-${month}-${day}`
+}
+
+function duplicateListing(job: JobListing, index = 0): JobListing {
+  const now = Date.now() + index
+  const isoDate = todayIsoDate()
+  return {
+    ...cloneJob(job),
+    id: `job-${now}`,
+    code: `DFT${String(now).slice(-6)}`,
+    title: `${job.title} (Copy)`,
+    status: 'draft',
+    postedAgo: 'Just now',
+    lastActivity: 'Just now',
+    createdAt: isoDate,
+    updatedAt: isoDate,
+    isMine: true,
+  }
+}
+
+function loadListedJobs(): JobListing[] {
+  return [...getExtraJobs().map(cloneJob), ...JOBS.map(cloneJob)]
+}
+
 export function JobsPage() {
   const navigate = useNavigate()
-  const [status, setStatus] = useState<JobStatus>('active')
+  const location = useLocation()
+  const [status, setStatus] = useState<JobStatusFilter>(
+    () => navStatusFilter(location.state) ?? 'all',
+  )
   const [scope, setScope] = useState<JobScope>('my')
   const [postedOn, setPostedOn] = useState('')
   const [updatedOn, setUpdatedOn] = useState('')
@@ -57,17 +145,27 @@ export function JobsPage() {
   const [appliedFilters, setAppliedFilters] = useState<FilterSortValues>(
     emptyFilterSortValues,
   )
-  const [jobs, setJobs] = useState<JobListing[]>(() =>
-    JOBS.map((job) => ({ ...job, metrics: job.metrics.map((m) => ({ ...m })) })),
-  )
+  const [jobs, setJobs] = useState<JobListing[]>(loadListedJobs)
   const [detailJob, setDetailJob] = useState<JobListing | null>(null)
   const [aiCreateOpen, setAiCreateOpen] = useState(false)
+  const [bulkStatusOpen, setBulkStatusOpen] = useState(false)
+  const [pendingDeleteJobs, setPendingDeleteJobs] = useState<JobListing[]>([])
+  const [stageStatuses, setStageStatuses] = useState<
+    Record<string, ChangeableJobStatus>
+  >({})
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [loadingMore, setLoadingMore] = useState(false)
   const loadMoreRef = useRef<HTMLDivElement>(null)
   const loadingLockRef = useRef(false)
 
   const activeFilterCount = countActiveFilters(appliedFilters)
+
+  useEffect(() => {
+    const nextStatus = navStatusFilter(location.state)
+    if (!nextStatus) return
+    setStatus(nextStatus)
+    setJobs(loadListedJobs())
+  }, [location.state])
 
   const scopeJobs = useMemo(
     () => jobs.filter((job) => (scope === 'my' ? job.isMine : true)),
@@ -162,14 +260,24 @@ export function JobsPage() {
     return () => observer.disconnect()
   }, [hasMore, loadMore, visibleJobs.length])
 
-  const selectedIds = useMemo(
-    () => filteredJobs.filter((job) => selected[job.id]).map((job) => job.id),
+  const selectedJobs = useMemo(
+    () => filteredJobs.filter((job) => selected[job.id]),
     [filteredJobs, selected],
   )
+  const selectedIds = selectedJobs.map((job) => job.id)
   const selectedCount = selectedIds.length
   const allFilteredSelected =
     filteredJobs.length > 0 && selectedCount === filteredJobs.length
   const someFilteredSelected = selectedCount > 0 && !allFilteredSelected
+
+  const bulkStatusValue = useMemo((): ChangeableJobStatus => {
+    const statuses = [
+      ...new Set(
+        selectedJobs.map((job) => stageStatusFor(job.id, stageStatuses)),
+      ),
+    ]
+    return statuses.length === 1 ? statuses[0] : 'new'
+  }, [selectedJobs, stageStatuses])
 
   function toggleSelect(id: string) {
     setSelected((current) => ({ ...current, [id]: !current[id] }))
@@ -193,22 +301,190 @@ export function JobsPage() {
     setDetailJob(job)
   }
 
-  function handleJobAction(jobCode: string, action: JobCardActionId) {
-    if (action === 'viewEdit') {
-      const job = jobs.find((item) => item.code === jobCode) ?? null
-      setDetailJob(job)
-      return
+  function applyStageStatus(ids: string[], nextStatus: ChangeableJobStatus) {
+    setStageStatuses((current) => ({
+      ...current,
+      ...Object.fromEntries(ids.map((id) => [id, nextStatus])),
+    }))
+  }
+
+  function replaceListing(next: JobListing) {
+    patchExtraJob(next)
+    setJobs((current) =>
+      current.map((item) => (item.id === next.id ? next : item)),
+    )
+    setDetailJob((current) => (current?.id === next.id ? next : current))
+  }
+
+  function removeListings(targets: JobListing[]) {
+    const ids = new Set(targets.map((job) => job.id))
+    targets.forEach((job) => removeExtraJob(job.id))
+    setJobs((current) => current.filter((job) => !ids.has(job.id)))
+    setSelected((current) => {
+      const next = { ...current }
+      ids.forEach((id) => {
+        delete next[id]
+      })
+      return next
+    })
+    setDetailJob((current) => (current && ids.has(current.id) ? null : current))
+  }
+
+  function reopenListing(job: JobListing) {
+    const next: JobListing = {
+      ...job,
+      status: 'active',
+      lastActivity: 'Just now',
+      updatedAt: todayIsoDate(),
     }
-    console.info('job action', jobCode, action)
+    replaceListing(next)
+    return next
+  }
+
+  function duplicateJobs(targets: JobListing[]) {
+    const copies = targets.map((job, index) => duplicateListing(job, index))
+    copies.forEach((copy) => upsertExtraJob(copy))
+    setJobs((current) => [...copies, ...current])
+    const count = copies.length
+    toast.success(
+      count === 1
+        ? `“${copies[0]?.title}” created as draft.`
+        : `${count} jobs duplicated as drafts.`,
+      { title: 'Duplicated' },
+    )
+  }
+
+  function handleJobStatusChange(jobId: string, nextStatus: ChangeableJobStatus) {
+    const job = jobs.find((item) => item.id === jobId)
+    applyStageStatus([jobId], nextStatus)
+    toast.success(
+      `“${job?.title ?? 'Job'}” is now ${jobChangeStatusLabel(nextStatus)}.`,
+      { title: 'Status updated' },
+    )
+  }
+
+  function handleJobAction(jobCode: string, action: JobCardActionId) {
+    const job = jobs.find((item) => item.code === jobCode)
+    if (!job) return
+
+    switch (action) {
+      case 'viewEdit':
+      case 'viewJob':
+        setDetailJob(job)
+        return
+      case 'changeStatus':
+        return
+      case 'schedulePublish':
+        toast.success(`“${job.title}” is ready to schedule.`, {
+          title: 'Schedule publish',
+        })
+        return
+      case 'duplicate':
+        duplicateJobs([job])
+        return
+      case 'delete':
+        setPendingDeleteJobs([job])
+        return
+      case 'extendReopen':
+      case 'reopen': {
+        const next = reopenListing(job)
+        toast.success(`“${next.title}” is active again.`, {
+          title: reopenActionTitle(action),
+        })
+        return
+      }
+      case 'archive':
+        removeListings([job])
+        toast.success(`“${job.title}” was archived.`, { title: 'Archived' })
+        return
+      case 'share':
+      case 'interviewTeam':
+      case 'oneWayQuestions':
+      case 'mask':
+        console.info('job action', jobCode, action)
+        return
+      default: {
+        const _exhaustive: never = action
+        return _exhaustive
+      }
+    }
   }
 
   function handleBulkAction(actionId: string) {
-    if (actionId === 'viewEdit' && selectedIds.length === 1) {
-      const job = filteredJobs.find((item) => item.id === selectedIds[0]) ?? null
-      setDetailJob(job)
-      return
+    const action = actionId as JobCardActionId
+    switch (action) {
+      case 'viewEdit':
+      case 'viewJob':
+        if (selectedJobs.length === 1) {
+          setDetailJob(selectedJobs[0])
+        }
+        return
+      case 'changeStatus':
+        setBulkStatusOpen(true)
+        return
+      case 'schedulePublish':
+        toast.success(`${jobsPhrase(selectedCount)} ready to schedule.`, {
+          title: 'Schedule publish',
+        })
+        return
+      case 'duplicate':
+        duplicateJobs(selectedJobs)
+        clearSelection()
+        return
+      case 'delete':
+        setPendingDeleteJobs(selectedJobs)
+        return
+      case 'extendReopen':
+      case 'reopen':
+        selectedJobs.forEach((job) => reopenListing(job))
+        toast.success(`${jobsPhrase(selectedCount)} set to Active.`, {
+          title: reopenActionTitle(action),
+        })
+        clearSelection()
+        return
+      case 'archive':
+        removeListings(selectedJobs)
+        toast.success(`${jobsPhrase(selectedCount)} archived.`, {
+          title: 'Archived',
+        })
+        clearSelection()
+        return
+      case 'share':
+      case 'interviewTeam':
+      case 'oneWayQuestions':
+      case 'mask':
+        console.info('bulk job action', actionId, selectedIds)
+        return
+      default: {
+        const _exhaustive: never = action
+        return _exhaustive
+      }
     }
-    console.info('bulk job action', actionId, selectedIds)
+  }
+
+  function confirmPendingDelete() {
+    const targets = pendingDeleteJobs
+    if (targets.length === 0) return
+    removeListings(targets)
+    const count = targets.length
+    toast.success(
+      count === 1
+        ? `“${targets[0]?.title}” was deleted.`
+        : `${count} jobs were deleted.`,
+      { title: 'Deleted' },
+    )
+    setPendingDeleteJobs([])
+    clearSelection()
+  }
+
+  function handleBulkStatusSave(nextStatus: ChangeableJobStatus) {
+    applyStageStatus(selectedIds, nextStatus)
+    const count = selectedIds.length
+    toast.success(
+      `${jobsPhrase(count)} set to ${jobChangeStatusLabel(nextStatus)}.`,
+      { title: 'Status updated' },
+    )
+    clearSelection()
   }
 
   function openApplications(jobCode: string) {
@@ -374,11 +650,9 @@ export function JobsPage() {
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
             <SegmentedControl
               value={status}
-              options={[
-                { value: 'active', label: 'Active' },
-                { value: 'inactive', label: 'Inactive' },
-              ]}
+              options={JOB_STATUS_FILTER_OPTIONS}
               onChange={setStatus}
+              aria-label="Job status"
               className="w-full sm:w-auto"
             />
             <SegmentedControl
@@ -397,7 +671,11 @@ export function JobsPage() {
           <BulkActionsBar
             selectedCount={selectedCount}
             entityLabel="Jobs"
-            actions={JOB_CARD_ACTIONS}
+            actions={
+              status === 'all'
+                ? JOB_CARD_ACTIONS
+                : jobCardActionsForStatus(status)
+            }
             onAction={handleBulkAction}
             onClear={clearSelection}
             selectAll={{
@@ -434,9 +712,15 @@ export function JobsPage() {
                       }
                     }}
                   >
-                    <h2 className="text-sm font-bold text-[#2D2061] transition-colors hover:text-[#241a52] hover:underline sm:truncate sm:text-base">
-                      {job.code} - {job.title}
-                    </h2>
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <h2 className="min-w-0 text-sm font-bold text-[#2D2061] transition-colors hover:text-[#241a52] hover:underline sm:truncate sm:text-base">
+                        {job.code} - {job.title}
+                      </h2>
+                      <StatusPillBadge
+                        option={jobStatusPillOption(job.status)}
+                        className="shrink-0"
+                      />
+                    </div>
 
                     <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted sm:gap-x-4">
                       <MetaItem
@@ -505,6 +789,11 @@ export function JobsPage() {
                   <JobCardMenu
                     jobCode={job.code}
                     jobTitle={job.title}
+                    listingStatus={job.status}
+                    currentStatus={stageStatusFor(job.id, stageStatuses)}
+                    onStatusChange={(nextStatus) =>
+                      handleJobStatusChange(job.id, nextStatus)
+                    }
                     onAction={(action) => handleJobAction(job.code, action)}
                   />
                 </div>
@@ -560,10 +849,7 @@ export function JobsPage() {
         onClose={() => setDetailJob(null)}
         onSave={(job, form) => {
           const next = applyCreateFormToListing(job, form)
-          setJobs((current) =>
-            current.map((item) => (item.id === next.id ? next : item)),
-          )
-          setDetailJob(next)
+          replaceListing(next)
           toast.success(`“${next.title}” was saved.`, {
             title: 'Job updated',
           })
@@ -573,6 +859,24 @@ export function JobsPage() {
       <AiCreateJobFlow
         open={aiCreateOpen}
         onClose={() => setAiCreateOpen(false)}
+      />
+
+      <ChangeStatusPopover
+        open={bulkStatusOpen}
+        onClose={() => setBulkStatusOpen(false)}
+        value={bulkStatusValue}
+        onChange={handleBulkStatusSave}
+      />
+
+      <ConfirmDeleteModal
+        open={pendingDeleteJobs.length > 0}
+        onClose={() => setPendingDeleteJobs([])}
+        onConfirm={confirmPendingDelete}
+        itemName={
+          pendingDeleteJobs.length === 1
+            ? pendingDeleteJobs[0]?.title
+            : `${pendingDeleteJobs.length} jobs`
+        }
       />
     </div>
   )

@@ -1,4 +1,60 @@
-export type JobStatus = 'active' | 'inactive'
+const JOB_STATUSES = ['active', 'draft', 'closed', 'expired'] as const
+const JOB_STATUS_FILTERS = ['all', ...JOB_STATUSES] as const
+
+export type JobStatus = (typeof JOB_STATUSES)[number]
+export type JobStatusFilter = (typeof JOB_STATUS_FILTERS)[number]
+
+type JobStatusMeta = {
+  label: string
+  className: string
+  dotClassName: string
+}
+
+const DEMO_JOB_STATUSES: JobStatus[] = [
+  'active',
+  'draft',
+  'active',
+  'closed',
+  'expired',
+  'active',
+]
+
+/** Open the Jobs page with the Draft tab selected. */
+export const JOBS_DRAFT_NAV_STATE = { status: 'draft' } as const
+
+const JOB_STATUS_META: Record<JobStatus, JobStatusMeta> = {
+  active: {
+    label: 'Active',
+    className: 'bg-[#E7F8ED] text-[#15803D]',
+    dotClassName: 'bg-[#15803D]',
+  },
+  draft: {
+    label: 'Draft',
+    className: 'bg-[#F3F2F7] text-[#626889]',
+    dotClassName: 'bg-[#8B8B9E]',
+  },
+  closed: {
+    label: 'Closed',
+    className: 'bg-[#FDECEC] text-[#C0392B]',
+    dotClassName: 'bg-[#C0392B]',
+  },
+  expired: {
+    label: 'Expired',
+    className: 'bg-[#FFF0E0] text-[#D97706]',
+    dotClassName: 'bg-[#D97706]',
+  },
+}
+
+export const JOB_STATUS_FILTER_OPTIONS: Array<{
+  value: JobStatusFilter
+  label: string
+}> = [
+  { value: 'all', label: 'All' },
+  ...JOB_STATUSES.map((status) => ({
+    value: status,
+    label: JOB_STATUS_META[status].label,
+  })),
+]
 
 export type JobMetric = {
   label: string
@@ -131,7 +187,7 @@ export const JOBS: JobListing[] = Array.from({ length: 36 }, (_, index) => {
   const createdAt = `2024-${month}-${day}`
   const updatedDay = pad2(1 + ((index + 3) % 28))
   const updatedAt = `2024-${pad2(1 + ((index + 1) % 8))}-${updatedDay}`
-  const status: JobStatus = index % 4 === 0 ? 'inactive' : 'active'
+  const status = DEMO_JOB_STATUSES[index % DEMO_JOB_STATUSES.length]
   const isMine = index % 3 !== 2
 
   return {
@@ -172,7 +228,7 @@ function metricTotal(jobs: JobListing[], label: string): number {
   }, 0)
 }
 
-/** KPI cards — based on jobs in the current My/All scope (not Active/Inactive list filter). */
+/** KPI cards — based on jobs in the current My/All scope (not the status list filter). */
 export function computeJobStats(jobs: JobListing[]): JobStats {
   return {
     activeJobs: jobs.filter((job) => job.status === 'active').length,
@@ -183,7 +239,7 @@ export function computeJobStats(jobs: JobListing[]): JobStats {
 }
 
 export type JobListFilters = {
-  status: JobStatus
+  status: JobStatusFilter
   scope: 'my' | 'all'
   recruiterQuery: string
   postedOn: string
@@ -200,6 +256,14 @@ export type JobListFilters = {
   project: string
 }
 
+function matchesSelected(selected: string[], value: string): boolean {
+  return selected.length === 0 || selected.includes(value)
+}
+
+function matchesOptional(filter: string, value: string): boolean {
+  return !filter || filter === value
+}
+
 export function filterJobs(
   jobs: JobListing[],
   filters: JobListFilters,
@@ -207,62 +271,50 @@ export function filterJobs(
   const recruiterQ = filters.recruiterQuery.trim().toLowerCase()
 
   return jobs.filter((job) => {
-    if (job.status !== filters.status) return false
+    if (filters.status !== 'all' && job.status !== filters.status) return false
     if (filters.scope === 'my' && !job.isMine) return false
-
     if (recruiterQ && !job.recruiter.toLowerCase().includes(recruiterQ)) {
       return false
     }
-    if (filters.postedOn && job.createdAt !== filters.postedOn) return false
-    if (filters.updatedOn && job.updatedAt !== filters.updatedOn) return false
 
-    if (
-      filters.jobReqIds.length > 0 &&
-      !filters.jobReqIds.includes(job.code)
-    ) {
-      return false
-    }
-    if (
-      filters.jobTitles.length > 0 &&
-      !filters.jobTitles.includes(job.title)
-    ) {
-      return false
-    }
-    if (
-      filters.leadRecruiters.length > 0 &&
-      !filters.leadRecruiters.includes(job.recruiter)
-    ) {
-      return false
-    }
-    if (
-      filters.locations.length > 0 &&
-      !filters.locations.includes(job.location)
-    ) {
-      return false
-    }
-    if (
-      filters.clients.length > 0 &&
-      !filters.clients.includes(job.client)
-    ) {
-      return false
-    }
-    if (filters.jobType && job.jobType !== filters.jobType) return false
-    if (filters.jobCategory && job.jobCategory !== filters.jobCategory) {
-      return false
-    }
-    if (
-      filters.jobSubCategory &&
-      job.jobSubCategory !== filters.jobSubCategory
-    ) {
-      return false
-    }
-    if (filters.brand && job.brand !== filters.brand) return false
-    if (filters.project && job.project !== filters.project) return false
-
-    return true
+    return (
+      matchesOptional(filters.postedOn, job.createdAt) &&
+      matchesOptional(filters.updatedOn, job.updatedAt) &&
+      matchesSelected(filters.jobReqIds, job.code) &&
+      matchesSelected(filters.jobTitles, job.title) &&
+      matchesSelected(filters.leadRecruiters, job.recruiter) &&
+      matchesSelected(filters.locations, job.location) &&
+      matchesSelected(filters.clients, job.client) &&
+      matchesOptional(filters.jobType, job.jobType) &&
+      matchesOptional(filters.jobCategory, job.jobCategory) &&
+      matchesOptional(filters.jobSubCategory, job.jobSubCategory) &&
+      matchesOptional(filters.brand, job.brand) &&
+      matchesOptional(filters.project, job.project)
+    )
   })
 }
 
 export function formatStat(value: number): string {
   return String(value)
+}
+
+export function isJobStatus(value: unknown): value is JobStatus {
+  return JOB_STATUSES.some((status) => status === value)
+}
+
+export function isJobStatusFilter(value: unknown): value is JobStatusFilter {
+  return JOB_STATUS_FILTERS.some((status) => status === value)
+}
+
+export function jobStatusPillOption(
+  status: JobStatus,
+): JobStatusMeta & { value: JobStatus } {
+  return { value: status, ...JOB_STATUS_META[status] }
+}
+
+/** Map stored/legacy listing statuses onto the current union. */
+export function coerceJobStatus(value: unknown): JobStatus {
+  if (isJobStatus(value)) return value
+  if (value === 'inactive') return 'closed'
+  return 'active'
 }

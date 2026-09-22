@@ -24,7 +24,8 @@ import {
   type ImportParsedDetails,
   type ImportResultStatus,
 } from '../../data/importCandidates'
-import { Button, Input, SidePanel, Switch, toast } from '../ui'
+import { JOBS } from '../../data/jobs'
+import { Button, Input, RadioGroup, Select, SidePanel, Switch, toast } from '../ui'
 import { cn } from '../../lib/cn'
 
 export type ImportCandidatesPanelProps = {
@@ -34,11 +35,15 @@ export type ImportCandidatesPanelProps = {
 
 type PanelStep = 'upload' | 'uploading' | 'review'
 
-const INTENT_TABS: Array<{ id: ImportIntent; label: string }> = [
-  { id: 'candidate', label: 'Add Candidate' },
-  { id: 'application', label: 'Add Application' },
-  { id: 'recommendation', label: 'Add Recommendation' },
+const INTENT_OPTIONS: Array<{ value: ImportIntent; label: string }> = [
+  { value: 'candidate', label: 'Add Candidate' },
+  { value: 'application', label: 'Add Application' },
 ]
+
+const JOB_OPTIONS = JOBS.map((job) => ({
+  value: job.id,
+  label: `${job.code} - ${job.title}`,
+}))
 
 const ACCEPT = '.pdf,.doc,.docx,.html,.txt,.zip'
 
@@ -53,6 +58,7 @@ export function ImportCandidatesPanel({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [step, setStep] = useState<PanelStep>('upload')
   const [intent, setIntent] = useState<ImportIntent>('candidate')
+  const [jobId, setJobId] = useState('')
   const [autoProcess, setAutoProcess] = useState(true)
   const [dragOver, setDragOver] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -67,6 +73,7 @@ export function ImportCandidatesPanel({
     if (!open) return
     setStep('upload')
     setIntent('candidate')
+    setJobId('')
     setAutoProcess(true)
     setDragOver(false)
     setProgress(0)
@@ -204,11 +211,16 @@ export function ImportCandidatesPanel({
       {step === 'upload' ? (
         <UploadStep
           intent={intent}
+          jobId={jobId}
           autoProcess={autoProcess}
           dragOver={dragOver}
           fileInputId={fileInputId}
           fileInputRef={fileInputRef}
-          onIntentChange={setIntent}
+          onIntentChange={(next) => {
+            setIntent(next)
+            if (next === 'candidate') setJobId('')
+          }}
+          onJobChange={setJobId}
           onAutoProcessChange={setAutoProcess}
           onDragOverChange={setDragOver}
           onFiles={handleFiles}
@@ -273,25 +285,30 @@ export function ImportCandidatesPanel({
 
 function UploadStep({
   intent,
+  jobId,
   autoProcess,
   dragOver,
   fileInputId,
   fileInputRef,
   onIntentChange,
+  onJobChange,
   onAutoProcessChange,
   onDragOverChange,
   onFiles,
 }: {
   intent: ImportIntent
+  jobId: string
   autoProcess: boolean
   dragOver: boolean
   fileInputId: string
   fileInputRef: RefObject<HTMLInputElement | null>
   onIntentChange: (value: ImportIntent) => void
+  onJobChange: (value: string) => void
   onAutoProcessChange: (value: boolean) => void
   onDragOverChange: (value: boolean) => void
   onFiles: (files: FileList | null) => void
 }) {
+  const showUpload = intent === 'candidate' || jobId !== ''
   function onDrop(event: DragEvent<HTMLLabelElement>) {
     event.preventDefault()
     onDragOverChange(false)
@@ -300,27 +317,35 @@ function UploadStep({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap gap-2">
-        {INTENT_TABS.map((tab) => {
-          const active = tab.id === intent
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onIntentChange(tab.id)}
-              className={cn(
-                'inline-flex h-9 items-center rounded-full border px-4 text-sm font-semibold transition-colors',
-                active
-                  ? 'border-[#2D2061] bg-[#2D2061] text-white'
-                  : 'border-[#E0DDEA] bg-white text-[#8B8B9E] hover:text-[#2D2061]',
-              )}
-            >
-              {tab.label}
-            </button>
-          )
-        })}
-      </div>
+      <RadioGroup
+        name="import-intent"
+        value={intent}
+        options={INTENT_OPTIONS}
+        onChange={(value) => {
+          switch (value) {
+            case 'candidate':
+            case 'application':
+              onIntentChange(value)
+              return
+            default:
+              return
+          }
+        }}
+      />
 
+      {intent === 'application' ? (
+        <Select
+          id="import-job"
+          label="Select Job"
+          options={JOB_OPTIONS}
+          value={jobId}
+          placeholder="Select"
+          onChange={(event) => onJobChange(event.target.value)}
+        />
+      ) : null}
+
+      {showUpload ? (
+        <>
       <div>
         <h3 className="text-base font-bold text-[#2D2061]">
           Upload Candidate Resumes
@@ -413,6 +438,8 @@ function UploadStep({
           Automatically extract candidate details and skills.
         </p>
       </div>
+        </>
+      ) : null}
     </div>
   )
 }

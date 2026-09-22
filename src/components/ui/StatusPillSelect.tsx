@@ -18,6 +18,18 @@ export type StatusPillOption = {
   dotClassName: string
 }
 
+export type StatusPillBadgeProps = {
+  option: StatusPillOption
+  showChevron?: boolean
+  className?: string
+}
+
+export type StatusPillOptionButtonProps = {
+  option: StatusPillOption
+  selected: boolean
+  onSelect: () => void
+}
+
 export type StatusPillSelectProps = {
   value: string
   options: StatusPillOption[]
@@ -34,15 +46,11 @@ const PANEL_MIN_WIDTH = 280
 
 type PanelCoords = { top: number; left: number }
 
-function StatusPillBadge({
+export function StatusPillBadge({
   option,
   showChevron,
   className,
-}: {
-  option: StatusPillOption
-  showChevron?: boolean
-  className?: string
-}) {
+}: StatusPillBadgeProps) {
   return (
     <span
       className={cn(
@@ -64,6 +72,39 @@ function StatusPillBadge({
         />
       ) : null}
     </span>
+  )
+}
+
+export function StatusPillOptionButton({
+  option,
+  selected,
+  onSelect,
+}: StatusPillOptionButtonProps) {
+  return (
+    <li role="presentation">
+      <button
+        type="button"
+        role="option"
+        aria-selected={selected}
+        onClick={onSelect}
+        className={cn(
+          'flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors',
+          'hover:bg-[#F7F6FA] focus-visible:bg-[#F7F6FA] focus-visible:outline-none',
+          selected && 'bg-[#FAFAFC]',
+        )}
+      >
+        <StatusPillBadge option={option} />
+        {selected ? (
+          <Check
+            className="size-4 shrink-0 text-[#1A6FD0]"
+            strokeWidth={2.5}
+            aria-hidden="true"
+          />
+        ) : (
+          <span className="size-4 shrink-0" aria-hidden="true" />
+        )}
+      </button>
+    </li>
   )
 }
 
@@ -132,6 +173,11 @@ export function StatusPillSelect({
     return () => window.cancelAnimationFrame(id)
   }, [open, options, value])
 
+  function closePanel() {
+    setOpen(false)
+    setCoords(null)
+  }
+
   useEffect(() => {
     if (!open) return
 
@@ -139,15 +185,11 @@ export function StatusPillSelect({
       const target = event.target as Node
       if (rootRef.current?.contains(target)) return
       if (panelRef.current?.contains(target)) return
-      setOpen(false)
-      setCoords(null)
+      closePanel()
     }
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setOpen(false)
-        setCoords(null)
-      }
+      if (event.key === 'Escape') closePanel()
     }
 
     function handleReposition() {
@@ -168,8 +210,7 @@ export function StatusPillSelect({
 
   function selectStatus(next: string) {
     onChange(next)
-    setOpen(false)
-    setCoords(null)
+    closePanel()
   }
 
   function toggleOpen() {
@@ -206,10 +247,7 @@ export function StatusPillSelect({
               </h2>
               <button
                 type="button"
-                onClick={() => {
-                  setOpen(false)
-                  setCoords(null)
-                }}
+                onClick={closePanel}
                 aria-label="Close"
                 className="inline-flex size-7 items-center justify-center rounded-md text-[#8B8B9E] transition-colors hover:bg-[#F5F4F8] hover:text-[#2A2740] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D2061]/25"
               >
@@ -218,35 +256,14 @@ export function StatusPillSelect({
             </header>
 
             <ul className="max-h-[min(50vh,22rem)] overflow-y-auto py-1.5">
-              {options.map((opt) => {
-                const selected = opt.value === value
-                return (
-                  <li key={opt.value} role="presentation">
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={selected}
-                      onClick={() => selectStatus(opt.value)}
-                      className={cn(
-                        'flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors',
-                        'hover:bg-[#F7F6FA] focus-visible:bg-[#F7F6FA] focus-visible:outline-none',
-                        selected && 'bg-[#FAFAFC]',
-                      )}
-                    >
-                      <StatusPillBadge option={opt} />
-                      {selected ? (
-                        <Check
-                          className="size-4 shrink-0 text-[#1A6FD0]"
-                          strokeWidth={2.5}
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        <span className="size-4 shrink-0" aria-hidden="true" />
-                      )}
-                    </button>
-                  </li>
-                )
-              })}
+              {options.map((opt) => (
+                <StatusPillOptionButton
+                  key={opt.value}
+                  option={opt}
+                  selected={opt.value === value}
+                  onSelect={() => selectStatus(opt.value)}
+                />
+              ))}
             </ul>
           </div>,
           document.body,

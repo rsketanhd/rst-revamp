@@ -9,6 +9,7 @@ export type CreateOneWayInterviewForm = {
   linkExpiration: string
   /** Selected job codes (multi) */
   jobCodes: string[]
+  avatarEnabled: boolean
   description: string
   /** Placeholder fields for later steps */
   templateId: string
@@ -19,6 +20,7 @@ export const defaultCreateOneWayForm: CreateOneWayInterviewForm = {
   interviewType: 'Skill Interview',
   linkExpiration: '1 Day',
   jobCodes: [],
+  avatarEnabled: true,
   description: '',
   templateId: '',
   notes: '',

@@ -1,4 +1,4 @@
-import { MultiSelect, Select, Textarea } from '../../ui'
+import { MultiSelect, Select, Switch, Textarea } from '../../ui'
 import { StepHeader } from '../../jobs/create/StepChrome'
 import {
   INTERVIEW_TYPE_OPTIONS,
@@ -54,6 +54,15 @@ export function StepInterviewDetails({ value, onChange, jobOptions }: Props) {
             placeholder="Search and select jobs"
           />
         </div>
+      </div>
+
+      <div className="mb-4 rounded-lg border border-[#E4E1EE] px-4 py-3">
+        <Switch
+          label="Avatar"
+          description="Enable an AI avatar for this interview."
+          checked={value.avatarEnabled}
+          onCheckedChange={(avatarEnabled) => onChange({ avatarEnabled })}
+        />
       </div>
 
       <Textarea

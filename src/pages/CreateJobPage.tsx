@@ -6,6 +6,7 @@ import {
   Button,
   StepsWizard,
   SuccessMessage,
+  toast,
 } from '../components/ui'
 import { PageHeader } from '../components/layout'
 import {
@@ -14,25 +15,40 @@ import {
   type CreateJobFormState,
 } from '../components/jobs/create/types'
 import type { AiCreateJobNavState } from '../components/jobs/create/aiCreateJobData'
+import {
+  createFormFromAiNavState,
+  persistDraftListing,
+} from '../components/jobs/create/jobListingToForm'
 import { StepCreateJob } from '../components/jobs/create/StepCreateJob'
 import { StepJobDetails } from '../components/jobs/create/StepJobDetails'
 import { StepJobAnalyzer } from '../components/jobs/create/StepJobAnalyzer'
 import { StepClientDetails } from '../components/jobs/create/StepClientDetails'
 import { StepJobBoards } from '../components/jobs/create/StepJobBoards'
 import { StepReview } from '../components/jobs/create/StepReview'
+import { JOBS_DRAFT_NAV_STATE } from '../data/jobs'
 
 const LAST_STEP = CREATE_JOB_STEPS.length - 1
+const wizardOutlineBtnClass =
+  'border-[#2D2061]/40 text-[#2D2061] hover:bg-[#f7f6fb]'
 
-function formFromAiNavState(
-  state: AiCreateJobNavState | null,
-): CreateJobFormState {
-  if (!state) return defaultCreateJobForm
-
-  return {
-    ...defaultCreateJobForm,
-    method: state.similarJobTitle ? 'copy' : 'scratch',
-    jobTitle: state.similarJobTitle ?? '',
-    jobDescription: state.aiPrompt ?? '',
+function canLeaveCreateStep(form: CreateJobFormState): boolean {
+  switch (form.method) {
+    case 'copy':
+      if (form.sourceJobId) return true
+      toast.error('Select an existing job to use as your template.')
+      return false
+    case 'scratch':
+      if (form.jobTitle.trim()) return true
+      toast.error('Enter a job title.')
+      return false
+    case 'upload':
+      if (form.jobDescription.trim()) return true
+      toast.error('Upload a job description or paste the text.')
+      return false
+    default: {
+      const exhaustive: never = form.method
+      return exhaustive
+    }
   }
 }
 
@@ -44,7 +60,7 @@ export function CreateJobPage() {
   const [step, setStep] = useState(0)
   const [maxReached, setMaxReached] = useState(0)
   const [form, setForm] = useState<CreateJobFormState>(() =>
-    formFromAiNavState(aiNavState),
+    createFormFromAiNavState(aiNavState),
   )
   const [success, setSuccess] = useState(false)
 
@@ -58,6 +74,7 @@ export function CreateJobPage() {
   }
 
   function handleContinue() {
+    if (step === 0 && !canLeaveCreateStep(form)) return
     if (step >= LAST_STEP) {
       setSuccess(true)
       return
@@ -71,6 +88,14 @@ export function CreateJobPage() {
       return
     }
     setStep((s) => Math.max(0, s - 1))
+  }
+
+  function handleSaveDraft() {
+    const listing = persistDraftListing(form)
+    toast.success(`“${listing.title}” saved as draft.`, {
+      title: 'Draft saved',
+    })
+    navigate('/jobs', { state: JOBS_DRAFT_NAV_STATE })
   }
 
   function resetWizard() {
@@ -158,24 +183,34 @@ export function CreateJobPage() {
           </div>
 
           <footer className="z-30 shrink-0 border-t border-[#eceaf3] bg-white px-8 py-4">
-            <div className="flex items-center justify-end gap-3">
-              {step > 0 ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handlePrevious}
-                  className="min-w-[6.5rem] border-[#2D2061]/40 text-[#2D2061] hover:bg-[#f7f6fb]"
-                >
-                  Previous
-                </Button>
-              ) : null}
+            <div className="flex items-center justify-between gap-3">
               <Button
                 type="button"
-                onClick={handleContinue}
-                className="min-w-[6.5rem] !bg-[#2D2061] hover:!bg-[#241a52]"
+                variant="outline"
+                onClick={handleSaveDraft}
+                className={`min-w-[7.5rem] ${wizardOutlineBtnClass}`}
               >
-                {step >= LAST_STEP ? 'Create' : 'Continue'}
+                Save as Draft
               </Button>
+              <div className="flex items-center gap-3">
+                {step > 0 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handlePrevious}
+                    className={`min-w-[6.5rem] ${wizardOutlineBtnClass}`}
+                  >
+                    Previous
+                  </Button>
+                ) : null}
+                <Button
+                  type="button"
+                  onClick={handleContinue}
+                  className="min-w-[6.5rem] !bg-[#2D2061] hover:!bg-[#241a52]"
+                >
+                  {step >= LAST_STEP ? 'Create' : 'Continue'}
+                </Button>
+              </div>
             </div>
           </footer>
         </div>

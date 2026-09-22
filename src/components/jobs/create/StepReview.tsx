@@ -33,9 +33,18 @@ function formatLocation(city: string, state: string, country: string) {
 }
 
 function methodLabel(method: CreateJobFormState['method']) {
-  return method === 'copy'
-    ? 'Copy from Existing Jobs'
-    : 'Create From Scratch'
+  switch (method) {
+    case 'copy':
+      return 'Copy from Existing Jobs'
+    case 'scratch':
+      return 'Create From Scratch'
+    case 'upload':
+      return 'Upload JD'
+    default: {
+      const exhaustive: never = method
+      return exhaustive
+    }
+  }
 }
 
 function criteriaText(item: CreateJobFormState['criteria'][number]) {

@@ -1,4 +1,4 @@
-export type ImportIntent = 'candidate' | 'application' | 'recommendation'
+export type ImportIntent = 'candidate' | 'application'
 
 export type ImportResultStatus = 'needsReview' | 'success' | 'failed'
 
