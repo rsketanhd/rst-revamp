@@ -236,6 +236,7 @@ export function CampaignSettingsPanel() {
   return (
     <>
       <SettingsPanel
+        eyebrow="Talent CRM"
         title="Campaign Settings"
         description="Choose which fields to show in columns and enable for filtering."
       >

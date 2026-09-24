@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import {
   Button,
+  ConfirmDeleteModal,
   DataTable,
   DataTableActionsHeader,
   DataTableBody,
@@ -27,6 +28,10 @@ export function StepAttachments({ value, onChange }: Props) {
   const [addOpen, setAddOpen] = useState(false)
   const [documentName, setDocumentName] = useState('')
   const [description, setDescription] = useState('')
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   function toggleAll(checked: boolean) {
     const next: Record<string, boolean> = {}
@@ -129,7 +134,11 @@ export function StepAttachments({ value, onChange }: Props) {
                       id: 'remove',
                       label: 'Remove',
                       destructive: true,
-                      onSelect: () => removeAttachment(item.id),
+                      onSelect: () =>
+                        setPendingDelete({
+                          id: item.id,
+                          name: item.documentName,
+                        }),
                     },
                   ]}
                 />
@@ -173,6 +182,18 @@ export function StepAttachments({ value, onChange }: Props) {
           </Button>
         </div>
       </Modal>
+
+      <ConfirmDeleteModal
+        open={Boolean(pendingDelete)}
+        title="Delete Attachment"
+        itemName={pendingDelete?.name}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={() => {
+          if (!pendingDelete) return
+          removeAttachment(pendingDelete.id)
+          setPendingDelete(null)
+        }}
+      />
     </div>
   )
 }

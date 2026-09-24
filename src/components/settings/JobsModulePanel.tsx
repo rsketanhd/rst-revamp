@@ -223,7 +223,6 @@ export function JobsModulePanel() {
                         onCheckedChange={(visible) =>
                           patchField(field.id, { visible })
                         }
-                        checkedTrackClassName="bg-[#3B82F6]"
                         id={`visibility-${field.id}`}
                         className="!gap-0"
                       />

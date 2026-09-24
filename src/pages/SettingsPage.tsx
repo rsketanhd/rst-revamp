@@ -8,12 +8,18 @@ import {
   CampaignSettingsPanel,
   ColumnFilterVisibilityPanel,
   CompanyBrandingPanel,
+  DEFAULT_CANDIDATES_SECTION,
+  DEFAULT_ONE_WAY_INTERVIEW_SECTION,
   DEFAULT_TALENT_CRM_SECTION,
+  DocumentsSettingsPanel,
   DomainRulesPanel,
   getDefaultSettingsSectionForRole,
   getSettingsNavGroupsForRole,
   isSettingsSectionIdForRole,
   JobsModulePanel,
+  LicenseLimitsPanel,
+  OneWayAvatarSettingsPanel,
+  OneWayDefaultSettingsPanel,
   NotificationConfigPanel,
   NotificationPreferencesPanel,
   RecruiterProfilePanel,
@@ -41,9 +47,22 @@ export function SettingsPage() {
     return <Navigate to={`/settings/${defaultSection}`} replace />
   }
 
+  if (role === 'recruiter' && activeSectionId === 'candidates') {
+    return <Navigate to={`/settings/${DEFAULT_CANDIDATES_SECTION}`} replace />
+  }
+
   if (role === 'recruiter' && activeSectionId === 'talent-crm') {
     return (
       <Navigate to={`/settings/${DEFAULT_TALENT_CRM_SECTION}`} replace />
+    )
+  }
+
+  if (role === 'recruiter' && activeSectionId === 'one-way-interview') {
+    return (
+      <Navigate
+        to={`/settings/${DEFAULT_ONE_WAY_INTERVIEW_SECTION}`}
+        replace
+      />
     )
   }
 
@@ -100,6 +119,9 @@ function SettingsSectionContent({
     case 'jobs':
       return <JobsModulePanel />
 
+    case 'candidates-documents':
+      return <DocumentsSettingsPanel />
+
     case 'talent-crm':
     case 'talent-crm-talent-pool':
       return <TalentCrmPanel />
@@ -110,6 +132,13 @@ function SettingsSectionContent({
     case 'talent-crm-campaign':
       return <CampaignSettingsPanel />
 
+    case 'one-way-interview':
+    case 'one-way-interview-default':
+      return <OneWayDefaultSettingsPanel />
+
+    case 'one-way-interview-avatar':
+      return <OneWayAvatarSettingsPanel />
+
     case 'talent-crm-usage-limits':
     case 'talent-crm-candidate':
     case 'candidates':
@@ -117,7 +146,6 @@ function SettingsSectionContent({
     case 'campaigns':
     case 'reports':
     case 'client-management':
-    case 'one-way-interview':
     case 'two-way-interview':
     case 'candidate-privacy':
     case 'data-retention':
@@ -150,6 +178,9 @@ function SettingsSectionContent({
 
     case 'admin-panel':
       return <AdminPanel />
+
+    case 'license-limits':
+      return <LicenseLimitsPanel />
 
     case 'domain-rules':
       return <DomainRulesPanel />

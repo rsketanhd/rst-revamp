@@ -13,6 +13,7 @@ import {
   DataTableSortHeader,
   DataTableTd,
   SegmentedControl,
+  ConfirmDeleteModal,
   Select,
   ThreeDotsMenu,
   toast,
@@ -60,6 +61,26 @@ function compareNumber(a: number, b: number, dir: 'asc' | 'desc'): number {
   return dir === 'asc' ? a - b : b - a
 }
 
+type PendingClientDelete =
+  | { kind: 'client'; id: string; name: string }
+  | { kind: 'endClient'; id: string; name: string }
+  | { kind: 'industry'; id: string; name: string }
+
+function pendingDeleteTitle(pending: PendingClientDelete): string {
+  switch (pending.kind) {
+    case 'client':
+      return 'Delete Client'
+    case 'endClient':
+      return 'Delete End Client'
+    case 'industry':
+      return 'Delete Industry'
+    default: {
+      const exhaustive: never = pending
+      return exhaustive
+    }
+  }
+}
+
 /**
  * Client Management listing — Clients / End Clients / Industries & Sectors.
  */
@@ -83,6 +104,9 @@ export function ClientsPage() {
 
   const [endClientOpen, setEndClientOpen] = useState(false)
   const [industryOpen, setIndustryOpen] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<PendingClientDelete | null>(
+    null,
+  )
 
   const metrics = useMemo(
     () => getClientMetrics(clients, endClients, industries),
@@ -233,19 +257,49 @@ export function ClientsPage() {
     setIndustries((current) => [row, ...current])
   }
 
-  function removeClient(id: string) {
-    setClients((current) => current.filter((item) => item.id !== id))
-    toast.success('Client removed')
+  function requestRemoveClient(id: string) {
+    const row = clients.find((item) => item.id === id)
+    if (!row) return
+    setPendingDelete({ kind: 'client', id: row.id, name: row.name })
   }
 
-  function removeEndClient(id: string) {
-    setEndClients((current) => current.filter((item) => item.id !== id))
-    toast.success('End client removed')
+  function requestRemoveEndClient(id: string) {
+    const row = endClients.find((item) => item.id === id)
+    if (!row) return
+    setPendingDelete({ kind: 'endClient', id: row.id, name: row.subsidiary })
   }
 
-  function removeIndustry(id: string) {
-    setIndustries((current) => current.filter((item) => item.id !== id))
-    toast.success('Industry removed')
+  function requestRemoveIndustry(id: string) {
+    const row = industries.find((item) => item.id === id)
+    if (!row) return
+    setPendingDelete({ kind: 'industry', id: row.id, name: row.name })
+  }
+
+  function confirmDelete() {
+    if (!pendingDelete) return
+    switch (pendingDelete.kind) {
+      case 'client':
+        setClients((current) => current.filter((item) => item.id !== pendingDelete.id))
+        toast.success('Client removed')
+        break
+      case 'endClient':
+        setEndClients((current) =>
+          current.filter((item) => item.id !== pendingDelete.id),
+        )
+        toast.success('End client removed')
+        break
+      case 'industry':
+        setIndustries((current) =>
+          current.filter((item) => item.id !== pendingDelete.id),
+        )
+        toast.success('Industry removed')
+        break
+      default: {
+        const exhaustive: never = pendingDelete
+        return exhaustive
+      }
+    }
+    setPendingDelete(null)
   }
 
   const statCards = [
@@ -362,7 +416,7 @@ export function ClientsPage() {
           rows={filteredClients}
           sortDirection={sortDirection}
           onSort={handleSort}
-          onRemove={removeClient}
+          onRemove={requestRemoveClient}
         />
       ) : null}
 
@@ -371,7 +425,7 @@ export function ClientsPage() {
           rows={filteredEndClients}
           sortDirection={sortDirection}
           onSort={handleSort}
-          onRemove={removeEndClient}
+          onRemove={requestRemoveEndClient}
         />
       ) : null}
 
@@ -380,7 +434,7 @@ export function ClientsPage() {
           rows={filteredIndustries}
           sortDirection={sortDirection}
           onSort={handleSort}
-          onRemove={removeIndustry}
+          onRemove={requestRemoveIndustry}
         />
       ) : null}
 
@@ -401,6 +455,14 @@ export function ClientsPage() {
         open={industryOpen}
         onClose={() => setIndustryOpen(false)}
         onSave={handleSaveIndustry}
+      />
+
+      <ConfirmDeleteModal
+        open={Boolean(pendingDelete)}
+        title={pendingDelete ? pendingDeleteTitle(pendingDelete) : 'Delete'}
+        itemName={pendingDelete?.name}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
       />
     </PageContainer>
   )

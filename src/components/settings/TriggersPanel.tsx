@@ -164,7 +164,6 @@ export function TriggersPanel() {
                         className="w-auto"
                         checked={trigger.enabled}
                         aria-label={`${trigger.enabled ? 'Disable' : 'Enable'} ${trigger.name}`}
-                        checkedTrackClassName="bg-[#3B82F6]"
                         onCheckedChange={(checked) =>
                           setTriggers((current) =>
                             current.map((item) =>

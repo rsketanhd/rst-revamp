@@ -1,8 +1,7 @@
-import { MultiSelect, Select, Switch, Textarea } from '../../ui'
+import { Select, Textarea } from '../../ui'
 import { StepHeader } from '../../jobs/create/StepChrome'
 import {
-  INTERVIEW_TYPE_OPTIONS,
-  LINK_EXPIRATION_OPTIONS,
+  LINK_VALID_DAYS_OPTIONS,
   type CreateOneWayInterviewForm,
 } from './types'
 
@@ -24,50 +23,37 @@ export function StepInterviewDetails({ value, onChange, jobOptions }: Props) {
       />
 
       <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-8">
           <Select
-            label="Interview Type"
-            requiredMark
-            options={INTERVIEW_TYPE_OPTIONS}
-            value={value.interviewType}
-            onChange={(e) => onChange({ interviewType: e.target.value })}
-            placeholder="Select type"
-          />
-        </div>
-        <div className="lg:col-span-3">
-          <Select
-            label="Link Expiration Duration"
-            requiredMark
-            options={LINK_EXPIRATION_OPTIONS}
-            value={value.linkExpiration}
-            onChange={(e) => onChange({ linkExpiration: e.target.value })}
-            placeholder="Select duration"
-          />
-        </div>
-        <div className="lg:col-span-6">
-          <MultiSelect
-            label="Job"
+            id="job-title"
+            label="Job Title"
             requiredMark
             options={jobOptions}
-            value={value.jobCodes}
-            onChange={(jobCodes) => onChange({ jobCodes })}
-            placeholder="Search and select jobs"
+            value={value.jobCode}
+            onChange={(e) => onChange({ jobCode: e.target.value })}
+            placeholder="Select job"
           />
         </div>
-      </div>
-
-      <div className="mb-4 rounded-lg border border-[#E4E1EE] px-4 py-3">
-        <Switch
-          label="Avatar"
-          description="Enable an AI avatar for this interview."
-          checked={value.avatarEnabled}
-          onCheckedChange={(avatarEnabled) => onChange({ avatarEnabled })}
-        />
+        <div className="lg:col-span-4">
+          <Select
+            id="link-valid-days"
+            label="Link Valid For (Days)"
+            requiredMark
+            labelTooltip="Number of days the interview link stays active after it is sent to the candidate."
+            options={LINK_VALID_DAYS_OPTIONS}
+            value={value.linkExpiration}
+            onChange={(e) => onChange({ linkExpiration: e.target.value })}
+            placeholder="Select days"
+          />
+          <p className="mt-1.5 text-xs text-[#8B8B9E]">
+            1 to 60 days, applies to every round.
+          </p>
+        </div>
       </div>
 
       <Textarea
-        label="Interview Description"
-        placeholder="Enter Interview Descriptions"
+        label="Job Descriptions"
+        placeholder="Enter Job Descriptions"
         value={value.description}
         onChange={(e) => onChange({ description: e.target.value })}
         rows={6}

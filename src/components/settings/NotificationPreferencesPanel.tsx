@@ -38,7 +38,6 @@ export function NotificationPreferencesPanel() {
           <Switch
             checked={applicationStatus}
             onCheckedChange={setApplicationStatus}
-            checkedTrackClassName="bg-[#2D2061]"
           />
         }
       />
@@ -50,7 +49,6 @@ export function NotificationPreferencesPanel() {
           <Switch
             checked={messages}
             onCheckedChange={setMessages}
-            checkedTrackClassName="bg-[#2D2061]"
           />
         }
       />

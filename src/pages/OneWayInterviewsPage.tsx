@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Settings, SlidersHorizontal, SquarePen, EyeOff, Copy } from 'lucide-react'
+import { SlidersHorizontal, SquarePen, EyeOff, Copy } from 'lucide-react'
 import { PageContainer, PageHeader } from '../components/layout'
 import { OneWayFilterSortPanel } from '../components/interviews/OneWayFilterSortPanel'
-import { OneWaySettingsPanel } from '../components/interviews/OneWaySettingsPanel'
 import {
   BulkActionsBar,
   Button,
@@ -51,7 +50,6 @@ export function OneWayInterviewsPage() {
   const [status, setStatus] = useState<OneWayStatus>('active')
   const [selected, setSelected] = useState<Record<string, boolean>>({})
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [filters, setFilters] = useState<OneWayFilterValues>(emptyOneWayFilters)
 
   const jobReqIdOptions = useMemo(
@@ -131,15 +129,6 @@ export function OneWayInterviewsPage() {
         subtitle="Manage and track all one-way interviews."
         actions={
           <>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setSettingsOpen(true)}
-              className="!h-10 !rounded-md border-[#2D2061] bg-white px-4 text-sm font-semibold text-[#2D2061] hover:bg-[#f7f6fb]"
-            >
-              <Settings className="size-4" strokeWidth={2} aria-hidden="true" />
-              1 Way Settings
-            </Button>
             <Button
               type="button"
               onClick={() => navigate('/e2e-interviews/one-way/new')}
@@ -244,11 +233,6 @@ export function OneWayInterviewsPage() {
         jobReqIdOptions={jobReqIdOptions}
         recruiterOptions={recruiterOptions}
         onApply={setFilters}
-      />
-
-      <OneWaySettingsPanel
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
       />
     </PageContainer>
   )

@@ -1,6 +1,7 @@
 import type { SelectHTMLAttributes } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Info } from 'lucide-react'
 import { cn } from '../../lib/cn'
+import { Tooltip } from './Tooltip'
 
 export type SelectOption = {
   value: string
@@ -13,6 +14,8 @@ export type SelectProps = Omit<
 > & {
   label?: string
   requiredMark?: boolean
+  /** Shows an info icon after the label with this tooltip text. */
+  labelTooltip?: string
   error?: string
   helperText?: string
   options: Array<SelectOption | string>
@@ -36,6 +39,7 @@ export function Select({
   id,
   label,
   requiredMark = false,
+  labelTooltip,
   error,
   helperText,
   options,
@@ -49,17 +53,30 @@ export function Select({
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
       {label ? (
-        <label
-          htmlFor={selectId}
-          className="text-xs font-medium text-[#2D2061]"
-        >
-          {label}
-          {requiredMark ? (
-            <span className="ml-0.5 text-[#E53935]" aria-hidden="true">
-              *
-            </span>
+        <div className="flex items-center gap-1.5">
+          <label
+            htmlFor={selectId}
+            className="text-xs font-medium text-[#2D2061]"
+          >
+            {label}
+            {requiredMark ? (
+              <span className="ml-0.5 text-[#E53935]" aria-hidden="true">
+                *
+              </span>
+            ) : null}
+          </label>
+          {labelTooltip ? (
+            <Tooltip content={labelTooltip} side="top" align="start" maxWidth={288}>
+              <button
+                type="button"
+                aria-label={`About ${label}`}
+                className="inline-flex text-[#8B8B9E] outline-none transition-colors hover:text-[#2D2061] focus-visible:text-[#2D2061]"
+              >
+                <Info className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+              </button>
+            </Tooltip>
           ) : null}
-        </label>
+        </div>
       ) : null}
 
       <div className="relative">

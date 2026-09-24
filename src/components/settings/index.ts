@@ -46,17 +46,23 @@ export { ImportUserPanel } from './ImportUserPanel'
 export { UserManagementFiltersPanel } from './UserManagementFiltersPanel'
 export { RoleManagementPanel } from './RoleManagementPanel'
 export { AdminPanel } from './AdminPanel'
+export { DocumentsSettingsPanel } from './DocumentsSettingsPanel'
+export { LicenseLimitsPanel } from './LicenseLimitsPanel'
 export { TalentCrmConfigPanel } from './TalentCrmConfigPanel'
 export { JeevesAiConfigPanel } from './JeevesAiConfigPanel'
 export { ClientModuleConfigPanel } from './ClientModuleConfigPanel'
 export { SettingsPlaceholderPanel } from './SettingsPlaceholderPanel'
+export { OneWayDefaultSettingsPanel } from './OneWayDefaultSettingsPanel'
+export { OneWayAvatarSettingsPanel } from './OneWayAvatarSettingsPanel'
 export {
   SETTINGS_NAV_GROUPS,
   CANDIDATE_SETTINGS_NAV_GROUPS,
   TALENT_CRM_NAV_CHILDREN,
   DEFAULT_SETTINGS_SECTION,
   DEFAULT_CANDIDATE_SETTINGS_SECTION,
+  DEFAULT_CANDIDATES_SECTION,
   DEFAULT_TALENT_CRM_SECTION,
+  DEFAULT_ONE_WAY_INTERVIEW_SECTION,
   isSettingsSectionId,
   isSettingsSectionIdForRole,
   getDefaultSettingsSectionForRole,

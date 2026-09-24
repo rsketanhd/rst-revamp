@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
-import { Button, Input, Select, SidePanel, Textarea, toast } from '../ui'
+import { Button, ConfirmDeleteModal, Input, Select, SidePanel, Textarea, toast } from '../ui'
 
 export type AddNewFieldFormValues = {
   name: string
@@ -66,6 +66,7 @@ export function AddNewFieldPanel({
   const [errors, setErrors] = useState<
     Partial<Record<'name' | 'category' | 'description' | 'values', string>>
   >({})
+  const [pendingValue, setPendingValue] = useState<number | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -79,6 +80,7 @@ export function AddNewFieldPanel({
         : EMPTY_FORM,
     )
     setErrors({})
+    setPendingValue(null)
   }, [open, initialValues])
 
   const showValues = needsValues(form.category)
@@ -259,7 +261,7 @@ export function AddNewFieldPanel({
                     <button
                       type="button"
                       aria-label={`Remove value ${index + 1}`}
-                      onClick={() => removeValue(index)}
+                      onClick={() => setPendingValue(index)}
                       className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-[#8B8B9E] transition-colors hover:bg-[#F7F6FA] hover:text-[#E53935]"
                     >
                       <Trash2 className="size-4" strokeWidth={1.75} />
@@ -294,6 +296,17 @@ export function AddNewFieldPanel({
           </div>
         ) : null}
       </div>
+      <ConfirmDeleteModal
+        open={pendingValue !== null}
+        title="Delete Value"
+        itemName={pendingValue === null ? undefined : form.values[pendingValue]}
+        onClose={() => setPendingValue(null)}
+        onConfirm={() => {
+          if (pendingValue === null) return
+          removeValue(pendingValue)
+          setPendingValue(null)
+        }}
+      />
     </SidePanel>
   )
 }

@@ -387,7 +387,6 @@ function InterviewPanelAccordion({
         <Switch
           checked={panel.enabled}
           onCheckedChange={onEnabledChange}
-          checkedTrackClassName="bg-[#E53955]"
           className="!gap-0"
         />
       </header>

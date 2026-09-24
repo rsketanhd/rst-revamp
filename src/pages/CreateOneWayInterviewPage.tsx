@@ -15,19 +15,15 @@ import {
   type CreateOneWayInterviewForm,
 } from '../components/interviews/create/types'
 import { StepInterviewDetails } from '../components/interviews/create/StepInterviewDetails'
-import {
-  StepInterviewTemplate,
-  formatTemplateDate,
-  type InterviewTemplateOption,
-} from '../components/interviews/create/StepInterviewTemplate'
+import { StepInterviewRounds } from '../components/interviews/create/StepInterviewRounds'
+import type { InterviewTemplateOption } from '../components/interviews/create/templates'
 import { StepInterviewReview } from '../components/interviews/create/StepInterviewReview'
-import { CreateTemplatePanel } from '../components/interviews/create/CreateTemplatePanel'
 
 const LAST_STEP = CREATE_ONE_WAY_STEPS.length - 1
 const LIST_PATH = '/e2e-interviews/one-way'
 
 /**
- * Create One-Way Interview wizard — Details → Template → Review.
+ * Create One-Way Interview wizard — Details → Rounds & Templates → Review.
  */
 export function CreateOneWayInterviewPage() {
   const navigate = useNavigate()
@@ -37,7 +33,6 @@ export function CreateOneWayInterviewPage() {
     defaultCreateOneWayForm,
   )
   const [success, setSuccess] = useState(false)
-  const [createTemplateOpen, setCreateTemplateOpen] = useState(false)
   const [templates, setTemplates] = useState<InterviewTemplateOption[]>([])
 
   const jobOptions = useMemo(
@@ -49,14 +44,10 @@ export function CreateOneWayInterviewPage() {
     [],
   )
 
-  const jobLabels = useMemo(() => {
-    const byCode = new Map(jobOptions.map((j) => [j.value, j.label]))
-    return form.jobCodes.map((code) => byCode.get(code) ?? code)
-  }, [form.jobCodes, jobOptions])
-
-  const selectedTemplate = useMemo(
-    () => templates.find((t) => t.id === form.templateId) ?? null,
-    [templates, form.templateId],
+  const jobLabel = useMemo(
+    () =>
+      jobOptions.find((j) => j.value === form.jobCode)?.label ?? form.jobCode,
+    [form.jobCode, jobOptions],
   )
 
   function patchForm(patch: Partial<CreateOneWayInterviewForm>) {
@@ -154,21 +145,20 @@ export function CreateOneWayInterviewPage() {
                   />
                 ) : null}
                 {step === 1 ? (
-                  <StepInterviewTemplate
+                  <StepInterviewRounds
                     value={form}
                     onChange={patchForm}
                     templates={templates}
                     onTemplatesChange={setTemplates}
-                    onCreateTemplate={() => setCreateTemplateOpen(true)}
                   />
                 ) : null}
                 {step === 2 ? (
                   <StepInterviewReview
                     value={form}
-                    jobLabels={jobLabels}
-                    template={selectedTemplate}
+                    jobLabel={jobLabel}
+                    templates={templates}
                     onEditDetails={() => goTo(0)}
-                    onEditTemplate={() => goTo(1)}
+                    onEditRounds={() => goTo(1)}
                   />
                 ) : null}
               </div>
@@ -196,34 +186,6 @@ export function CreateOneWayInterviewPage() {
           </footer>
         </div>
       )}
-
-      <CreateTemplatePanel
-        open={createTemplateOpen}
-        onClose={() => setCreateTemplateOpen(false)}
-        interviewType={form.interviewType}
-        onCreated={(template) => {
-          const isDefault = template.type === 'Default'
-          const isResend = template.type === 'Resend'
-          const next: InterviewTemplateOption = {
-            id: template.id,
-            name: template.name,
-            language: template.language,
-            type: template.type,
-            updatedOn: formatTemplateDate(new Date()),
-            isDefault,
-            isResend,
-            questions: template.questions,
-            screeningEnabled: template.screeningEnabled,
-          }
-          setTemplates((current) => {
-            const rest = isDefault
-              ? current.map((t) => ({ ...t, isDefault: false }))
-              : current
-            return [next, ...rest]
-          })
-          patchForm({ templateId: template.id })
-        }}
-      />
     </div>
   )
 }

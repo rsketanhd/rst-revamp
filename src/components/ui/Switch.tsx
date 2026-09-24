@@ -9,16 +9,11 @@ export type SwitchProps = {
   disabled?: boolean
   className?: string
   id?: string
-  /**
-   * Track color when checked. Defaults to brand navy.
-   * Use for danger/magenta accents (e.g. team panel loops).
-   */
-  checkedTrackClassName?: string
   'aria-label'?: string
 }
 
 /**
- * On/off toggle switch (career page visibility, feature flags, etc.).
+ * Brand navy enable/disable switch used for every on/off toggle.
  */
 export function Switch({
   checked,
@@ -28,7 +23,6 @@ export function Switch({
   disabled = false,
   className,
   id,
-  checkedTrackClassName = 'bg-[#2D2061]',
   'aria-label': ariaLabel,
 }: SwitchProps) {
   const autoId = useId()
@@ -70,7 +64,7 @@ export function Switch({
         className={cn(
           'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D2061]/30 focus-visible:ring-offset-2',
-          checked ? checkedTrackClassName : 'bg-[#d5d2e2]',
+          checked ? 'bg-[#2D2061]' : 'bg-[#d5d2e2]',
           disabled && 'cursor-not-allowed opacity-50',
         )}
       >

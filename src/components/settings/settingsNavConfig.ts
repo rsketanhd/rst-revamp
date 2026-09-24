@@ -1,6 +1,7 @@
 export type SettingsSectionId =
   | 'jobs'
   | 'candidates'
+  | 'candidates-documents'
   | 'pipeline'
   | 'talent-crm'
   | 'talent-crm-usage-limits'
@@ -12,6 +13,8 @@ export type SettingsSectionId =
   | 'reports'
   | 'client-management'
   | 'one-way-interview'
+  | 'one-way-interview-default'
+  | 'one-way-interview-avatar'
   | 'two-way-interview'
   | 'recruiter-profile'
   | 'company-branding'
@@ -22,6 +25,7 @@ export type SettingsSectionId =
   | 'user-management'
   | 'role-management'
   | 'admin-panel'
+  | 'license-limits'
   | 'domain-rules'
   | 'candidate-privacy'
   | 'data-retention'
@@ -42,6 +46,15 @@ export type SettingsNavGroup = {
   items: SettingsNavItem[]
 }
 
+export const ONE_WAY_INTERVIEW_NAV_CHILDREN: SettingsNavItem[] = [
+  { id: 'one-way-interview-default', label: 'Default Settings' },
+  { id: 'one-way-interview-avatar', label: 'Avatar Settings' },
+]
+
+export const CANDIDATES_NAV_CHILDREN: SettingsNavItem[] = [
+  { id: 'candidates-documents', label: 'Documents' },
+]
+
 export const TALENT_CRM_NAV_CHILDREN: SettingsNavItem[] = [
   { id: 'talent-crm-usage-limits', label: 'Usage & Limits' },
   { id: 'talent-crm-column-filter', label: 'Column & Filter Visibility' },
@@ -60,7 +73,11 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
     title: 'Module Configuration',
     items: [
       { id: 'jobs', label: 'Jobs' },
-      { id: 'candidates', label: 'Candidates' },
+      {
+        id: 'candidates',
+        label: 'Candidates',
+        children: CANDIDATES_NAV_CHILDREN,
+      },
       { id: 'pipeline', label: 'Pipeline' },
       {
         id: 'talent-crm',
@@ -70,7 +87,11 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
       { id: 'campaigns', label: 'Campaigns' },
       { id: 'reports', label: 'Reports' },
       { id: 'client-management', label: 'Client Management' },
-      { id: 'one-way-interview', label: '1 Way Interview' },
+      {
+        id: 'one-way-interview',
+        label: '1 Way Interview',
+        children: ONE_WAY_INTERVIEW_NAV_CHILDREN,
+      },
       { id: 'two-way-interview', label: '2 Way Interview' },
     ],
   },
@@ -93,6 +114,7 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
       { id: 'user-management', label: 'User Management' },
       { id: 'role-management', label: 'Role Management' },
       { id: 'admin-panel', label: 'Admin Panel' },
+      { id: 'license-limits', label: 'License & Limit Management' },
     ],
   },
   {
@@ -112,9 +134,17 @@ export const DEFAULT_SETTINGS_SECTION: SettingsSectionId = 'recruiter-profile'
 export const DEFAULT_CANDIDATE_SETTINGS_SECTION: SettingsSectionId =
   'account-settings'
 
+/** Default landing page when opening Candidates parent. */
+export const DEFAULT_CANDIDATES_SECTION: SettingsSectionId =
+  'candidates-documents'
+
 /** Default landing page when opening Talent CRM parent. */
 export const DEFAULT_TALENT_CRM_SECTION: SettingsSectionId =
   'talent-crm-usage-limits'
+
+/** Default landing page when opening 1 Way Interview parent. */
+export const DEFAULT_ONE_WAY_INTERVIEW_SECTION: SettingsSectionId =
+  'one-way-interview-default'
 
 export const CANDIDATE_SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
   {
@@ -199,6 +229,7 @@ export function isSettingsSectionId(value: string): value is SettingsSectionId {
 
 export function getSettingsSectionLabel(id: SettingsSectionId): string {
   if (id === 'talent-crm') return 'Talent CRM'
+  if (id === 'one-way-interview') return '1 Way Interview'
   for (const item of flattenSettingsNavItems(CANDIDATE_SETTINGS_NAV_GROUPS)) {
     if (item.id === id) return item.label
   }
@@ -212,6 +243,8 @@ export function getSettingsSectionLabel(id: SettingsSectionId): string {
 export function resolveSettingsSectionId(
   sectionId: SettingsSectionId,
 ): SettingsSectionId {
+  if (sectionId === 'candidates') return DEFAULT_CANDIDATES_SECTION
   if (sectionId === 'talent-crm') return DEFAULT_TALENT_CRM_SECTION
+  if (sectionId === 'one-way-interview') return DEFAULT_ONE_WAY_INTERVIEW_SECTION
   return sectionId
 }

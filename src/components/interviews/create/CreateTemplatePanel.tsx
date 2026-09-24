@@ -4,10 +4,10 @@ import {
   useRef,
   useState,
   type DragEvent,
-  type RefObject,
 } from 'react'
 import {
-  CloudUpload,
+  Clock,
+  Lightbulb,
   GripVertical,
   Minus,
   Plus,
@@ -23,6 +23,8 @@ import {
   toast,
 } from '../../ui'
 import { cn } from '../../../lib/cn'
+import type { InterviewDifficulty } from './types'
+import { questionsDurationMins } from './templates'
 
 export type ScreeningQuestionType =
   | 'Yes/No'
@@ -52,6 +54,18 @@ export type CreateTemplatePanelProps = {
    * Screening & Logistics layout; other types use video Q&A layout.
    */
   interviewType?: string
+  /**
+   * Round difficulty — AI-generated questions match this level.
+   * Falls back to Medium when not set.
+   */
+  difficulty?: InterviewDifficulty | ''
+  /** Round the template is being created for, shown as context at the top. */
+  round?: {
+    /** e.g. "Round 1" */
+    label: string
+    /** User-given round name, e.g. "Technical Screening" */
+    name: string
+  }
   onCreated?: (template: {
     id: string
     name: string
@@ -69,6 +83,62 @@ const SCREENING_TYPES: ScreeningQuestionType[] = [
   'Range',
   'Single Choice',
   'Multi-Select',
+]
+
+const EASY_VIDEO_QUESTIONS: Array<Omit<TemplateQuestion, 'id'>> = [
+  {
+    text: 'Tell us a little about yourself and your current role',
+    prep: '00:30',
+    answer: '01:00',
+  },
+  {
+    text: 'What interests you about this position?',
+    prep: '00:30',
+    answer: '01:00',
+  },
+  {
+    text: 'Which tools do you use most in your day-to-day work?',
+    prep: '00:30',
+    answer: '01:00',
+  },
+  {
+    text: 'How do you keep your work organised during a busy week?',
+    prep: '00:30',
+    answer: '01:00',
+  },
+  {
+    text: 'What do you enjoy most about working in a team?',
+    prep: '00:30',
+    answer: '01:00',
+  },
+]
+
+const HARD_VIDEO_QUESTIONS: Array<Omit<TemplateQuestion, 'id'>> = [
+  {
+    text: 'Design a system to process millions of events per day. Walk us through the architecture and its trade-offs',
+    prep: '02:00',
+    answer: '05:00',
+  },
+  {
+    text: 'Describe a production incident you led. How did you find the root cause and prevent it recurring?',
+    prep: '02:00',
+    answer: '04:00',
+  },
+  {
+    text: 'How would you migrate a critical legacy service with zero downtime?',
+    prep: '02:00',
+    answer: '04:00',
+  },
+  {
+    text: 'Tell us about a technical decision you made that turned out wrong. What did you change afterwards?',
+    prep: '01:30',
+    answer: '04:00',
+  },
+  {
+    text: 'How do you balance delivery speed against long-term maintainability when the team disagrees?',
+    prep: '01:30',
+    answer: '04:00',
+  },
 ]
 
 const SAMPLE_VIDEO_QUESTIONS: Array<Omit<TemplateQuestion, 'id'>> = [
@@ -153,6 +223,72 @@ const SAMPLE_TELEPHONIC_QUESTIONS: Array<Omit<TemplateQuestion, 'id'>> = [
   },
 ]
 
+const VIDEO_QUESTIONS_BY_DIFFICULTY: Record<
+  InterviewDifficulty,
+  Array<Omit<TemplateQuestion, 'id'>>
+> = {
+  Easy: EASY_VIDEO_QUESTIONS,
+  Medium: SAMPLE_VIDEO_QUESTIONS,
+  Hard: HARD_VIDEO_QUESTIONS,
+}
+
+/** Extra prompts used once a level's own pool runs out. */
+const EXTRA_VIDEO_QUESTIONS: string[] = [
+  'Describe a goal you set for yourself recently and how you worked towards it',
+  'How do you prioritise when several stakeholders need something at once?',
+  'Tell us about a time you learned a new skill quickly for a project',
+  'How do you make sure your work meets the expected quality before handing it over?',
+  'Describe a situation where you had to explain something complex to a non-expert',
+]
+
+const EXTRA_TELEPHONIC_QUESTIONS: Array<Omit<TemplateQuestion, 'id'>> = [
+  {
+    text: 'Are you comfortable with occasional travel?',
+    prep: '',
+    answer: '',
+    questionType: 'Yes/No',
+    acceptValue: 'Yes',
+  },
+  {
+    text: 'Which shift pattern suits you?',
+    prep: '',
+    answer: '',
+    questionType: 'Single Choice',
+    acceptValue: 'Day, Evening, Flexible',
+  },
+  {
+    text: 'Do you hold a valid driving licence?',
+    prep: '',
+    answer: '',
+    questionType: 'Yes/No',
+    acceptValue: 'Yes',
+  },
+]
+
+export const QUESTION_COUNT_OPTIONS = Array.from({ length: 10 }, (_, i) =>
+  String(i + 1),
+)
+const DEFAULT_QUESTION_COUNT = '5'
+
+/**
+ * Picks exactly `count` questions: the level's pool first, then extras
+ * (video extras borrow the level's prep/answer timing).
+ */
+function generateQuestions(
+  pool: Array<Omit<TemplateQuestion, 'id'>>,
+  count: number,
+  telephonic: boolean,
+): TemplateQuestion[] {
+  const extras: Array<Omit<TemplateQuestion, 'id'>> = telephonic
+    ? EXTRA_TELEPHONIC_QUESTIONS
+    : EXTRA_VIDEO_QUESTIONS.map((text) => ({
+        text,
+        prep: pool[0]?.prep ?? '01:00',
+        answer: pool[0]?.answer ?? '02:00',
+      }))
+  return withIds([...pool, ...extras].slice(0, count))
+}
+
 function nextId() {
   return `q-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 }
@@ -236,6 +372,8 @@ export function CreateTemplatePanel({
   open,
   onClose,
   interviewType,
+  difficulty,
+  round,
   onCreated,
 }: CreateTemplatePanelProps) {
   const telephonic = isTelephonicInterview(interviewType)
@@ -248,6 +386,7 @@ export function CreateTemplatePanel({
   const [nameError, setNameError] = useState('')
   const [dragId, setDragId] = useState<string | null>(null)
   const [screeningEnabled, setScreeningEnabled] = useState(true)
+  const [questionCount, setQuestionCount] = useState(DEFAULT_QUESTION_COUNT)
 
   useEffect(() => {
     if (!open) return
@@ -258,12 +397,16 @@ export function CreateTemplatePanel({
     setQuestions([])
     setDragId(null)
     setScreeningEnabled(true)
+    setQuestionCount(DEFAULT_QUESTION_COUNT)
   }, [open, interviewType])
 
   const hasQuestions = questions.length > 0
+  const level: InterviewDifficulty = difficulty || 'Medium'
   const sampleSource = telephonic
     ? SAMPLE_TELEPHONIC_QUESTIONS
-    : SAMPLE_VIDEO_QUESTIONS
+    : VIDEO_QUESTIONS_BY_DIFFICULTY[level]
+  const count = Number(questionCount)
+  const durationMins = Math.round(questionsDurationMins(questions) * 10) / 10
 
   function handleCreate() {
     const trimmed = name.trim()
@@ -289,7 +432,9 @@ export function CreateTemplatePanel({
 
   function handleAddQuestions() {
     setQuestions((current) => {
-      if (current.length === 0) return withIds(sampleSource)
+      if (current.length === 0) {
+        return generateQuestions(sampleSource, count, telephonic)
+      }
       return [
         ...current,
         telephonic ? emptyTelephonicQuestion() : emptyVideoQuestion(),
@@ -298,13 +443,12 @@ export function CreateTemplatePanel({
   }
 
   function handleAutoGenerate() {
-    setQuestions(withIds(sampleSource))
+    setQuestions(generateQuestions(sampleSource, count, telephonic))
+    const summary = `${count} ${level} level ${count === 1 ? 'question' : 'questions'}`
     toast.success(
-      hasQuestions
-        ? 'Template questions re-generated.'
-        : 'Template questions generated.',
+      hasQuestions ? `${summary} re-generated.` : `${summary} generated.`,
       {
-        title: hasQuestions ? 'Re-Generate Template' : 'Auto Generate Template',
+        title: hasQuestions ? 'Regenerate with AI' : 'Generate with AI',
       },
     )
   }
@@ -384,8 +528,38 @@ export function CreateTemplatePanel({
       widthClassName="w-[60vw] max-w-none min-w-[20rem]"
       headerClassName="bg-[#2D2061]"
       bodyClassName="!p-5 sm:!p-6"
+      footerClassName="flex-wrap items-center justify-between"
       footer={
         <>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[#F1F0F7] text-[#2D2061]">
+              <Clock className="size-4" strokeWidth={1.75} aria-hidden="true" />
+            </span>
+            <div className="min-w-0 leading-tight">
+              <p className="text-xs text-[#8B8B9E]">Estimated interview duration</p>
+              <p className="text-sm text-[#2D2061]">
+                {telephonic ? (
+                  <span className="font-bold">
+                    {questions.length}{' '}
+                    {questions.length === 1 ? 'question' : 'questions'}
+                  </span>
+                ) : (
+                  <>
+                    <span className="font-bold tabular-nums">
+                      {durationMins} mins
+                    </span>
+                    <span className="text-[#8B8B9E]">
+                      {' '}
+                      · {questions.length}{' '}
+                      {questions.length === 1 ? 'question' : 'questions'}, prep +
+                      answer time
+                    </span>
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="ml-auto flex items-center gap-3">
           <Button
             type="button"
             variant="outline"
@@ -401,12 +575,21 @@ export function CreateTemplatePanel({
           >
             Create
           </Button>
+          </div>
         </>
       }
     >
       <div className="flex flex-col gap-5">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-          <div className="lg:col-span-6">
+        {round ? (
+          <RoundContext
+            round={round}
+            interviewType={interviewType}
+            difficulty={difficulty}
+          />
+        ) : null}
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">
+          <div className="sm:col-span-2 lg:col-span-5">
             <Input
               label="Template Name"
               requiredMark
@@ -420,7 +603,7 @@ export function CreateTemplatePanel({
               className="!rounded-md border-[#ddd9e8] !text-[#2D2061] placeholder:!text-[#A0A0B2]"
             />
           </div>
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-2">
             <Select
               label="Type"
               options={[...TYPE_OPTIONS]}
@@ -438,7 +621,47 @@ export function CreateTemplatePanel({
               className="bg-white"
             />
           </div>
+          <div className="lg:col-span-2">
+            <Select
+              id="template-question-count"
+              label="No. of Questions"
+              labelTooltip="AI generates exactly this many questions when you auto generate the template."
+              options={QUESTION_COUNT_OPTIONS}
+              value={questionCount}
+              onChange={(e) => setQuestionCount(e.target.value)}
+              placeholder="Select"
+              className="bg-white"
+            />
+          </div>
         </div>
+
+        {difficulty && !round ? (
+          <div className="flex items-center gap-2.5 rounded-lg border border-[#E3D9FB] bg-[#F6F2FE] px-3.5 py-2.5">
+            <Sparkles
+              className="size-4 shrink-0 text-[#7C3AED]"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+            <p className="text-sm text-[#2D2061]">
+              AI will generate{' '}
+              <span className="font-semibold">{difficulty}</span> level
+              questions, based on this round&apos;s difficulty.
+            </p>
+          </div>
+        ) : null}
+
+        <input
+          ref={fileInputRef}
+          id={fileInputId}
+          type="file"
+          accept=".zip,.csv,.txt,.xlsx,.json"
+          className="sr-only"
+          aria-label="Upload bulk questions"
+          onChange={(e) => {
+            void handleFileChange(e.target.files?.[0] ?? null)
+            e.target.value = ''
+          }}
+        />
 
         {telephonic ? (
           <TelephonicTemplateBody
@@ -449,6 +672,7 @@ export function CreateTemplatePanel({
             onScreeningChange={setScreeningEnabled}
             onAddQuestions={handleAddQuestions}
             onAutoGenerate={handleAutoGenerate}
+            onUploadClick={handleUploadClick}
             onUpdateQuestion={updateQuestion}
             onRemoveQuestion={removeQuestion}
             onDragStart={handleDragStart}
@@ -460,14 +684,9 @@ export function CreateTemplatePanel({
             questions={questions}
             hasQuestions={hasQuestions}
             dragId={dragId}
-            fileInputId={fileInputId}
-            fileInputRef={fileInputRef}
             onAddQuestions={handleAddQuestions}
             onAutoGenerate={handleAutoGenerate}
             onUploadClick={handleUploadClick}
-            onFileChange={(file) => {
-              void handleFileChange(file)
-            }}
             onUpdateQuestion={updateQuestion}
             onRemoveQuestion={removeQuestion}
             onDragStart={handleDragStart}
@@ -480,6 +699,47 @@ export function CreateTemplatePanel({
   )
 }
 
+function RoundContext({
+  round,
+  interviewType,
+  difficulty,
+}: {
+  round: { label: string; name: string }
+  interviewType?: string
+  difficulty?: InterviewDifficulty | ''
+}) {
+  const name = round.name.trim()
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-[#E4E1EE] bg-[#F5F5F9] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <div className="min-w-0">
+        <p className="text-xs text-[#8B8B9E]">Creating template for</p>
+        <p className="truncate text-sm font-bold text-[#2D2061]">
+          {round.label}
+          {name && name !== round.label ? (
+            <>
+              <span className="mx-1.5 font-normal text-[#C8C5D6]">·</span>
+              {name}
+            </>
+          ) : null}
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {interviewType ? (
+          <span className="inline-flex rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#2D2061] ring-1 ring-[#E4E1EE]">
+            {interviewType}
+          </span>
+        ) : null}
+        {difficulty ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#F6F2FE] px-2.5 py-1 text-xs font-semibold text-[#7C3AED] ring-1 ring-[#E3D9FB]">
+            <Sparkles className="size-3" strokeWidth={2} aria-hidden="true" />
+            AI questions: {difficulty}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
 /* -------------------------------------------------------------------------- */
 /* Video (non-telephonic) layout                                              */
 /* -------------------------------------------------------------------------- */
@@ -488,12 +748,9 @@ function VideoTemplateBody({
   questions,
   hasQuestions,
   dragId,
-  fileInputId,
-  fileInputRef,
   onAddQuestions,
   onAutoGenerate,
   onUploadClick,
-  onFileChange,
   onUpdateQuestion,
   onRemoveQuestion,
   onDragStart,
@@ -503,12 +760,9 @@ function VideoTemplateBody({
   questions: TemplateQuestion[]
   hasQuestions: boolean
   dragId: string | null
-  fileInputId: string
-  fileInputRef: RefObject<HTMLInputElement | null>
   onAddQuestions: () => void
   onAutoGenerate: () => void
   onUploadClick: () => void
-  onFileChange: (file: File | null) => void
   onUpdateQuestion: (
     id: string,
     patch: Partial<Omit<TemplateQuestion, 'id'>>,
@@ -529,59 +783,14 @@ function VideoTemplateBody({
             Questions you&apos;ve added will appear here
           </p>
         </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onAddQuestions}
-            className="!h-9 !rounded-md border-[#2D2061] bg-white px-3 text-xs font-semibold text-[#2D2061] hover:bg-[#f7f6fb]"
-          >
-            <Plus className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
-            Add Questions
-          </Button>
-          <Button
-            type="button"
-            onClick={onAutoGenerate}
-            className="!h-9 !rounded-md !bg-[#7C3AED] px-3 text-xs font-semibold text-white hover:!bg-[#6D28D9]"
-          >
-            <Sparkles className="size-3.5" strokeWidth={2} aria-hidden="true" />
-            {hasQuestions ? 'Re-Generate Template' : 'Auto Generate Template'}
-          </Button>
-        </div>
-      </div>
-
-      <div className="mx-4 mt-4 flex flex-col gap-3 rounded-lg border border-[#D8E0F0] bg-[#EEF2FA] px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div className="flex min-w-0 items-start gap-3">
-          <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-[#2D2061] shadow-sm">
-            <CloudUpload className="size-4" strokeWidth={1.75} aria-hidden="true" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-[#2D2061]">Upload Bulk Questions</p>
-            <p className="mt-0.5 text-xs text-[#6B6B80]">
-              We support bulk ZIP files for large imports.
-            </p>
-          </div>
-        </div>
-        <Button
-          type="button"
-          onClick={onUploadClick}
-          className="!h-9 shrink-0 !rounded-md !bg-[#2D2061] px-3 text-xs font-semibold text-white hover:!bg-[#241a52]"
-        >
-          <Upload className="size-3.5" strokeWidth={2} aria-hidden="true" />
-          Upload File
-        </Button>
-        <input
-          ref={fileInputRef}
-          id={fileInputId}
-          type="file"
-          accept=".zip,.csv,.txt,.xlsx,.json"
-          className="sr-only"
-          onChange={(e) => {
-            onFileChange(e.target.files?.[0] ?? null)
-            e.target.value = ''
-          }}
+        <QuestionActions
+          hasQuestions={hasQuestions}
+          onAutoGenerate={onAutoGenerate}
+          onAddQuestions={onAddQuestions}
+          onUploadClick={onUploadClick}
         />
       </div>
+
 
       {hasQuestions ? (
         <ul className="flex flex-col gap-2.5 px-4 py-4">
@@ -644,8 +853,78 @@ function VideoTemplateBody({
           ))}
         </ul>
       ) : (
-        <div className="min-h-[12rem] flex-1" aria-hidden="true" />
+        <div className="flex flex-1 items-center justify-center p-4">
+          <EmptyQuestionsNudge />
+        </div>
       )}
+    </div>
+  )
+}
+
+/** Question toolbar: Generate with AI, Add Question, Upload Bulk Question. */
+function QuestionActions({
+  hasQuestions,
+  disabled = false,
+  onAutoGenerate,
+  onAddQuestions,
+  onUploadClick,
+}: {
+  hasQuestions: boolean
+  disabled?: boolean
+  onAutoGenerate: () => void
+  onAddQuestions: () => void
+  onUploadClick: () => void
+}) {
+  return (
+    <div className="flex shrink-0 flex-wrap items-center gap-2">
+      <Button
+        type="button"
+        onClick={onAutoGenerate}
+        disabled={disabled}
+        className="!h-9 !rounded-md !bg-[#7C3AED] px-3 text-xs font-semibold text-white hover:!bg-[#6D28D9]"
+      >
+        <Sparkles className="size-3.5" strokeWidth={2} aria-hidden="true" />
+        {hasQuestions ? 'Regenerate with AI' : 'Generate with AI'}
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onAddQuestions}
+        disabled={disabled}
+        className="!h-9 !rounded-md border-[#2D2061] bg-white px-3 text-xs font-semibold text-[#2D2061] hover:bg-[#f7f6fb]"
+      >
+        <Plus className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
+        Add Question
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onUploadClick}
+        disabled={disabled}
+        title="ZIP, CSV, TXT, XLSX or JSON"
+        className="!h-9 !rounded-md border-[#2D2061] bg-white px-3 text-xs font-semibold text-[#2D2061] hover:bg-[#f7f6fb]"
+      >
+        <Upload className="size-3.5" strokeWidth={2} aria-hidden="true" />
+        Upload Bulk Question
+      </Button>
+    </div>
+  )
+}
+
+/** Empty-state nudge pointing at the toolbar actions. */
+function EmptyQuestionsNudge() {
+  return (
+    <div className="flex min-h-[12rem] max-w-md flex-col items-center justify-center text-center">
+      <span className="mb-3 inline-flex size-10 items-center justify-center rounded-full bg-[#F6F2FE] text-[#7C3AED]">
+        <Lightbulb className="size-5" strokeWidth={1.75} aria-hidden="true" />
+      </span>
+      <p className="text-sm font-bold text-[#2D2061]">No questions added yet</p>
+      <p className="mt-1 text-xs leading-relaxed text-[#8B8B9E]">
+        Use <span className="font-semibold text-[#7C3AED]">Generate with AI</span>,{' '}
+        <span className="font-semibold text-[#2D2061]">Add Question</span> or{' '}
+        <span className="font-semibold text-[#2D2061]">Upload Bulk Question</span>{' '}
+        above to start building this template.
+      </p>
     </div>
   )
 }
@@ -662,6 +941,7 @@ function TelephonicTemplateBody({
   onScreeningChange,
   onAddQuestions,
   onAutoGenerate,
+  onUploadClick,
   onUpdateQuestion,
   onRemoveQuestion,
   onDragStart,
@@ -675,6 +955,7 @@ function TelephonicTemplateBody({
   onScreeningChange: (on: boolean) => void
   onAddQuestions: () => void
   onAutoGenerate: () => void
+  onUploadClick: () => void
   onUpdateQuestion: (
     id: string,
     patch: Partial<Omit<TemplateQuestion, 'id'>>,
@@ -718,27 +999,13 @@ function TelephonicTemplateBody({
               Drawn from the shared screening library. Answers write back to the
               candidate record.
             </p>
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onAddQuestions}
-                disabled={!screeningEnabled}
-                className="!h-9 !rounded-md border-[#2D2061] bg-white px-3 text-xs font-semibold text-[#2D2061] hover:bg-[#f7f6fb]"
-              >
-                <Plus className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
-                Add Questions
-              </Button>
-              <Button
-                type="button"
-                onClick={onAutoGenerate}
-                disabled={!screeningEnabled}
-                className="!h-9 !rounded-md !bg-[#7C3AED] px-3 text-xs font-semibold text-white hover:!bg-[#6D28D9]"
-              >
-                <Sparkles className="size-3.5" strokeWidth={2} aria-hidden="true" />
-                {hasQuestions ? 'Re-Generate Template' : 'Auto Generate Template'}
-              </Button>
-            </div>
+            <QuestionActions
+              hasQuestions={hasQuestions}
+              disabled={!screeningEnabled}
+              onAutoGenerate={onAutoGenerate}
+              onAddQuestions={onAddQuestions}
+              onUploadClick={onUploadClick}
+            />
           </div>
         </div>
 

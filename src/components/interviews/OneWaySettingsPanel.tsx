@@ -21,6 +21,7 @@ import { cn } from '../../lib/cn'
 import {
   Button,
   Checkbox,
+  ConfirmDeleteModal,
   Select,
   SidePanel,
   Switch,
@@ -654,6 +655,10 @@ function AudioConfigTab() {
     },
   ])
   const [speed, setSpeed] = useState(1)
+  const [pendingVoice, setPendingVoice] = useState<{
+    id: string
+    region: string
+  } | null>(null)
   const [silenceTimeout, setSilenceTimeout] = useState('5')
   const [allowInterrupt, setAllowInterrupt] = useState(true)
   const [rephrase, setRephrase] = useState(true)
@@ -822,9 +827,7 @@ function AudioConfigTab() {
                     type="button"
                     aria-label="Remove voice mapping"
                     onClick={() =>
-                      setVoices((current) =>
-                        current.filter((v) => v.id !== row.id),
-                      )
+                      setPendingVoice({ id: row.id, region: row.region })
                     }
                     className="inline-flex size-10 items-center justify-center rounded-md text-[#8B8B9E] hover:bg-[#F7F6FA] hover:text-[#E53935]"
                   >
@@ -1321,6 +1324,18 @@ function AudioConfigTab() {
           </Button>
         </div>
       </section>
+
+      <ConfirmDeleteModal
+        open={Boolean(pendingVoice)}
+        title="Delete Voice Mapping"
+        itemName={pendingVoice?.region}
+        onClose={() => setPendingVoice(null)}
+        onConfirm={() => {
+          if (!pendingVoice) return
+          setVoices((current) => current.filter((v) => v.id !== pendingVoice.id))
+          setPendingVoice(null)
+        }}
+      />
     </div>
   )
 }

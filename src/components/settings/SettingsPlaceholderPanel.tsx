@@ -13,6 +13,13 @@ export function SettingsPlaceholderPanel({
 
   return (
     <SettingsPanel
+      eyebrow={
+        sectionId.startsWith('talent-crm-')
+          ? 'Talent CRM'
+          : sectionId.startsWith('candidates-')
+            ? 'Candidates'
+            : undefined
+      }
       title={title}
       description="This settings module is ready for content. Configuration will appear here."
     >

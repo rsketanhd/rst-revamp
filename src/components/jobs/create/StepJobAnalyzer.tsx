@@ -1,6 +1,6 @@
 import { ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { Button, PercentSlider, SegmentedToggle, Tooltip } from '../../ui'
+import { Button, ConfirmDeleteModal, PercentSlider, SegmentedToggle, Tooltip } from '../../ui'
 import type { AnalyzerCriteria, CreateJobFormState } from './types'
 import { cn } from '../../../lib/cn'
 
@@ -11,6 +11,7 @@ type Props = {
 
 export function StepJobAnalyzer({ value, onChange }: Props) {
   const [open, setOpen] = useState(true)
+  const [pendingDelete, setPendingDelete] = useState<AnalyzerCriteria | null>(null)
 
   function updateCriteria(id: string, patch: Partial<AnalyzerCriteria>) {
     onChange({
@@ -92,12 +93,24 @@ export function StepJobAnalyzer({ value, onChange }: Props) {
                 key={row.id}
                 row={row}
                 onChange={(patch) => updateCriteria(row.id, patch)}
-                onRemove={() => removeCriteria(row.id)}
+                onRemove={() => setPendingDelete(row)}
               />
             ))}
           </div>
         ) : null}
       </div>
+
+      <ConfirmDeleteModal
+        open={Boolean(pendingDelete)}
+        title="Delete Criteria"
+        itemName={pendingDelete?.label}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={() => {
+          if (!pendingDelete) return
+          removeCriteria(pendingDelete.id)
+          setPendingDelete(null)
+        }}
+      />
     </div>
   )
 }

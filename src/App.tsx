@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell, RequireAuth } from './components/layout'
 import { ToastProvider } from './components/ui'
 import { CandidateDiscoveryPage } from './pages/CandidateDiscoveryPage'
+import { CandidateProfilePage } from './pages/CandidateProfilePage'
 import { CandidatesPage } from './pages/CandidatesPage'
 import { CreateJobPage } from './pages/CreateJobPage'
 import { DashboardPage } from './pages/DashboardPage'
@@ -53,7 +54,12 @@ export default function App() {
               path="/jobs/:jobCode/applications"
               element={<JobApplicationsPage />}
             />
+            <Route
+              path="/jobs/:jobCode/applications/:applicantId"
+              element={<CandidateProfilePage />}
+            />
             <Route path="/candidates" element={<CandidatesPage />} />
+            <Route path="/candidates/:candidateId" element={<CandidateProfilePage />} />
             <Route
               path="/candidate-discovery"
               element={<CandidateDiscoveryPage />}

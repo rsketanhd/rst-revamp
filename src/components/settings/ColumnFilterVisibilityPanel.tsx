@@ -241,6 +241,7 @@ export function ColumnFilterVisibilityPanel() {
 
   return (
     <SettingsPanel
+      eyebrow="Talent CRM"
       title="Column & Filter Visibility"
       description="Choose which fields to show in columns and enable for filtering."
     >

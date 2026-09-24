@@ -110,6 +110,7 @@ export function TalentCrmPanel() {
   return (
     <>
       <SettingsPanel
+        eyebrow="Talent CRM"
         title="Talent Pool Settings"
         description="Manage your user registration credentials and customize active recruiter daily digest parameters."
       >

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Search, Send, SlidersHorizontal, Upload } from 'lucide-react'
 import { cn } from '../lib/cn'
 import { PageContainer, PageHeader } from '../components/layout'
@@ -224,7 +225,16 @@ export function CandidatesPage() {
       case 'candidateId':
         return <DataTableTd key={columnId}>{candidate.candidateId}</DataTableTd>
       case 'name':
-        return <DataTableTd key={columnId}>{candidate.name}</DataTableTd>
+        return (
+          <DataTableTd key={columnId}>
+            <Link
+              to={`/candidates/${candidate.id}`}
+              className="font-semibold text-[#2D2061] hover:underline"
+            >
+              {candidate.name}
+            </Link>
+          </DataTableTd>
+        )
       case 'email':
         return <DataTableTd key={columnId}>{candidate.email}</DataTableTd>
       case 'phone':

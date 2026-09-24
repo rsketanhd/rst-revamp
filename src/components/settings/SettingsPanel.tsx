@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
 export type SettingsPanelProps = {
+  /** Small uppercase parent label above the title (e.g. "Talent CRM"). */
+  eyebrow?: string
   title: string
   description?: string
   /** Optional header trailing actions (e.g. Import / Invite buttons). */
@@ -14,6 +16,7 @@ export type SettingsPanelProps = {
  * White bordered content panel used on Settings pages.
  */
 export function SettingsPanel({
+  eyebrow,
   title,
   description,
   actions,
@@ -29,6 +32,11 @@ export function SettingsPanel({
     >
       <header className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-[#ECEAF3] pb-4">
         <div className="min-w-0">
+          {eyebrow ? (
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9A98A8]">
+              {eyebrow}
+            </p>
+          ) : null}
           <h2 className="text-lg font-bold text-[#2D2061]">{title}</h2>
           {description ? (
             <p className="mt-1 text-sm leading-relaxed text-[#8B8B9E]">

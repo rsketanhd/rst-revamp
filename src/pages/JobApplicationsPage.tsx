@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Check,
@@ -214,7 +214,12 @@ export function JobApplicationsPage() {
       case 'name':
         return (
           <DataTableTd key={columnId} strong>
-            {applicant.name}
+            <Link
+              to={`/jobs/${job?.code ?? jobCode}/applications/${applicant.id}`}
+              className="font-semibold text-[#2D2061] hover:underline"
+            >
+              {applicant.name}
+            </Link>
           </DataTableTd>
         )
       case 'email':
