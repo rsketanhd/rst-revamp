@@ -9,6 +9,7 @@ import {
   ColumnFilterVisibilityPanel,
   CompanyBrandingPanel,
   DEFAULT_CANDIDATES_SECTION,
+  DEFAULT_JOBS_SECTION,
   DEFAULT_ONE_WAY_INTERVIEW_SECTION,
   DEFAULT_TALENT_CRM_SECTION,
   DocumentsSettingsPanel,
@@ -17,6 +18,7 @@ import {
   getSettingsNavGroupsForRole,
   isSettingsSectionIdForRole,
   JobsModulePanel,
+  JobsPipelinePanel,
   LicenseLimitsPanel,
   OneWayAvatarSettingsPanel,
   OneWayDefaultSettingsPanel,
@@ -45,6 +47,10 @@ export function SettingsPage() {
 
   if (!isSettingsSectionIdForRole(activeSectionId, role)) {
     return <Navigate to={`/settings/${defaultSection}`} replace />
+  }
+
+  if (role === 'recruiter' && activeSectionId === 'jobs') {
+    return <Navigate to={`/settings/${DEFAULT_JOBS_SECTION}`} replace />
   }
 
   if (role === 'recruiter' && activeSectionId === 'candidates') {
@@ -117,6 +123,10 @@ function SettingsSectionContent({
 
   switch (sectionId) {
     case 'jobs':
+    case 'jobs-pipeline':
+      return <JobsPipelinePanel />
+
+    case 'jobs-field-customization':
       return <JobsModulePanel />
 
     case 'candidates-documents':

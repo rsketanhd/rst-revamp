@@ -3,6 +3,7 @@ export type { SettingsNavProps } from './SettingsNav'
 export { SettingsPanel, SettingsBlock } from './SettingsPanel'
 export type { SettingsPanelProps, SettingsBlockProps } from './SettingsPanel'
 export { JobsModulePanel } from './JobsModulePanel'
+export { JobsPipelinePanel } from './JobsPipelinePanel'
 export { CampaignSettingsPanel } from './CampaignSettingsPanel'
 export { AddSmsPhonePanel } from './AddSmsPhonePanel'
 export type {
@@ -61,6 +62,7 @@ export {
   DEFAULT_SETTINGS_SECTION,
   DEFAULT_CANDIDATE_SETTINGS_SECTION,
   DEFAULT_CANDIDATES_SECTION,
+  DEFAULT_JOBS_SECTION,
   DEFAULT_TALENT_CRM_SECTION,
   DEFAULT_ONE_WAY_INTERVIEW_SECTION,
   isSettingsSectionId,

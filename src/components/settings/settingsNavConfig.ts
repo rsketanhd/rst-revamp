@@ -1,5 +1,7 @@
 export type SettingsSectionId =
   | 'jobs'
+  | 'jobs-pipeline'
+  | 'jobs-field-customization'
   | 'candidates'
   | 'candidates-documents'
   | 'pipeline'
@@ -51,6 +53,11 @@ export const ONE_WAY_INTERVIEW_NAV_CHILDREN: SettingsNavItem[] = [
   { id: 'one-way-interview-avatar', label: 'Avatar Settings' },
 ]
 
+export const JOBS_NAV_CHILDREN: SettingsNavItem[] = [
+  { id: 'jobs-pipeline', label: 'Pipeline' },
+  { id: 'jobs-field-customization', label: 'Field Customization' },
+]
+
 export const CANDIDATES_NAV_CHILDREN: SettingsNavItem[] = [
   { id: 'candidates-documents', label: 'Documents' },
 ]
@@ -72,7 +79,7 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
     id: 'module-configuration',
     title: 'Module Configuration',
     items: [
-      { id: 'jobs', label: 'Jobs' },
+      { id: 'jobs', label: 'Jobs', children: JOBS_NAV_CHILDREN },
       {
         id: 'candidates',
         label: 'Candidates',
@@ -133,6 +140,9 @@ export const DEFAULT_SETTINGS_SECTION: SettingsSectionId = 'recruiter-profile'
 
 export const DEFAULT_CANDIDATE_SETTINGS_SECTION: SettingsSectionId =
   'account-settings'
+
+/** Default landing page when opening Jobs parent. */
+export const DEFAULT_JOBS_SECTION: SettingsSectionId = 'jobs-pipeline'
 
 /** Default landing page when opening Candidates parent. */
 export const DEFAULT_CANDIDATES_SECTION: SettingsSectionId =
@@ -243,6 +253,7 @@ export function getSettingsSectionLabel(id: SettingsSectionId): string {
 export function resolveSettingsSectionId(
   sectionId: SettingsSectionId,
 ): SettingsSectionId {
+  if (sectionId === 'jobs') return DEFAULT_JOBS_SECTION
   if (sectionId === 'candidates') return DEFAULT_CANDIDATES_SECTION
   if (sectionId === 'talent-crm') return DEFAULT_TALENT_CRM_SECTION
   if (sectionId === 'one-way-interview') return DEFAULT_ONE_WAY_INTERVIEW_SECTION
