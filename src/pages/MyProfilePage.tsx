@@ -27,6 +27,8 @@ import {
   type PendingItemId,
 } from '../data/myProfile'
 import { toast } from '../components/ui'
+import { ResumeReviewPanel } from '../components/my-profile/ResumeReviewPanel'
+import { applyResumeReview } from '../data/resumeReview'
 
 /**
  * Candidate portal — My Profile with empty and filled section states.
@@ -38,6 +40,9 @@ export function MyProfilePage() {
   const educationSectionRef = useRef<HTMLElement>(null)
 
   const [profile, setProfile] = useState<MyProfileState>(() => getMyProfile())
+  /** Uploaded file kept in memory so Download CV works this session */
+  const [resumeFile, setResumeFile] = useState<File | null>(null)
+  const [resumeReviewOpen, setResumeReviewOpen] = useState(false)
   const [editPersonalOpen, setEditPersonalOpen] = useState(false)
   const [addJobOpen, setAddJobOpen] = useState(false)
   const [addCompensationOpen, setAddCompensationOpen] = useState(false)
@@ -84,8 +89,34 @@ export function MyProfilePage() {
 
   function handleResumeUpload(file: File) {
     setProfileResume(file.name)
+    setResumeFile(file)
     refreshProfile()
     toast.success('Resume uploaded successfully.', { title: 'My Profile' })
+  }
+
+  function handleResumeDownload() {
+    if (!resumeFile) {
+      toast.error('Upload the resume again to download it in this session.', {
+        title: 'Download CV',
+      })
+      return
+    }
+    const url = URL.createObjectURL(resumeFile)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = resumeFile.name
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function handleApplyResume(
+    values: Parameters<typeof applyResumeReview>[0],
+    skills: string[],
+  ) {
+    applyResumeReview(values, skills)
+    refreshProfile()
+    setResumeReviewOpen(false)
+    toast.success('Profile updated from your resume.', { title: 'My Profile' })
   }
 
   function handleAddSkill(skill: string) {
@@ -124,7 +155,11 @@ export function MyProfilePage() {
             <section ref={resumeSectionRef}>
               <ProfileResumeBanner
                 fileName={profile.resumeFileName}
+                uploadedOn={profile.resumeUploadedOn}
+                appliedToProfile={profile.resumeAppliedToProfile}
                 onUpload={handleResumeUpload}
+                onDownload={handleResumeDownload}
+                onApplyToProfile={() => setResumeReviewOpen(true)}
               />
             </section>
 
@@ -161,6 +196,12 @@ export function MyProfilePage() {
           </div>
         </div>
       </PageContainer>
+
+      <ResumeReviewPanel
+        open={resumeReviewOpen}
+        onClose={() => setResumeReviewOpen(false)}
+        onApply={handleApplyResume}
+      />
 
       <ProfileEditPersonalPanel
         open={editPersonalOpen}

@@ -48,6 +48,10 @@ export type MyProfileState = {
   personalInfo: PersonalInfo
   avatarDataUrl: string | null
   resumeFileName: string | null
+  /** Display date of the latest upload, e.g. "16 Sep 2026" */
+  resumeUploadedOn: string | null
+  /** False until the candidate applies the new resume's details to their profile */
+  resumeAppliedToProfile: boolean
   skills: string[]
   jobInformation: JobInfoEntry[]
   compensation: CompensationEntry[]
@@ -162,6 +166,8 @@ const DEFAULT_STATE: MyProfileState = {
   personalInfo: { ...EMPTY_PERSONAL_INFO },
   avatarDataUrl: null,
   resumeFileName: null,
+  resumeUploadedOn: null,
+  resumeAppliedToProfile: false,
   skills: [],
   jobInformation: [],
   compensation: [],
@@ -216,8 +222,19 @@ export function updatePersonalInfo(info: PersonalInfo): MyProfileState {
   return updateMyProfile({ personalInfo: info })
 }
 
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function formatShortDate(date: Date): string {
+  return `${date.getDate()} ${SHORT_MONTHS[date.getMonth()]} ${date.getFullYear()}`
+}
+
+/** Saves a newly uploaded resume; its details are not applied to the profile yet. */
 export function setProfileResume(fileName: string | null): MyProfileState {
-  return updateMyProfile({ resumeFileName: fileName })
+  return updateMyProfile({
+    resumeFileName: fileName,
+    resumeUploadedOn: fileName ? formatShortDate(new Date()) : null,
+    resumeAppliedToProfile: false,
+  })
 }
 
 export function setProfileAvatar(dataUrl: string | null): MyProfileState {
