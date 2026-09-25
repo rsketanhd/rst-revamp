@@ -162,11 +162,12 @@ export function JobsModulePanel() {
 
   return (
     <SettingsPanel
-      title="Jobs"
+      eyebrow="Jobs"
+      title="Field Customization"
       description="Manage your user registration credentials and customize active recruiter daily digest parameters."
     >
       <SettingsBlock
-        title="Field Customization"
+        title="Job Fields"
         trailing={
           <button
             type="button"

@@ -2,13 +2,11 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   ArrowDown,
   ArrowUp,
-  Check,
   ChevronLeft,
   ChevronRight,
-  CircleX,
-  X,
 } from 'lucide-react'
 import {
+  AllowToggleCell,
   Button,
   Checkbox,
   DataTable,
@@ -516,50 +514,6 @@ function OrderButton({
 }
 
 /* -------------------------------------------------------------------------- */
-/* Shared allow/block cell                                                    */
-/* -------------------------------------------------------------------------- */
-
-function RuleCell({
-  on,
-  label,
-  disabled = false,
-  compact = false,
-  onToggle,
-}: {
-  on: boolean
-  label: string
-  disabled?: boolean
-  /** Small square cell (Status moves) instead of full-width */
-  compact?: boolean
-  onToggle: () => void
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={on}
-      aria-label={label}
-      disabled={disabled}
-      onClick={onToggle}
-      className={cn(
-        'flex items-center justify-center rounded-md border text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-60',
-        compact ? 'mx-auto h-7 w-9' : 'h-8 w-full min-w-16',
-        on
-          ? 'border-[#E3F5EA] bg-[#E3F5EA] text-[#15803D] hover:bg-[#D6F0DF]'
-          : 'border-[#E4E3EA] bg-white text-[#A0A0B2] hover:bg-[#F7F7FA]',
-      )}
-    >
-      {on ? (
-        <Check className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
-      ) : compact ? (
-        <CircleX className="size-3.5" strokeWidth={2} aria-hidden="true" />
-      ) : (
-        <X className="size-3" strokeWidth={2} aria-hidden="true" />
-      )}
-    </button>
-  )
-}
-
-/* -------------------------------------------------------------------------- */
 /* Stage moves                                                                */
 /* -------------------------------------------------------------------------- */
 
@@ -641,7 +595,7 @@ function StageMovesCard({
               <span className="sr-only">From stage</span>
             </DataTableTh>
             {stages.map((st) => (
-              <DataTableTh key={st.id} className="text-center !text-[11px]">
+              <DataTableTh key={st.id} className="!px-1.5 !text-center !text-[11px]">
                 {st.name}
               </DataTableTh>
             ))}
@@ -670,13 +624,13 @@ function StageMovesCard({
                           —
                         </span>
                       ) : (
-                        <RuleCell
-                          on={allowed.includes(to.id)}
+                        <AllowToggleCell
+                          allowed={allowed.includes(to.id)}
                           disabled={
                             workflow.strictStageMoves &&
                             order.indexOf(to.id) < fromIndex
                           }
-                          label={`${from.name} to ${to.name}: ${
+                          aria-label={`${from.name} to ${to.name}: ${
                             allowed.includes(to.id) ? 'allowed' : 'blocked'
                           }`}
                           onToggle={() => onToggle(from.id, to.id)}
@@ -766,7 +720,7 @@ function StatusesPerStageCard({
             <span className="sr-only">Stage</span>
           </DataTableTh>
           {statuses.map((st) => (
-            <DataTableTh key={st.id} className="text-center !text-[11px]">
+            <DataTableTh key={st.id} className="!px-1.5 !text-center !text-[11px]">
               {st.name}
             </DataTableTh>
           ))}
@@ -794,9 +748,9 @@ function StatusesPerStageCard({
                   const on = ids.includes(st.id)
                   return (
                     <DataTableTd key={st.id} className="!px-1.5 !py-2.5">
-                      <RuleCell
-                        on={on}
-                        label={`${st.name} in ${stage.name}: ${on ? 'allowed' : 'hidden'}`}
+                      <AllowToggleCell
+                        allowed={on}
+                        aria-label={`${st.name} in ${stage.name}: ${on ? 'allowed' : 'hidden'}`}
                         onToggle={() => onToggle(stage.id, st.id)}
                       />
                     </DataTableTd>
@@ -851,7 +805,7 @@ function StatusMovesCard({
             <span className="sr-only">From status</span>
           </DataTableTh>
           {statuses.map((st) => (
-            <DataTableTh key={st.id} className="text-center !text-[11px]">
+            <DataTableTh key={st.id} className="!px-1.5 !text-center !text-[11px]">
               {st.name}
             </DataTableTh>
           ))}
@@ -882,10 +836,9 @@ function StatusMovesCard({
                         —
                       </span>
                     ) : (
-                      <RuleCell
-                        compact
-                        on={allowed.includes(to.id)}
-                        label={`${from.name} to ${to.name}: ${
+                      <AllowToggleCell
+                        allowed={allowed.includes(to.id)}
+                        aria-label={`${from.name} to ${to.name}: ${
                           allowed.includes(to.id) ? 'allowed' : 'blocked'
                         }`}
                         onToggle={() => onToggle(from.id, to.id)}

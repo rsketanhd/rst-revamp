@@ -142,6 +142,8 @@ export type {
   StatusPillSelectProps,
   StatusPillOption,
 } from './StatusPillSelect'
+export { AllowToggleCell } from './AllowToggleCell'
+export type { AllowToggleCellProps } from './AllowToggleCell'
 export { Tooltip } from './Tooltip'
 export type { TooltipProps } from './Tooltip'
 export {
