@@ -2,20 +2,22 @@ import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
-  Check,
-  Circle,
+  Search,
+  Send,
   Share2,
+  SlidersHorizontal,
   SquarePen,
-  UserPlus,
-  X,
+  Sparkles,
 } from 'lucide-react'
 import { PageContainer, PageHeader } from '../components/layout'
+import { JobViewEditPanel } from '../components/jobs/JobViewEditPanel'
+import { AddFetchCandidatePanel } from '../components/applications/AddFetchCandidatePanel'
+import { applyCreateFormToListing } from '../components/jobs/create/jobListingToForm'
+import type { JobListing } from '../data/jobs'
 import {
   APPLICANT_STATUS_META,
   APPLICANT_STATUS_OPTIONS,
-  SOURCE_OPTIONS,
   getApplicantsForJob,
-  getJobActivityItems,
   getJobByCode,
   getPipelineStages,
   type Applicant,
@@ -43,10 +45,10 @@ import {
   ShareJobPopover,
   ThreeDotsMenu,
   type TableColumnConfig,
+  toast,
 } from '../components/ui'
 
 import { PipelineFunnel } from '../components/applications/PipelineFunnel'
-import { ApplicationFiltersBar } from '../components/applications/ApplicationFiltersBar'
 import {
   ApplicationMoreFiltersPanel,
   emptyApplicationMoreFilters,
@@ -74,7 +76,11 @@ const DEFAULT_APPLICATION_COLUMNS: TableColumnConfig[] = [
 export function JobApplicationsPage() {
   const navigate = useNavigate()
   const { jobCode = '' } = useParams()
-  const job = getJobByCode(jobCode)
+  /** Edits saved from the Edit Job panel (demo: kept for this visit) */
+  const [editedJob, setEditedJob] = useState<JobListing | null>(null)
+  const sourceJob = getJobByCode(jobCode)
+  const job = editedJob && editedJob.id === sourceJob?.id ? editedJob : sourceJob
+  const [editJobOpen, setEditJobOpen] = useState(false)
 
   const pipeline = useMemo(
     () => (job ? getPipelineStages(job) : []),
@@ -84,19 +90,17 @@ export function JobApplicationsPage() {
     () => (job ? getApplicantsForJob(job.code) : []),
     [job],
   )
-  const activityItems = useMemo(() => getJobActivityItems(), [])
 
   const [activeStage, setActiveStage] = useState<PipelineStageId>(
     'clientEndorsement',
   )
-  const [source, setSource] = useState('')
-  const [cvRelevancy, setCvRelevancy] = useState(0)
-  const [suitability, setSuitability] = useState<[number, number]>([0, 95])
+  const [query, setQuery] = useState('')
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false)
   const [moreFilters, setMoreFilters] = useState<ApplicationMoreFilters>(
     emptyApplicationMoreFilters,
   )
   const [shareOpen, setShareOpen] = useState(false)
+  const [addCandidateOpen, setAddCandidateOpen] = useState(false)
   const shareAnchorRef = useRef<HTMLDivElement>(null)
   const [columns, setColumns] = useState<TableColumnConfig[]>(
     DEFAULT_APPLICATION_COLUMNS,
@@ -107,36 +111,24 @@ export function JobApplicationsPage() {
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
+  const filterCount = Object.values(moreFilters).filter(Boolean).length
+
   const filtered = useMemo(() => {
-    const barSource = source || moreFilters.source
+    const q = query.trim().toLowerCase()
     return allApplicants.filter((applicant) => {
-      if (barSource && applicant.source !== barSource) return false
-      if (cvRelevancy > 0 && applicant.cvRelevancy < cvRelevancy) return false
       if (
-        applicant.suitability < suitability[0] ||
-        applicant.suitability > suitability[1]
+        q &&
+        ![applicant.name, applicant.email, applicant.location, applicant.nationality]
+          .join(' ')
+          .toLowerCase()
+          .includes(q)
       ) {
         return false
       }
       const resolvedStatus = statuses[applicant.id] ?? applicant.status
-      return matchesApplicationMoreFilters(
-        applicant,
-        {
-          ...moreFilters,
-          // Source handled with bar above so skip double-filter inside helper
-          source: '',
-        },
-        resolvedStatus,
-      )
+      return matchesApplicationMoreFilters(applicant, moreFilters, resolvedStatus)
     })
-  }, [
-    allApplicants,
-    source,
-    cvRelevancy,
-    suitability,
-    moreFilters,
-    statuses,
-  ])
+  }, [allApplicants, query, moreFilters, statuses])
 
   const stageScoped = useMemo(() => {
     const matched = filtered.filter((a) => a.stage === activeStage)
@@ -292,7 +284,7 @@ export function JobApplicationsPage() {
   return (
     <PageContainer contentClassName="gap-4 sm:gap-5">
       {/* Header */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <button
             type="button"
@@ -309,34 +301,58 @@ export function JobApplicationsPage() {
           <PageHeader
             className="mt-1"
             title={`${job.title} Applications`}
-            subtitle="Review applicants and manage this job's hiring pipeline."
+            subtitle={
+              <dl className="flex flex-col gap-1 text-sm text-[#6B6B80] sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1 sm:gap-y-1">
+                <div className="min-w-0">
+                  <dt className="inline">Job ID : </dt>
+                  <dd className="inline font-medium text-[#2D2061]">{job.code}</dd>
+                </div>
+                <span className="hidden text-[#C8C5D6] sm:inline" aria-hidden="true">
+                  •
+                </span>
+                <div className="min-w-0">
+                  <dt className="inline">Location : </dt>
+                  <dd className="inline font-medium text-[#2D2061]">{job.location}</dd>
+                </div>
+                <span className="hidden text-[#C8C5D6] sm:inline" aria-hidden="true">
+                  •
+                </span>
+                <div className="min-w-0">
+                  <dt className="inline">Skills : </dt>
+                  <dd className="inline font-medium text-[#2D2061]">
+                    Programming, Problem Solving
+                  </dd>
+                </div>
+              </dl>
+            }
           />
-          <dl className="mt-2 flex flex-col gap-1 text-sm text-[#6B6B80] sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-1 sm:gap-y-1">
-            <div className="min-w-0">
-              <dt className="inline">Job ID : </dt>
-              <dd className="inline font-medium text-[#2D2061]">{job.code}</dd>
-            </div>
-            <span className="hidden text-[#C8C5D6] sm:inline" aria-hidden="true">
-              •
-            </span>
-            <div className="min-w-0">
-              <dt className="inline">Location : </dt>
-              <dd className="inline font-medium text-[#2D2061]">{job.location}</dd>
-            </div>
-            <span className="hidden text-[#C8C5D6] sm:inline" aria-hidden="true">
-              •
-            </span>
-            <div className="min-w-0">
-              <dt className="inline">Skills : </dt>
-              <dd className="inline font-medium text-[#2D2061]">
-                Programming, Problem Solving
-              </dd>
-            </div>
-          </dl>
         </div>
 
         <div className="flex flex-col items-stretch gap-3 sm:items-end">
           <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setAddCandidateOpen(true)}
+              className="w-full !gap-2.5 !rounded-lg !border-[#C9B8F2] !bg-[#FAF7FF] !pr-1.5 !text-[#2D2061] hover:!bg-[#F3EEFE] sm:w-auto"
+            >
+              Add/Fetch Candidate
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#8E2DB5] to-[#D6336C] px-2.5 py-1 text-xs font-semibold leading-none text-white">
+                <Sparkles className="size-3" strokeWidth={2.25} aria-hidden="true" />
+                AI
+              </span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setEditJobOpen(true)}
+              className="w-full !rounded-md border-[#d5d2e2] bg-white text-[#2D2061] sm:w-auto"
+            >
+              <SquarePen className="size-3.5" aria-hidden="true" />
+              Edit Job
+            </Button>
             <div ref={shareAnchorRef} className="relative inline-flex w-full sm:w-auto">
               <Button
                 type="button"
@@ -351,30 +367,6 @@ export function JobApplicationsPage() {
                 Share Job
               </Button>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full !rounded-md border-[#d5d2e2] bg-white text-[#2D2061] sm:w-auto"
-            >
-              <UserPlus className="size-3.5" aria-hidden="true" />
-              Add Candidate
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full !rounded-md border-[#d5d2e2] bg-white text-[#2D2061] sm:w-auto"
-            >
-              <SquarePen className="size-3.5" aria-hidden="true" />
-              Edit Job
-            </Button>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-            {activityItems.map((item) => (
-              <ActivityChip key={item.id} item={item} />
-            ))}
           </div>
         </div>
       </div>
@@ -388,25 +380,45 @@ export function JobApplicationsPage() {
         }}
       />
 
-      <ApplicationFiltersBar
-        source={source}
-        sourceOptions={SOURCE_OPTIONS}
-        onSourceChange={(next) => {
-          setSource(next)
-          setPage(1)
-        }}
-        cvRelevancy={cvRelevancy}
-        onCvRelevancyChange={(next) => {
-          setCvRelevancy(next)
-          setPage(1)
-        }}
-        suitability={suitability}
-        onSuitabilityChange={(next) => {
-          setSuitability(next)
-          setPage(1)
-        }}
-        onMoreFilters={() => setMoreFiltersOpen(true)}
-      />
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="relative min-w-0 flex-1">
+          <Search
+            className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#8B8B9E]"
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value)
+              setPage(1)
+            }}
+            placeholder="Type here to search"
+            aria-label="Search applications"
+            className="h-11 w-full rounded-[5px] border border-[#E0DDEA] bg-white py-2 pl-11 pr-12 text-sm text-[#2D2061] outline-none placeholder:text-[#A0A0B2] focus:border-[#2D2061] focus:ring-2 focus:ring-[#2D2061]/10"
+          />
+          <span
+            className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#5B8DEF]"
+            aria-hidden="true"
+          >
+            <Send className="size-4" strokeWidth={1.75} />
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setMoreFiltersOpen(true)}
+          className="relative inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#2D2061]/25 bg-white px-4 text-sm font-medium text-[#2D2061] shadow-[0_1px_2px_rgba(45,32,97,0.04)] transition-colors hover:bg-[#faf9fd]"
+        >
+          <SlidersHorizontal className="size-4 shrink-0" aria-hidden="true" />
+          Filter By
+          {filterCount > 0 ? (
+            <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#2D2061] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
+              {filterCount}
+            </span>
+          ) : null}
+        </button>
+      </div>
 
       <ApplicationMoreFiltersPanel
         open={moreFiltersOpen}
@@ -414,8 +426,6 @@ export function JobApplicationsPage() {
         value={moreFilters}
         onApply={(next) => {
           setMoreFilters(next)
-          // Keep bar Source in sync when set from the panel
-          if (next.source) setSource(next.source)
           setPage(1)
         }}
       />
@@ -517,52 +527,24 @@ export function JobApplicationsPage() {
         jobCode={job.code}
         jobTitle={job.title}
       />
+
+      <AddFetchCandidatePanel
+        open={addCandidateOpen}
+        onClose={() => setAddCandidateOpen(false)}
+        job={job}
+      />
+
+      <JobViewEditPanel
+        open={editJobOpen}
+        job={job}
+        initialMode="edit"
+        onClose={() => setEditJobOpen(false)}
+        onSave={(current, form) => {
+          const next = applyCreateFormToListing(current, form)
+          setEditedJob(next)
+          toast.success(`“${next.title}” was saved.`, { title: 'Job updated' })
+        }}
+      />
     </PageContainer>
-  )
-}
-
-function ActivityChip({
-  item,
-}: {
-  item: ReturnType<typeof getJobActivityItems>[number]
-}) {
-  return (
-    <div className="inline-flex max-w-full items-center gap-2 rounded-lg border border-[#e4e1ee] bg-white px-2.5 py-1.5 shadow-[0_1px_2px_rgba(45,32,97,0.04)]">
-      <StatusIcon status={item.status} />
-      <div className="min-w-0">
-        <p className="truncate text-[11px] font-semibold leading-tight text-[#2D2061]">
-          {item.label}
-        </p>
-        <p className="truncate text-[10px] leading-tight text-[#8B8B9E]">
-          {item.timestamp}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-function StatusIcon({
-  status,
-}: {
-  status: 'done' | 'failed' | 'pending'
-}) {
-  if (status === 'done') {
-    return (
-      <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[#E9F8EF] text-[#1B9E4B]">
-        <Check className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
-      </span>
-    )
-  }
-  if (status === 'failed') {
-    return (
-      <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[#FDECEC] text-[#E53935]">
-        <X className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[#F0F0F4] text-[#A0A0B2]">
-      <Circle className="size-3.5" strokeWidth={2} aria-hidden="true" />
-    </span>
   )
 }

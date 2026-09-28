@@ -289,3 +289,53 @@ export function countOneWayFilters(values: OneWayFilterValues): number {
   if (values.recruiter) n += 1
   return n
 }
+
+export type OneWayRoundProgress = {
+  id: string
+  number: number
+  /** e.g. "Skill-based" */
+  type: string
+  name: string
+  invited: number
+  completed: number
+  /** Candidates who passed and can be invited to the next round */
+  readyForNextRound: number
+}
+
+export type OneWayRoundSummary = {
+  totalInvites: number
+  candidates: number
+  /** Round currently in progress (highlighted) */
+  currentRoundId: string
+  rounds: OneWayRoundProgress[]
+}
+
+/** Per-round invite progress for an interview (demo data). */
+export function getOneWayRoundSummary(_interviewId: string): OneWayRoundSummary {
+  const rounds: OneWayRoundProgress[] = [
+    {
+      id: 'round-1',
+      number: 1,
+      type: 'Skill-based',
+      name: 'Skills screen',
+      invited: 9,
+      completed: 3,
+      readyForNextRound: 1,
+    },
+    {
+      id: 'round-2',
+      number: 2,
+      type: 'Skill-based',
+      name: 'Technical deep dive',
+      invited: 2,
+      completed: 1,
+      readyForNextRound: 0,
+    },
+  ]
+  return {
+    totalInvites: rounds.reduce((sum, r) => sum + r.invited, 0),
+    candidates: 9,
+    currentRoundId: 'round-1',
+    rounds,
+  }
+}

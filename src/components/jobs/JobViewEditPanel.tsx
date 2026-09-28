@@ -20,6 +20,8 @@ export type JobViewEditPanelProps = {
   onClose: () => void
   /** Called when the user saves edits (demo: parent may log or refresh list). */
   onSave?: (job: JobListing, form: CreateJobFormState) => void
+  /** Mode the panel opens in (default: view) */
+  initialMode?: PanelMode
 }
 
 type PanelMode = 'view' | 'edit'
@@ -32,6 +34,7 @@ export function JobViewEditPanel({
   job,
   onClose,
   onSave,
+  initialMode = 'view',
 }: JobViewEditPanelProps) {
   const [mode, setMode] = useState<PanelMode>('view')
   const [form, setForm] = useState<CreateJobFormState>(defaultCreateJobForm)
@@ -44,9 +47,9 @@ export function JobViewEditPanel({
     const seeded = jobListingToCreateForm(job)
     setForm(seeded)
     setBaseline(seeded)
-    setMode('view')
+    setMode(initialMode)
     // Seed once per open job; keep in-panel edits if parent refreshes the same record.
-  }, [open, job?.id])
+  }, [open, job?.id, initialMode])
 
   function patchForm(patch: Partial<CreateJobFormState>) {
     setForm((current) => ({ ...current, ...patch }))

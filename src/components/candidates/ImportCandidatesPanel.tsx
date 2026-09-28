@@ -1,4 +1,12 @@
-import { useEffect, useId, useRef, useState, type DragEvent, type RefObject } from 'react'
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type DragEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 import {
   Check,
   ChevronDown,
@@ -47,6 +55,36 @@ const JOB_OPTIONS = JOBS.map((job) => ({
 
 const ACCEPT = '.pdf,.doc,.docx,.html,.txt,.zip'
 
+export type ImportCandidatesFlowOptions = {
+  /** Resets the flow each time it becomes active (e.g. panel opens) */
+  active: boolean
+  /** Called after the final Continue */
+  onDone: () => void
+  defaultIntent?: ImportIntent
+  /** Preselected job (with intent "application") */
+  defaultJobId?: string
+  /**
+   * Compact upload step (job already known): hides the candidate/application
+   * choice, job select and auto-process switch; chosen files wait for
+   * Continue, with Go Back beside it.
+   */
+  compact?: boolean
+  /** Go Back from the compact upload step */
+  onBack?: () => void
+}
+
+/** What a side panel needs to host the import flow. */
+export type ImportCandidatesFlow = {
+  title: string
+  widthClassName: string
+  bodyClassName?: string
+  footerClassName?: string
+  footer?: ReactNode
+  body: ReactNode
+  /** True on the first screen (choosing files), before upload starts */
+  onUploadStep: boolean
+}
+
 /**
  * Candidates → Upload Resume — Import Candidates side panel.
  */
@@ -54,6 +92,34 @@ export function ImportCandidatesPanel({
   open,
   onClose,
 }: ImportCandidatesPanelProps) {
+  const flow = useImportCandidatesFlow({ active: open, onDone: onClose })
+  return (
+    <SidePanel
+      open={open}
+      onClose={onClose}
+      title={flow.title}
+      widthClassName={flow.widthClassName}
+      bodyClassName={flow.bodyClassName}
+      footerClassName={flow.footerClassName}
+      footer={flow.footer}
+    >
+      {flow.body}
+    </SidePanel>
+  )
+}
+
+/**
+ * Upload → uploading → review flow, hostable in any side panel
+ * (Candidates import, Job Applications → Add/Fetch Candidate).
+ */
+export function useImportCandidatesFlow({
+  active,
+  onDone,
+  defaultIntent = 'candidate',
+  defaultJobId = '',
+  compact = false,
+  onBack,
+}: ImportCandidatesFlowOptions): ImportCandidatesFlow {
   const fileInputId = useId()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [step, setStep] = useState<PanelStep>('upload')
@@ -68,12 +134,14 @@ export function ImportCandidatesPanel({
   const [statusTab, setStatusTab] =
     useState<ImportResultStatus>('needsReview')
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  /** Compact mode: files chosen but not uploaded until Continue */
+  const [pendingFiles, setPendingFiles] = useState<File[]>([])
 
   useEffect(() => {
-    if (!open) return
+    if (!active) return
     setStep('upload')
-    setIntent('candidate')
-    setJobId('')
+    setIntent(defaultIntent)
+    setJobId(defaultJobId)
     setAutoProcess(true)
     setDragOver(false)
     setProgress(0)
@@ -82,7 +150,8 @@ export function ImportCandidatesPanel({
     setItems([])
     setStatusTab('needsReview')
     setSelectedId(null)
-  }, [open])
+    setPendingFiles([])
+  }, [active, defaultIntent, defaultJobId])
 
   useEffect(() => {
     if (step !== 'uploading') return
@@ -136,6 +205,14 @@ export function ImportCandidatesPanel({
 
   function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return
+    if (compact) {
+      const incoming = Array.from(files)
+      setPendingFiles((current) => [
+        ...current,
+        ...incoming.filter((f) => !current.some((c) => c.name === f.name)),
+      ])
+      return
+    }
     startUpload(files)
   }
 
@@ -174,40 +251,57 @@ export function ImportCandidatesPanel({
         : 'Candidate imported successfully.',
       { title: 'Import Candidates' },
     )
-    onClose()
+    onDone()
   }
 
   const wide = step === 'review'
   const showFooter = step === 'review'
+  const compactUploadFooter = compact && step === 'upload'
 
-  return (
-    <SidePanel
-      open={open}
-      onClose={onClose}
-      title="Import Candidates"
-      widthClassName={
-        wide
-          ? 'w-full max-w-[min(100%,90vw)]'
-          : 'w-full max-w-[min(100%,52rem)]'
-      }
-      bodyClassName={
-        wide
-          ? '!flex min-h-0 flex-col overflow-hidden !p-0'
-          : undefined
-      }
-      footerClassName={showFooter ? 'justify-end' : undefined}
-      footer={
-        showFooter ? (
-          <Button
-            type="button"
-            onClick={handleContinue}
-            className="!h-10 !rounded-md !bg-[#2D2061] px-6 text-sm font-semibold text-white hover:!bg-[#241a52]"
-          >
-            Continue
-          </Button>
-        ) : undefined
-      }
-    >
+  return {
+    onUploadStep: step === 'upload',
+    title: 'Import Candidates',
+    widthClassName: wide
+      ? 'w-full max-w-[min(100%,90vw)]'
+      : 'w-full max-w-[min(100%,52rem)]',
+    bodyClassName: wide
+      ? '!flex min-h-0 flex-col overflow-hidden !p-0'
+      : undefined,
+    footerClassName: compactUploadFooter
+      ? 'justify-end gap-3 border-t border-[#ECEAF3]'
+      : showFooter
+        ? 'justify-end'
+        : undefined,
+    footer: compactUploadFooter ? (
+      <>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onBack}
+          className="!h-10 !rounded-md !border-[#2D2061] !px-5 !text-[#2D2061] hover:!bg-[#F7F6FA]"
+        >
+          Go Back
+        </Button>
+        <Button
+          type="button"
+          onClick={() => startUpload(pendingFiles)}
+          disabled={pendingFiles.length === 0}
+          className="!h-10 !rounded-md !bg-[#2D2061] !px-5 text-sm font-semibold text-white hover:!bg-[#241a52] disabled:opacity-50"
+        >
+          Continue
+        </Button>
+      </>
+    ) : showFooter ? (
+      <Button
+        type="button"
+        onClick={handleContinue}
+        className="!h-10 !rounded-md !bg-[#2D2061] px-6 text-sm font-semibold text-white hover:!bg-[#241a52]"
+      >
+        Continue
+      </Button>
+    ) : undefined,
+    body: (
+      <>
       {step === 'upload' ? (
         <UploadStep
           intent={intent}
@@ -224,6 +318,11 @@ export function ImportCandidatesPanel({
           onAutoProcessChange={setAutoProcess}
           onDragOverChange={setDragOver}
           onFiles={handleFiles}
+          compact={compact}
+          pendingFiles={pendingFiles}
+          onRemovePendingFile={(name) =>
+            setPendingFiles((current) => current.filter((f) => f.name !== name))
+          }
         />
       ) : null}
 
@@ -279,8 +378,9 @@ export function ImportCandidatesPanel({
           }}
         />
       ) : null}
-    </SidePanel>
-  )
+      </>
+    ),
+  }
 }
 
 function UploadStep({
@@ -295,6 +395,9 @@ function UploadStep({
   onAutoProcessChange,
   onDragOverChange,
   onFiles,
+  compact = false,
+  pendingFiles = [],
+  onRemovePendingFile,
 }: {
   intent: ImportIntent
   jobId: string
@@ -307,8 +410,12 @@ function UploadStep({
   onAutoProcessChange: (value: boolean) => void
   onDragOverChange: (value: boolean) => void
   onFiles: (files: FileList | null) => void
+  /** Hide intent / job / auto-process and list chosen files */
+  compact?: boolean
+  pendingFiles?: File[]
+  onRemovePendingFile?: (name: string) => void
 }) {
-  const showUpload = intent === 'candidate' || jobId !== ''
+  const showUpload = compact || intent === 'candidate' || jobId !== ''
   function onDrop(event: DragEvent<HTMLLabelElement>) {
     event.preventDefault()
     onDragOverChange(false)
@@ -317,6 +424,7 @@ function UploadStep({
 
   return (
     <div className="flex flex-col gap-5">
+      {compact ? null : (
       <RadioGroup
         name="import-intent"
         value={intent}
@@ -332,8 +440,9 @@ function UploadStep({
           }
         }}
       />
+      )}
 
-      {intent === 'application' ? (
+      {!compact && intent === 'application' ? (
         <Select
           id="import-job"
           label="Select Job"
@@ -428,6 +537,33 @@ function UploadStep({
         </Button>
       </div>
 
+      {compact && pendingFiles.length > 0 ? (
+        <div className="rounded-lg border border-[#E4E1EE] bg-white p-3">
+          <p className="mb-2 text-xs font-semibold text-[#2D2061]">
+            {pendingFiles.length} {pendingFiles.length === 1 ? 'file' : 'files'} selected
+          </p>
+          <ul className="flex flex-wrap gap-2">
+            {pendingFiles.map((file) => (
+              <li
+                key={file.name}
+                className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-[#F1F0F7] py-1 pl-3 pr-1.5 text-xs text-[#2D2061]"
+              >
+                <span className="truncate">{file.name}</span>
+                <button
+                  type="button"
+                  onClick={() => onRemovePendingFile?.(file.name)}
+                  aria-label={`Remove ${file.name}`}
+                  className="inline-flex size-5 items-center justify-center rounded-full text-[#6B6B80] hover:bg-white hover:text-[#E53935]"
+                >
+                  <X className="size-3" strokeWidth={2.25} aria-hidden="true" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {compact ? null : (
       <div className="flex flex-col gap-2 border-t border-[#F0EEF5] pt-4 sm:flex-row sm:items-center sm:justify-between">
         <Switch
           checked={autoProcess}
@@ -438,6 +574,7 @@ function UploadStep({
           Automatically extract candidate details and skills.
         </p>
       </div>
+      )}
         </>
       ) : null}
     </div>

@@ -12,10 +12,12 @@ import {
 } from 'lucide-react'
 import { PageContainer, PageHeader } from '../components/layout'
 import { GetPublicLinkPanel } from '../components/interviews/GetPublicLinkPanel'
+import { OneWayRoundSummary } from '../components/interviews/OneWayRoundSummary'
 import {
   getOneWayInterviewById,
   getOneWayInviteStatusCounts,
   getOneWayInvites,
+  getOneWayRoundSummary,
   ONE_WAY_INVITE_STATUS_META,
   type OneWayInvite,
   type OneWayInviteStatus,
@@ -141,6 +143,11 @@ export function OneWayInterviewDetailPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
+
+  const roundSummary = useMemo(
+    () => (interview ? getOneWayRoundSummary(interview.id) : null),
+    [interview],
+  )
 
   const counts = useMemo(
     () => getOneWayInviteStatusCounts(allInvites),
@@ -331,7 +338,7 @@ export function OneWayInterviewDetailPage() {
               onClick={() => setPublicLinkOpen(true)}
               className="!h-10 !rounded-md border-[#2D2061] bg-white px-4 text-sm font-semibold text-[#2D2061] hover:bg-[#f7f6fb]"
             >
-              Get Public Link
+              View Templates
             </Button>
             <Button
               type="button"
@@ -347,6 +354,8 @@ export function OneWayInterviewDetailPage() {
           </div>
         }
       />
+
+      {roundSummary ? <OneWayRoundSummary summary={roundSummary} /> : null}
 
       {/* Status tabs — full-width equal segments */}
       <div
