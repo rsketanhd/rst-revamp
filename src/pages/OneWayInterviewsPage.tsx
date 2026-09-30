@@ -1,8 +1,17 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SlidersHorizontal, SquarePen, EyeOff, Copy } from 'lucide-react'
+import {
+  EyeOff,
+  FolderOpen,
+  LayoutList,
+  SlidersHorizontal,
+  SquarePen,
+  UserPlus,
+} from 'lucide-react'
 import { PageContainer, PageHeader } from '../components/layout'
 import { OneWayFilterSortPanel } from '../components/interviews/OneWayFilterSortPanel'
+import { ViewTemplatesPanel } from '../components/interviews/ViewTemplatesPanel'
+import { InviteCandidatesPanel } from '../components/interviews/InviteCandidatesPanel'
 import {
   BulkActionsBar,
   Button,
@@ -24,18 +33,28 @@ import {
 
 const ROW_ACTIONS: Array<{ id: string; label: string; icon: ThreeDotsMenuItem['icon'] }> = [
   {
-    id: 'viewEdit',
-    label: 'View / Edit',
+    id: 'open',
+    label: 'Open interview set',
+    icon: <FolderOpen strokeWidth={1.75} aria-hidden="true" />,
+  },
+  {
+    id: 'viewTemplates',
+    label: 'View Templates (read-only)',
+    icon: <LayoutList strokeWidth={1.75} aria-hidden="true" />,
+  },
+  {
+    id: 'edit',
+    label: 'Edit Interview Set',
     icon: <SquarePen strokeWidth={1.75} aria-hidden="true" />,
   },
   {
-    id: 'duplicate',
-    label: 'Duplicate',
-    icon: <Copy strokeWidth={1.75} aria-hidden="true" />,
+    id: 'invite',
+    label: 'Invite Candidates',
+    icon: <UserPlus strokeWidth={1.75} aria-hidden="true" />,
   },
   {
     id: 'deactivate',
-    label: 'Deactivate',
+    label: 'Mark as inactive',
     icon: <EyeOff strokeWidth={1.75} aria-hidden="true" />,
   },
 ]
@@ -50,6 +69,8 @@ export function OneWayInterviewsPage() {
   const [status, setStatus] = useState<OneWayStatus>('active')
   const [selected, setSelected] = useState<Record<string, boolean>>({})
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [templatesFor, setTemplatesFor] = useState<OneWayInterview | null>(null)
+  const [inviteFor, setInviteFor] = useState<OneWayInterview | null>(null)
   const [filters, setFilters] = useState<OneWayFilterValues>(emptyOneWayFilters)
 
   const jobReqIdOptions = useMemo(
@@ -107,18 +128,24 @@ export function OneWayInterviewsPage() {
   }
 
   function handleRowAction(id: string, interview: OneWayInterview) {
-    if (id === 'viewEdit') {
-      navigate(`/e2e-interviews/one-way/${interview.id}`)
-      return
-    }
-    if (id === 'duplicate') {
-      toast.success(`Duplicated “${interview.title}”.`, { title: 'Duplicate' })
-      return
-    }
-    if (id === 'deactivate') {
-      toast.success(`“${interview.title}” set inactive.`, {
-        title: 'Deactivate',
-      })
+    switch (id) {
+      case 'open':
+        navigate(`/e2e-interviews/one-way/${interview.id}`)
+        return
+      case 'viewTemplates':
+        setTemplatesFor(interview)
+        return
+      case 'edit':
+        navigate(`/e2e-interviews/one-way/${interview.id}/edit`)
+        return
+      case 'invite':
+        setInviteFor(interview)
+        return
+      case 'deactivate':
+        toast.success(`“${interview.title}” marked as inactive.`, {
+          title: 'Mark as inactive',
+        })
+        return
     }
   }
 
@@ -234,6 +261,23 @@ export function OneWayInterviewsPage() {
         recruiterOptions={recruiterOptions}
         onApply={setFilters}
       />
+
+      <ViewTemplatesPanel
+        open={templatesFor !== null}
+        interview={templatesFor}
+        onClose={() => setTemplatesFor(null)}
+        onEditInterviewSet={() => {
+          const interview = templatesFor
+          setTemplatesFor(null)
+          if (interview) handleRowAction('edit', interview)
+        }}
+      />
+
+      <InviteCandidatesPanel
+        open={inviteFor !== null}
+        interview={inviteFor}
+        onClose={() => setInviteFor(null)}
+      />
     </PageContainer>
   )
 }
@@ -251,7 +295,6 @@ function InterviewCard({
   onAction: (id: string) => void
   onOpen: () => void
 }) {
-  const typeMeta = ONE_WAY_TYPE_META[interview.type]
   const menuItems: ThreeDotsMenuItem[] = ROW_ACTIONS.map((item) => ({
     id: item.id,
     label: item.label,
@@ -279,13 +322,19 @@ function InterviewCard({
               >
                 {interview.title}
               </button>
-              <span
-                className={cn(
-                  'inline-flex h-6 items-center rounded-full px-2.5 text-[11px] font-semibold',
-                  typeMeta.className,
-                )}
-              >
-                {typeMeta.label}
+              {interview.roundTypes.map((type) => (
+                <span
+                  key={type}
+                  className={cn(
+                    'inline-flex h-6 items-center rounded-full px-2.5 text-[11px] font-semibold',
+                    ONE_WAY_TYPE_META[type].className,
+                  )}
+                >
+                  {ONE_WAY_TYPE_META[type].label}
+                </span>
+              ))}
+              <span className="text-xs text-[#8B8B9E]">
+                {interview.jobReqId} · {interview.location}
               </span>
             </div>
 
@@ -297,17 +346,23 @@ function InterviewCard({
             />
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
-            <MetaField label="Created On" value={interview.createdOn} />
-            <MetaField label="Updated On" value={interview.updatedOn} />
+
+          <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">
+            <MetaField label="Rounds" value={String(interview.rounds)} />
             <MetaField
-              label="Link Expiration Duration"
-              value={interview.linkExpiration}
+              label="Avatar"
+              value={interview.avatarEnabled ? 'Enabled' : 'Disabled'}
             />
             <MetaField
               label="Templates Created"
               value={interview.templatesCreated}
             />
+            <MetaField
+              label="Link Expiration Duration"
+              value={interview.linkExpiration}
+            />
+            <MetaField label="Created On" value={interview.createdOn} />
+            <MetaField label="Updated On" value={interview.updatedOn} />
           </div>
         </div>
       </div>

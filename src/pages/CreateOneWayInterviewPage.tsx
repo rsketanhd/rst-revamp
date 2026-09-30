@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import {
   AppTopBar,
@@ -18,22 +18,39 @@ import { StepInterviewDetails } from '../components/interviews/create/StepInterv
 import { StepInterviewRounds } from '../components/interviews/create/StepInterviewRounds'
 import type { InterviewTemplateOption } from '../components/interviews/create/templates'
 import { StepInterviewReview } from '../components/interviews/create/StepInterviewReview'
+import { interviewSetToWizardState } from '../components/interviews/create/fromInterviewSet'
+import { getOneWayInterviewById } from '../data/oneWayInterviews'
 
 const LAST_STEP = CREATE_ONE_WAY_STEPS.length - 1
 const LIST_PATH = '/e2e-interviews/one-way'
 
 /**
  * Create One-Way Interview wizard — Details → Rounds & Templates → Review.
+ * With an `interviewId` route param it edits that interview set instead.
  */
 export function CreateOneWayInterviewPage() {
   const navigate = useNavigate()
-  const [step, setStep] = useState(0)
-  const [maxReached, setMaxReached] = useState(0)
-  const [form, setForm] = useState<CreateOneWayInterviewForm>(
-    defaultCreateOneWayForm,
+  const { interviewId } = useParams()
+  const editing = useMemo(
+    () => (interviewId ? getOneWayInterviewById(interviewId) : undefined),
+    [interviewId],
   )
+  const initial = useMemo(
+    () =>
+      editing
+        ? interviewSetToWizardState(editing)
+        : { form: defaultCreateOneWayForm, templates: [] },
+    [editing],
+  )
+  const [step, setStep] = useState(0)
+  // Every step of an existing interview is already filled in, so all are reachable
+  const [maxReached, setMaxReached] = useState(editing ? LAST_STEP : 0)
+  const [form, setForm] = useState<CreateOneWayInterviewForm>(initial.form)
   const [success, setSuccess] = useState(false)
-  const [templates, setTemplates] = useState<InterviewTemplateOption[]>([])
+  const [templates, setTemplates] = useState<InterviewTemplateOption[]>(
+    initial.templates,
+  )
+  const detailPath = editing ? `${LIST_PATH}/${editing.id}` : LIST_PATH
 
   const jobOptions = useMemo(
     () =>
@@ -69,16 +86,17 @@ export function CreateOneWayInterviewPage() {
 
   function handlePrevious() {
     if (step === 0) {
-      navigate(LIST_PATH)
+      navigate(detailPath)
       return
     }
     setStep((s) => Math.max(0, s - 1))
   }
 
   function resetWizard() {
-    setForm(defaultCreateOneWayForm)
+    setForm(initial.form)
+    setTemplates(initial.templates)
     setStep(0)
-    setMaxReached(0)
+    setMaxReached(editing ? LAST_STEP : 0)
     setSuccess(false)
   }
 
@@ -89,15 +107,20 @@ export function CreateOneWayInterviewPage() {
       {success ? (
         <div className="flex min-h-0 flex-1 items-center justify-center bg-white p-8">
           <SuccessMessage
-            title="Interview Created Successfully!"
+            title={
+              editing
+                ? 'Interview Updated Successfully!'
+                : 'Interview Created Successfully!'
+            }
             primaryAction={{
               label: 'View All Interviews',
               onClick: () => navigate(LIST_PATH),
             }}
-            secondaryAction={{
-              label: 'Create Another',
-              onClick: resetWizard,
-            }}
+            secondaryAction={
+              editing
+                ? { label: 'Back to Interview', onClick: () => navigate(detailPath) }
+                : { label: 'Create Another', onClick: resetWizard }
+            }
           />
         </div>
       ) : (
@@ -106,7 +129,7 @@ export function CreateOneWayInterviewPage() {
             <header className="shrink-0 border-b border-[#eceaf3] bg-white pb-3">
               <button
                 type="button"
-                onClick={() => navigate(LIST_PATH)}
+                onClick={() => navigate(detailPath)}
                 className="inline-flex items-center gap-1 text-[13px] font-medium text-[#6B6B80] transition-colors hover:text-[#2D2061]"
               >
                 <ArrowLeft
@@ -119,8 +142,12 @@ export function CreateOneWayInterviewPage() {
 
               <PageHeader
                 className="mt-1"
-                title="Create Interview"
-                subtitle="Configure questions, branding, and invite settings for this interview."
+                title={editing ? 'Edit Interview Set' : 'Create Interview'}
+                subtitle={
+                  editing
+                    ? `Update the details, rounds and templates of “${editing.title}”.`
+                    : 'Configure questions, branding, and invite settings for this interview.'
+                }
               />
             </header>
 
@@ -180,7 +207,7 @@ export function CreateOneWayInterviewPage() {
                 onClick={handleContinue}
                 className="min-w-[6.5rem] !bg-[#2D2061] hover:!bg-[#241a52]"
               >
-                {step >= LAST_STEP ? 'Create' : 'Continue'}
+                {step >= LAST_STEP ? (editing ? 'Save Changes' : 'Create') : 'Continue'}
               </Button>
             </div>
           </footer>

@@ -61,6 +61,7 @@ export const INTERVIEW_TYPE_OPTIONS = [
   'Skill Interview',
   'Telephonic Interview',
   'AI Coding Interview',
+  'Culture Fit Interview',
 ]
 
 /** Link validity in days: 1 to 60, applies to every round. */

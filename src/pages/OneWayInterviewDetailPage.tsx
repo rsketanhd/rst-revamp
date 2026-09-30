@@ -11,8 +11,12 @@ import {
   SlidersHorizontal,
 } from 'lucide-react'
 import { PageContainer, PageHeader } from '../components/layout'
-import { GetPublicLinkPanel } from '../components/interviews/GetPublicLinkPanel'
-import { OneWayRoundSummary } from '../components/interviews/OneWayRoundSummary'
+import { ViewTemplatesPanel } from '../components/interviews/ViewTemplatesPanel'
+import { InviteCandidatesPanel } from '../components/interviews/InviteCandidatesPanel'
+import {
+  OneWayRoundSummary,
+  type RoundSelection,
+} from '../components/interviews/OneWayRoundSummary'
 import {
   getOneWayInterviewById,
   getOneWayInviteStatusCounts,
@@ -118,7 +122,7 @@ function getInviteMenuItems(status: OneWayInviteStatus): ThreeDotsMenuItem[] {
 }
 
 /**
- * One-Way Interview detail — invitations table + Get Public Link.
+ * One-Way Interview detail — invitations table + View Templates.
  */
 export function OneWayInterviewDetailPage() {
   const navigate = useNavigate()
@@ -137,25 +141,37 @@ export function OneWayInterviewDetailPage() {
   const [search, setSearch] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [filters, setFilters] = useState<DetailFilters>(EMPTY_FILTERS)
-  const [publicLinkOpen, setPublicLinkOpen] = useState(false)
+  const [templatesOpen, setTemplatesOpen] = useState(false)
+  const [inviteOpen, setInviteOpen] = useState(false)
   const [selected, setSelected] = useState<Record<string, boolean>>({})
   const [sortKey, setSortKey] = useState<SortKey>('name')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
   const [page, setPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
-  const roundSummary = useMemo(
-    () => (interview ? getOneWayRoundSummary(interview.id) : null),
-    [interview],
-  )
+  // Opens on the first round, as in the design
+  const [roundSelection, setRoundSelection] = useState<RoundSelection>('round-1')
 
-  const counts = useMemo(
-    () => getOneWayInviteStatusCounts(allInvites),
+  const roundSummary = useMemo(
+    () => getOneWayRoundSummary(allInvites),
     [allInvites],
   )
 
+  const roundInvites = useMemo(
+    () =>
+      roundSelection === 'all'
+        ? allInvites
+        : allInvites.filter((i) => i.roundId === roundSelection),
+    [allInvites, roundSelection],
+  )
+
+  const counts = useMemo(
+    () => getOneWayInviteStatusCounts(roundInvites),
+    [roundInvites],
+  )
+
   const filtered = useMemo(() => {
-    let rows = allInvites
+    let rows = roundInvites
     if (statusTab !== 'all') {
       rows = rows.filter((r) => r.status === statusTab)
     }
@@ -182,7 +198,7 @@ export function OneWayInterviewDetailPage() {
       return sortDir === 'asc' ? cmp : -cmp
     })
     return rows
-  }, [allInvites, statusTab, filters, search, sortKey, sortDir])
+  }, [roundInvites, statusTab, filters, search, sortKey, sortDir])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage))
   const currentPage = Math.min(page, totalPages)
@@ -285,10 +301,6 @@ export function OneWayInterviewDetailPage() {
     )
   }
 
-  const publicUrl =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/share/one-way/${interview.id}`
-      : `https://share.example.com/ht`
 
   const isCompletedTab = statusTab === 'completed'
 
@@ -335,18 +347,14 @@ export function OneWayInterviewDetailPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setPublicLinkOpen(true)}
+              onClick={() => setTemplatesOpen(true)}
               className="!h-10 !rounded-md border-[#2D2061] bg-white px-4 text-sm font-semibold text-[#2D2061] hover:bg-[#f7f6fb]"
             >
               View Templates
             </Button>
             <Button
               type="button"
-              onClick={() =>
-                toast.success('Invite flow will open here.', {
-                  title: 'Invite Candidates',
-                })
-              }
+              onClick={() => setInviteOpen(true)}
               className="!h-10 !rounded-md !bg-[#2D2061] px-4 text-sm font-semibold text-white hover:!bg-[#241a52]"
             >
               Invite Candidates
@@ -355,8 +363,19 @@ export function OneWayInterviewDetailPage() {
         }
       />
 
-      {roundSummary ? <OneWayRoundSummary summary={roundSummary} /> : null}
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[17.5rem_minmax(0,1fr)]">
+        <OneWayRoundSummary
+          summary={roundSummary}
+          selected={roundSelection}
+          onSelect={(next) => {
+            setRoundSelection(next)
+            setStatusTab('all')
+            setPage(1)
+            setSelected({})
+          }}
+        />
 
+        <section className="flex min-w-0 flex-col gap-4 rounded-xl border border-[#E4E1EE] bg-white p-4">
       {/* Status tabs — full-width equal segments */}
       <div
         className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 lg:gap-2.5"
@@ -378,13 +397,19 @@ export function OneWayInterviewDetailPage() {
                 setSelected({})
               }}
               className={cn(
-                'inline-flex h-10 w-full items-center justify-center rounded-md border px-2 text-sm font-semibold transition-colors sm:px-3',
+                'relative inline-flex h-11 w-full items-center justify-center rounded-md border px-2 text-sm font-semibold transition-colors sm:px-3',
                 active
                   ? 'border-[#2D2061] bg-[#2D2061] text-white'
                   : 'border-[#E0DDEA] bg-white text-[#2D2061] hover:bg-[#f7f6fb]',
               )}
             >
               {tab.label}({count})
+              {active ? (
+                <span
+                  className="absolute -bottom-1.5 left-1/2 size-3 -translate-x-1/2 rotate-45 bg-[#2D2061]"
+                  aria-hidden="true"
+                />
+              ) : null}
             </button>
           )
         })}
@@ -557,6 +582,8 @@ export function OneWayInterviewDetailPage() {
           )}
         </DataTableBody>
       </DataTable>
+        </section>
+      </div>
 
       <InviteFilterPanel
         open={filtersOpen}
@@ -568,11 +595,19 @@ export function OneWayInterviewDetailPage() {
         }}
       />
 
-      <GetPublicLinkPanel
-        open={publicLinkOpen}
-        onClose={() => setPublicLinkOpen(false)}
-        interviewTitle={interview.title}
-        publicUrl={publicUrl}
+      <InviteCandidatesPanel
+        open={inviteOpen}
+        interview={interview}
+        onClose={() => setInviteOpen(false)}
+      />
+
+      <ViewTemplatesPanel
+        open={templatesOpen}
+        interview={interview}
+        onClose={() => setTemplatesOpen(false)}
+        onEditInterviewSet={() =>
+          navigate(`/e2e-interviews/one-way/${interview.id}/edit`)
+        }
       />
     </PageContainer>
   )

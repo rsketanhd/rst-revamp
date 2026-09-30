@@ -84,6 +84,10 @@ export default function App() {
               path="/e2e-interviews/one-way/:interviewId"
               element={<OneWayInterviewDetailPage />}
             />
+            <Route
+              path="/e2e-interviews/one-way/:interviewId/edit"
+              element={<CreateOneWayInterviewPage />}
+            />
             <Route path="/e2e-interviews/two-way" element={<ModulePage />} />
             <Route
               path="/e2e-interviews/scheduler"
