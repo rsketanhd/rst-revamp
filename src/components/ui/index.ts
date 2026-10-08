@@ -144,6 +144,8 @@ export type {
 } from './StatusPillSelect'
 export { AllowToggleCell } from './AllowToggleCell'
 export type { AllowToggleCellProps } from './AllowToggleCell'
+export { Collapse } from './Collapse'
+export type { CollapseProps } from './Collapse'
 export { Tooltip } from './Tooltip'
 export type { TooltipProps } from './Tooltip'
 export {

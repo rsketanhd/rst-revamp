@@ -286,6 +286,7 @@ export function JobsPipelinePanel() {
         ]}
       />
 
+      <div key={tab} className="animate-fade-up">
       {tab === 'stage-moves' ? (
         <StageMovesCard
           workflow={draft}
@@ -355,6 +356,7 @@ export function JobsPipelinePanel() {
           <RecruiterDropdownPreview workflow={draft} />
         </div>
       )}
+      </div>
 
       <div className="flex flex-wrap items-center justify-end gap-4">
         <Button

@@ -209,7 +209,7 @@ export function ThreeDotsMenu({
                 : { top: -9999, left: -9999, visibility: 'hidden' as const }
             }
             className={cn(
-              'fixed z-[100] min-w-[15.5rem] rounded-xl bg-white py-2.5',
+              'fixed z-[100] min-w-[15.5rem] animate-scale-in rounded-xl bg-white py-2.5',
               'shadow-[0_10px_32px_rgba(26,22,56,0.16)] ring-1 ring-black/5',
               menuClassName,
             )}

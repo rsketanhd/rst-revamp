@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { cn } from '../../lib/cn'
+
+const MODAL_ANIMATION_MS = 200
 
 export type ModalProps = {
   open: boolean
@@ -24,6 +26,21 @@ export function Modal({
   contentClassName,
   zClassName = 'z-50',
 }: ModalProps) {
+  // Stay mounted briefly after closing so the exit animation can play
+  const [mounted, setMounted] = useState(open)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setMounted(true)
+      const frame = window.requestAnimationFrame(() => setVisible(true))
+      return () => window.cancelAnimationFrame(frame)
+    }
+    setVisible(false)
+    const timer = window.setTimeout(() => setMounted(false), MODAL_ANIMATION_MS)
+    return () => window.clearTimeout(timer)
+  }, [open])
+
   useEffect(() => {
     if (!open) return
 
@@ -43,7 +60,7 @@ export function Modal({
     }
   }, [open, onClose])
 
-  if (!open || typeof document === 'undefined') {
+  if (!mounted || typeof document === 'undefined') {
     return null
   }
 
@@ -57,7 +74,10 @@ export function Modal({
       <button
         type="button"
         aria-label="Close dialog backdrop"
-        className="absolute inset-0 bg-brand-950/55 backdrop-blur-[2px]"
+        className={cn(
+          'absolute inset-0 bg-brand-950/55 backdrop-blur-[2px] transition-opacity duration-200 ease-out',
+          visible ? 'opacity-100' : 'opacity-0',
+        )}
         onClick={onClose}
       />
 
@@ -67,6 +87,8 @@ export function Modal({
         aria-labelledby="modal-title"
         className={cn(
           'relative z-10 flex max-h-[min(90vh,44rem)] w-full max-w-xl flex-col overflow-hidden rounded-xl bg-surface shadow-2xl',
+          'transition-[opacity,scale,translate] duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]',
+          visible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-2 scale-[0.97] opacity-0',
           className,
         )}
       >

@@ -38,6 +38,18 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
     title: 'Two-Way Interviews',
     subtitle: 'Schedule and manage live interview sessions.',
   },
+  '/e2e-interviews/two-way/interview-sets': {
+    title: 'Interview Sets',
+    subtitle: 'Create and manage two-way interview sets and their rounds.',
+  },
+  '/e2e-interviews/two-way/scheduled': {
+    title: 'Scheduled Interviews',
+    subtitle: 'Upcoming live interviews with candidates and panels.',
+  },
+  '/e2e-interviews/two-way/interviews': {
+    title: 'Interviews',
+    subtitle: 'Completed and in-progress two-way interviews with feedback.',
+  },
   '/e2e-interviews/scheduler': {
     title: 'Interview Scheduler & Analytics',
     subtitle: 'Coordinate interviews and collect feedback in one place.',

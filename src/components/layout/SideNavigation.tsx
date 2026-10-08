@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   type LucideIcon,
@@ -26,6 +27,7 @@ import {
 import logo from '../../assets/Logo.png'
 import { getUserRole, setAuthenticated, type UserRole } from '../../lib/auth'
 import { cn } from '../../lib/cn'
+import { Collapse } from '../ui'
 
 export type NavItem = {
   id: string
@@ -33,6 +35,14 @@ export type NavItem = {
   to: string
   icon: ReactNode
   badge?: string
+  children?: NavChild[]
+}
+
+/** Submenu link; may hold one more level of links (e.g. Two-Way Interviews) */
+export type NavChild = {
+  id: string
+  label: string
+  to: string
   children?: Array<{ id: string; label: string; to: string }>
 }
 
@@ -125,6 +135,23 @@ const RECRUITER_NAV_SECTIONS: NavSection[] = [
             id: 'two-way',
             label: 'Two-Way Interviews',
             to: '/e2e-interviews/two-way',
+            children: [
+              {
+                id: 'two-way-interview-sets',
+                label: 'Interview Sets',
+                to: '/e2e-interviews/two-way/interview-sets',
+              },
+              {
+                id: 'two-way-scheduled',
+                label: 'Scheduled Interviews',
+                to: '/e2e-interviews/two-way/scheduled',
+              },
+              {
+                id: 'two-way-interviews',
+                label: 'Interviews',
+                to: '/e2e-interviews/two-way/interviews',
+              },
+            ],
           },
           {
             id: 'interview-scheduler',
@@ -326,7 +353,6 @@ export function SideNavigation({
                   pathname={pathname}
                   isGroupOpen={Boolean(openGroups[item.id])}
                   onToggleGroup={toggleGroup}
-                  onNavigate={navigate}
                 />
               ))}
             </ul>
@@ -489,7 +515,6 @@ type SideNavItemProps = {
   pathname: string
   isGroupOpen: boolean
   onToggleGroup: (id: string) => void
-  onNavigate: (to: string) => void
 }
 
 function SideNavItem({
@@ -498,7 +523,6 @@ function SideNavItem({
   pathname,
   isGroupOpen,
   onToggleGroup,
-  onNavigate,
 }: SideNavItemProps) {
   const hasChildren = Boolean(item.children?.length)
   const groupSelected = isGroupOpen || isGroupRouteActive(item, pathname)
@@ -512,7 +536,6 @@ function SideNavItem({
           isGroupOpen={isGroupOpen}
           groupSelected={groupSelected}
           onToggleGroup={onToggleGroup}
-          onNavigate={onNavigate}
         />
       ) : (
         <NavLeafLink item={item} collapsed={collapsed} pathname={pathname} />
@@ -527,7 +550,6 @@ type NavGroupItemProps = {
   isGroupOpen: boolean
   groupSelected: boolean
   onToggleGroup: (id: string) => void
-  onNavigate: (to: string) => void
 }
 
 function NavGroupItem({
@@ -536,25 +558,9 @@ function NavGroupItem({
   isGroupOpen,
   groupSelected,
   onToggleGroup,
-  onNavigate,
 }: NavGroupItemProps) {
   if (collapsed) {
-    const firstChildTo = item.children?.[0]?.to
-    return (
-      <button
-        type="button"
-        title={item.label}
-        onClick={() => {
-          if (firstChildTo) onNavigate(firstChildTo)
-        }}
-        className={cn(
-          navItemBaseClass(true),
-          groupSelected && navItemActiveClass(true),
-        )}
-      >
-        <NavItemGlyph icon={item.icon} />
-      </button>
-    )
+    return <CollapsedGroupFlyout item={item} groupSelected={groupSelected} />
   }
 
   return (
@@ -589,28 +595,243 @@ function NavGroupItem({
       >
         <div className="min-h-0 overflow-hidden">
           <ul className="rounded-b-lg bg-white pb-1.5 pt-0.5">
-            {item.children?.map((child) => (
-              <li key={child.id}>
+            {item.children?.map((child) =>
+              child.children?.length ? (
+                <NavSubGroup key={child.id} child={child} />
+              ) : (
+                <li key={child.id}>
+                  <NavLink
+                    to={child.to}
+                    title={child.label}
+                    className={({ isActive }) =>
+                      cn(
+                        'flex min-h-9 items-center truncate py-2 pl-10 pr-3 text-[13px] transition-colors',
+                        isActive
+                          ? 'font-semibold text-[#2D2061]'
+                          : 'font-medium text-[#6B7280] hover:text-[#2D2061]',
+                      )
+                    }
+                  >
+                    <span className="truncate">{child.label}</span>
+                  </NavLink>
+                </li>
+              ),
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Collapsed sidebar: a group icon opens a flyout with its submenus (hover,
+ * click or keyboard focus). Rendered in a portal so the scrolling nav can't
+ * clip it.
+ */
+function CollapsedGroupFlyout({
+  item,
+  groupSelected,
+}: {
+  item: NavItem
+  groupSelected: boolean
+}) {
+  const { pathname } = useLocation()
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const closeTimer = useRef<number | undefined>(undefined)
+  const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
+
+  function show() {
+    window.clearTimeout(closeTimer.current)
+    const rect = triggerRef.current?.getBoundingClientRect()
+    if (rect) setPos({ top: rect.top, left: rect.right + 10 })
+    setOpen(true)
+  }
+
+  function hideSoon() {
+    window.clearTimeout(closeTimer.current)
+    closeTimer.current = window.setTimeout(() => setOpen(false), 150)
+  }
+
+  // Close after navigating, on Escape, or when the page scrolls / resizes
+  useEffect(() => setOpen(false), [pathname])
+  useEffect(() => {
+    if (!open) return
+    const close = () => setOpen(false)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false)
+        triggerRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', close)
+    }
+  }, [open])
+  useEffect(() => () => window.clearTimeout(closeTimer.current), [])
+
+  const linkClass = ({ isActive }: { isActive: boolean }) =>
+    cn(
+      'flex min-h-8 items-center rounded-md px-2.5 py-1.5 text-[13px] transition-colors',
+      isActive
+        ? 'bg-[#F1F0F7] font-semibold text-[#2D2061]'
+        : 'font-medium text-[#4B5563] hover:bg-[#F7F6FA] hover:text-[#2D2061]',
+    )
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-label={item.label}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onMouseEnter={show}
+        onMouseLeave={hideSoon}
+        onFocus={show}
+        onBlur={hideSoon}
+        onClick={() => (open ? setOpen(false) : show())}
+        className={cn(navItemBaseClass(true), groupSelected && navItemActiveClass(true))}
+      >
+        <NavItemGlyph icon={item.icon} />
+      </button>
+
+      {open && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              role="menu"
+              aria-label={item.label}
+              onMouseEnter={show}
+              onMouseLeave={hideSoon}
+              onFocus={show}
+              onBlur={hideSoon}
+              style={{ top: pos.top, left: pos.left }}
+              className="fixed z-[90] w-60 origin-left animate-scale-in rounded-xl bg-white p-2 shadow-[0_10px_32px_rgba(26,22,56,0.16)] ring-1 ring-black/5"
+            >
+              <p className="px-2.5 pb-1.5 pt-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#8B8B9E]">
+                {item.label}
+              </p>
+              <ul className="flex flex-col gap-0.5">
+                {item.children?.map((child) =>
+                  child.children?.length ? (
+                    <li key={child.id}>
+                      <p className="px-2.5 pb-1 pt-2 text-[13px] font-semibold text-[#2D2061]">
+                        {child.label}
+                      </p>
+                      <ul className="ml-3.5 border-l border-[#D5D2E2] pl-2">
+                        {child.children.map((grandchild) => (
+                          <li key={grandchild.id}>
+                            <NavLink to={grandchild.to} role="menuitem" className={linkClass}>
+                              {grandchild.label}
+                            </NavLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  ) : (
+                    <li key={child.id}>
+                      <NavLink to={child.to} role="menuitem" className={linkClass}>
+                        {child.label}
+                      </NavLink>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
+  )
+}
+
+/** Second-level submenu (e.g. Two-Way Interviews → Interview Sets…) */
+function NavSubGroup({ child }: { child: NavChild }) {
+  const { pathname } = useLocation()
+  const routeActive = pathname === child.to || pathname.startsWith(`${child.to}/`)
+  const [open, setOpen] = useState(routeActive)
+
+  // Open automatically when navigating into this group
+  useEffect(() => {
+    if (routeActive) setOpen(true)
+  }, [routeActive])
+
+  return (
+    <li>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          'flex min-h-9 w-full items-center gap-2 py-2 pl-10 pr-3 text-left text-[13px] transition-colors',
+          routeActive
+            ? 'font-semibold text-[#2D2061]'
+            : 'font-medium text-[#6B7280] hover:text-[#2D2061]',
+        )}
+      >
+        <span className="min-w-0 flex-1 truncate">{child.label}</span>
+        <ChevronDown
+          className={cn('size-3.5 shrink-0 transition-transform duration-200', open && 'rotate-180')}
+          aria-hidden="true"
+        />
+      </button>
+      <Collapse open={open}>
+        {/* Tree: a vertical guide with an elbow connector into each item */}
+        <ul className="pb-1 pl-[2.75rem]">
+          {child.children?.map((grandchild, index, list) => {
+            const last = index === list.length - 1
+            return (
+              <li key={grandchild.id} className="relative">
+                {/* vertical guide — stops at the last item's elbow */}
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'absolute left-0 top-0 w-px bg-[#D5D2E2]',
+                    last ? 'h-1/2' : 'h-full',
+                  )}
+                />
                 <NavLink
-                  to={child.to}
-                  title={child.label}
+                  to={grandchild.to}
+                  title={grandchild.label}
                   className={({ isActive }) =>
                     cn(
-                      'flex min-h-9 items-center truncate py-2 pl-10 pr-3 text-[13px] transition-colors',
+                      'group/tree relative flex min-h-8 items-center gap-2 truncate py-1.5 pl-3 pr-3 text-[13px] transition-colors',
                       isActive
                         ? 'font-semibold text-[#2D2061]'
                         : 'font-medium text-[#6B7280] hover:text-[#2D2061]',
                     )
                   }
                 >
-                  <span className="truncate">{child.label}</span>
+                  {({ isActive }) => (
+                    <>
+                      {/* elbow connector */}
+                      <span
+                        aria-hidden="true"
+                        className="absolute left-0 top-1/2 h-px w-2 bg-[#D5D2E2]"
+                      />
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          'size-1.5 shrink-0 rounded-full transition-colors',
+                          isActive
+                            ? 'bg-[#2D2061]'
+                            : 'bg-[#C5C2D3] group-hover/tree:bg-[#2D2061]',
+                        )}
+                      />
+                      <span className="truncate">{grandchild.label}</span>
+                    </>
+                  )}
                 </NavLink>
               </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
+            )
+          })}
+        </ul>
+      </Collapse>
+    </li>
   )
 }
 

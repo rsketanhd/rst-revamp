@@ -2,7 +2,6 @@ import { useState, type DragEvent } from 'react'
 import {
   Check,
   ChevronDown,
-  ChevronUp,
   Copy,
   GripVertical,
   Info,
@@ -15,6 +14,7 @@ import {
 import { cn } from '../../../lib/cn'
 import {
   Button,
+  Collapse,
   ConfirmDeleteModal,
   ThreeDotsMenu,
   Tooltip,
@@ -365,11 +365,14 @@ export function StepInterviewRounds({
                             aria-label={`${isOpen ? 'Hide' : 'Show'} templates for ${roundName}`}
                             className="inline-flex size-9 items-center justify-center rounded-md border border-[#E4E1EE] bg-[#F7F7FA] text-[#2D2061] transition-colors hover:bg-[#EFEEF5]"
                           >
-                            {isOpen ? (
-                              <ChevronUp className="size-4" strokeWidth={2} aria-hidden="true" />
-                            ) : (
-                              <ChevronDown className="size-4" strokeWidth={2} aria-hidden="true" />
-                            )}
+                            <ChevronDown
+                              className={cn(
+                                'size-4 transition-transform duration-200',
+                                isOpen && 'rotate-180',
+                              )}
+                              strokeWidth={2}
+                              aria-hidden="true"
+                            />
                           </button>
                         ) : null}
                       </span>
@@ -377,7 +380,8 @@ export function StepInterviewRounds({
                   </div>
 
                   {/* Templates */}
-                  {isOpen ? (
+                  {templateCount > 0 ? (
+                    <Collapse open={isOpen}>
                     <div className="border-t border-[#E4E1EE] bg-[#F7F7FA] p-4">
                       <header className="mb-4 flex items-center justify-between gap-3">
                         <h3 className="text-sm font-bold text-[#1F1B4D]">Templates</h3>
@@ -501,6 +505,7 @@ export function StepInterviewRounds({
                         </div>
                       </div>
                     </div>
+                    </Collapse>
                   ) : null}
                 </li>
               )

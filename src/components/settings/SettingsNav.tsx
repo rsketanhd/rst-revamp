@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '../../lib/cn'
+import { Collapse } from '../ui'
 import {
   DEFAULT_TALENT_CRM_SECTION,
   SETTINGS_NAV_GROUPS,
@@ -228,13 +229,7 @@ function NestedNavItem({
         />
       </button>
 
-      <div
-        className={cn(
-          'grid transition-all duration-200 ease-out',
-          isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
-        )}
-      >
-        <div className="min-h-0 overflow-hidden">
+      <Collapse open={isOpen}>
           <ul className="bg-[#F7F6FA] pb-1.5 pt-0.5">
             {item.children?.map((child) => {
               const path = resolvePath(child.id)
@@ -262,8 +257,7 @@ function NestedNavItem({
               )
             })}
           </ul>
-        </div>
-      </div>
+      </Collapse>
     </li>
   )
 }

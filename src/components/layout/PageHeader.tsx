@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
 export type PageHeaderProps = {
-  /** Main page title (h1) */
-  title: string
+  /** Main page title (h1) — text, or text with an inline badge */
+  title: ReactNode
   /** Supporting line under the title — required on every page (text or rich content) */
   subtitle: ReactNode
   /** Optional CTAs or trailing controls (right-aligned on larger screens) */

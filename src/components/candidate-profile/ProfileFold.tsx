@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import { Collapse } from '../ui'
 import { cn } from '../../lib/cn'
 
 export function ProfileFold({
@@ -37,14 +38,18 @@ export function ProfileFold({
           aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
           className="inline-flex size-7 items-center justify-center text-[#6B6B80]"
         >
-          {open ? (
-            <ChevronDown className="size-4" strokeWidth={2} aria-hidden="true" />
-          ) : (
-            <ChevronRight className="size-4" strokeWidth={2} aria-hidden="true" />
-          )}
+          <ChevronRight
+            className={cn('size-4 transition-transform duration-200', open && 'rotate-90')}
+            strokeWidth={2}
+            aria-hidden="true"
+          />
         </button>
       </div>
-      {open && children ? <div className="px-4 pb-4">{children}</div> : null}
+      {children ? (
+        <Collapse open={open}>
+          <div className="px-4 pb-4">{children}</div>
+        </Collapse>
+      ) : null}
     </section>
   )
 }

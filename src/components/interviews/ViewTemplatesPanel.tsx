@@ -82,7 +82,7 @@ export function ViewTemplatesPanel({
 
         {round ? (
           <>
-            <dl className="grid grid-cols-2 gap-4 rounded-lg bg-[#F5F5F9] px-4 py-3.5 sm:grid-cols-5">
+            <dl key={round.id} className="grid animate-fade-up grid-cols-2 gap-4 rounded-lg bg-[#F5F5F9] px-4 py-3.5 sm:grid-cols-5">
               <Detail label="Round" value={round.name} />
               <Detail label="Interview type" value={round.interviewType} />
               <Detail label="Difficulty level" value={round.difficulty} />

@@ -4,6 +4,11 @@ import { ToastProvider } from './components/ui'
 import { CandidateDiscoveryPage } from './pages/CandidateDiscoveryPage'
 import { CandidateProfilePage } from './pages/CandidateProfilePage'
 import { CandidatesPage } from './pages/CandidatesPage'
+import { TwoWayInterviewSetsPage } from './pages/TwoWayInterviewSetsPage'
+import { ConfigureInterviewSetPage } from './pages/ConfigureInterviewSetPage'
+import { ScheduledInterviewsPage } from './pages/ScheduledInterviewsPage'
+import { TwoWayInterviewsPage } from './pages/TwoWayInterviewsPage'
+import { InterviewPlanPage } from './pages/InterviewPlanPage'
 import { CreateJobPage } from './pages/CreateJobPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { JobApplicationsPage } from './pages/JobApplicationsPage'
@@ -88,7 +93,21 @@ export default function App() {
               path="/e2e-interviews/one-way/:interviewId/edit"
               element={<CreateOneWayInterviewPage />}
             />
-            <Route path="/e2e-interviews/two-way" element={<ModulePage />} />
+            <Route
+              path="/e2e-interviews/two-way"
+              element={<Navigate to="/e2e-interviews/two-way/interview-sets" replace />}
+            />
+            <Route path="/e2e-interviews/two-way/interview-sets" element={<TwoWayInterviewSetsPage />} />
+            <Route
+              path="/e2e-interviews/two-way/interview-sets/new"
+              element={<ConfigureInterviewSetPage />}
+            />
+            <Route path="/e2e-interviews/two-way/scheduled" element={<ScheduledInterviewsPage />} />
+            <Route path="/e2e-interviews/two-way/interviews" element={<TwoWayInterviewsPage />} />
+            <Route
+              path="/e2e-interviews/two-way/interviews/:interviewId/plan"
+              element={<InterviewPlanPage />}
+            />
             <Route
               path="/e2e-interviews/scheduler"
               element={<InterviewSchedulerPage />}
