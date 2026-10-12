@@ -20,6 +20,7 @@ import {
   JobsModulePanel,
   JobsPipelinePanel,
   LicenseLimitsPanel,
+  MaskingSettingsPanel,
   OneWayAvatarSettingsPanel,
   OneWayDefaultSettingsPanel,
   NotificationConfigPanel,
@@ -131,6 +132,9 @@ function SettingsSectionContent({
 
     case 'candidates-documents':
       return <DocumentsSettingsPanel />
+
+    case 'candidates-masking':
+      return <MaskingSettingsPanel />
 
     case 'talent-crm':
     case 'talent-crm-talent-pool':

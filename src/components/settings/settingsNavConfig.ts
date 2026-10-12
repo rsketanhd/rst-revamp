@@ -4,6 +4,7 @@ export type SettingsSectionId =
   | 'jobs-field-customization'
   | 'candidates'
   | 'candidates-documents'
+  | 'candidates-masking'
   | 'pipeline'
   | 'talent-crm'
   | 'talent-crm-usage-limits'
@@ -60,6 +61,7 @@ export const JOBS_NAV_CHILDREN: SettingsNavItem[] = [
 
 export const CANDIDATES_NAV_CHILDREN: SettingsNavItem[] = [
   { id: 'candidates-documents', label: 'Documents' },
+  { id: 'candidates-masking', label: 'Masking' },
 ]
 
 export const TALENT_CRM_NAV_CHILDREN: SettingsNavItem[] = [

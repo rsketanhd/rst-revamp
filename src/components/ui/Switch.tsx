@@ -13,7 +13,7 @@ export type SwitchProps = {
 }
 
 /**
- * Brand navy enable/disable switch used for every on/off toggle.
+ * Navy enable/disable switch (`#2D2061` when on). Shared across all settings pages.
  */
 export function Switch({
   checked,
