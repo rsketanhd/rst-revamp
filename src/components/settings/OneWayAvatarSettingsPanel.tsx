@@ -507,7 +507,7 @@ function AvatarTile({
         aria-pressed={selected}
         aria-label={`Select ${avatar.name}`}
         className={cn(
-          'flex h-[4.5rem] items-center gap-2 rounded-xl border-2 bg-white py-1.5 pr-2 pl-1.5 text-left',
+          'flex h-[4.5rem] items-center gap-2 rounded-[8px] border-2 bg-white py-1.5 pr-2 pl-1.5 text-left',
           avatar.custom ? 'w-[11.5rem]' : 'w-[9.25rem]',
           selected ? 'border-[#2D2061]' : 'border-[#E8E6F0]',
           disabled && 'cursor-not-allowed',

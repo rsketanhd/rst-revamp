@@ -61,7 +61,7 @@ export function LicenseLimitsPanel() {
       description="Manage your user registration credentials and customize active recruiter daily digest parameters."
     >
       {/* Contract period */}
-      <section className="flex flex-wrap items-start justify-between gap-4 rounded-xl border border-[#E4E1EE] bg-white p-5">
+      <section className="flex flex-wrap items-start justify-between gap-4 rounded-[8px] border border-[#E4E1EE] bg-white p-5">
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#7A86A8]">
             Current Contract Enrolment Period
@@ -98,7 +98,7 @@ export function LicenseLimitsPanel() {
       </section>
 
       {/* Feature quotas */}
-      <section className="rounded-xl border border-[#E4E1EE] bg-white p-5">
+      <section className="rounded-[8px] border border-[#E4E1EE] bg-white p-5">
         <h3 className="mb-4 text-[11px] font-bold uppercase tracking-[0.06em] text-[#2D2061]">
           Feature Quota Allocation &amp; Consumption
         </h3>

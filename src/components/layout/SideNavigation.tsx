@@ -153,11 +153,6 @@ const RECRUITER_NAV_SECTIONS: NavSection[] = [
               },
             ],
           },
-          {
-            id: 'interview-scheduler',
-            label: 'Interview Scheduler & Analytics',
-            to: '/e2e-interviews/scheduler',
-          },
         ],
       },
       {

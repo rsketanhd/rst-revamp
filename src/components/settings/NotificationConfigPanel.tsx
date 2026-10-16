@@ -174,7 +174,7 @@ export function NotificationConfigPanel() {
       title="Notification Config"
       description="Operational Recruitment Trigger"
     >
-      <div className="overflow-hidden rounded-xl border border-[#E4E1EE] bg-white">
+      <div className="overflow-hidden rounded-[8px] border border-[#E4E1EE] bg-white">
         {/* Column headers */}
         <div className="hidden border-b border-[#ECEAF3] bg-white px-4 py-3 sm:grid sm:grid-cols-[minmax(0,1fr)_10rem_7.5rem] sm:items-end sm:gap-4 lg:grid-cols-[minmax(0,1fr)_11rem_8.5rem] lg:px-5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8B8B9E]">

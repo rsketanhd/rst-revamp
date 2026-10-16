@@ -68,7 +68,7 @@ export function TalentCrmConfigPanel({
       widthClassName="w-full max-w-[52rem]"
       bodyClassName="bg-[#F0F0F4] px-4 py-4 sm:px-5"
     >
-      <section className="rounded-xl border border-[#E4E1EE] bg-white p-4 shadow-sm sm:p-5">
+      <section className="rounded-[8px] border border-[#E4E1EE] bg-white p-4 shadow-sm sm:p-5">
         <header className="mb-5">
           <h3 className="text-base font-bold text-[#2A2740]">
             Talent CRM Branding & Templates

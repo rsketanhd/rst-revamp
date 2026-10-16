@@ -6,23 +6,35 @@ import {
   AdminPanel,
   ApprovalsPanel,
   CampaignSettingsPanel,
+  CandidatesGeneralPanel,
+  CandidateDiscoveryGeneralPanel,
   ColumnFilterVisibilityPanel,
   CompanyBrandingPanel,
   DEFAULT_CANDIDATES_SECTION,
+  DEFAULT_CANDIDATE_DISCOVERY_SECTION,
+  DEFAULT_OFFER_MANAGEMENT_SECTION,
   DEFAULT_JOBS_SECTION,
   DEFAULT_ONE_WAY_INTERVIEW_SECTION,
+  DEFAULT_TWO_WAY_INTERVIEW_SECTION,
   DEFAULT_TALENT_CRM_SECTION,
   DocumentsSettingsPanel,
   DomainRulesPanel,
   getDefaultSettingsSectionForRole,
   getSettingsNavGroupsForRole,
   isSettingsSectionIdForRole,
+  JobsGeneralPanel,
+  JobsCareerPagePanel,
+  JobsIndustriesPanel,
+  JobsJobCategoriesPanel,
   JobsModulePanel,
   JobsPipelinePanel,
   LicenseLimitsPanel,
   MaskingSettingsPanel,
   OneWayAvatarSettingsPanel,
   OneWayDefaultSettingsPanel,
+  TwoWayConfigurationPanel,
+  TwoWayRoundsPanel,
+  TwoWayPlanSummaryPanel,
   NotificationConfigPanel,
   NotificationPreferencesPanel,
   RecruiterProfilePanel,
@@ -58,6 +70,24 @@ export function SettingsPage() {
     return <Navigate to={`/settings/${DEFAULT_CANDIDATES_SECTION}`} replace />
   }
 
+  if (role === 'recruiter' && activeSectionId === 'candidate-discovery') {
+    return (
+      <Navigate
+        to={`/settings/${DEFAULT_CANDIDATE_DISCOVERY_SECTION}`}
+        replace
+      />
+    )
+  }
+
+  if (role === 'recruiter' && activeSectionId === 'offer-management') {
+    return (
+      <Navigate
+        to={`/settings/${DEFAULT_OFFER_MANAGEMENT_SECTION}`}
+        replace
+      />
+    )
+  }
+
   if (role === 'recruiter' && activeSectionId === 'talent-crm') {
     return (
       <Navigate to={`/settings/${DEFAULT_TALENT_CRM_SECTION}`} replace />
@@ -68,6 +98,15 @@ export function SettingsPage() {
     return (
       <Navigate
         to={`/settings/${DEFAULT_ONE_WAY_INTERVIEW_SECTION}`}
+        replace
+      />
+    )
+  }
+
+  if (role === 'recruiter' && activeSectionId === 'two-way-interview') {
+    return (
+      <Navigate
+        to={`/settings/${DEFAULT_TWO_WAY_INTERVIEW_SECTION}`}
         replace
       />
     )
@@ -123,18 +162,58 @@ function SettingsSectionContent({
   }
 
   switch (sectionId) {
-    case 'jobs':
     case 'jobs-pipeline':
       return <JobsPipelinePanel />
 
     case 'jobs-field-customization':
       return <JobsModulePanel />
 
+    case 'jobs':
+    case 'jobs-general':
+      return <JobsGeneralPanel />
+
+    case 'jobs-job-categories':
+      return <JobsJobCategoriesPanel />
+
+    case 'jobs-industries':
+      return <JobsIndustriesPanel />
+
+    case 'jobs-career-page':
+      return <JobsCareerPagePanel />
+
+    case 'candidates':
+    case 'candidates-general':
+      return <CandidatesGeneralPanel />
+
     case 'candidates-documents':
       return <DocumentsSettingsPanel />
 
     case 'candidates-masking':
       return <MaskingSettingsPanel />
+
+    case 'candidate-discovery':
+    case 'candidate-discovery-general':
+      return <CandidateDiscoveryGeneralPanel />
+
+    case 'offer-management':
+    case 'offer-management-stages-status':
+    case 'offer-management-pipeline-sync':
+    case 'offer-management-reasons':
+    case 'offer-management-approval-rules':
+    case 'offer-management-templates-emails':
+    case 'offer-management-team-notifications':
+    case 'offer-management-entities-compensation':
+    case 'offer-management-lifecycle-signing':
+    case 'offer-management-audit-log':
+      return (
+        <SettingsPlaceholderPanel
+          sectionId={
+            sectionId === 'offer-management'
+              ? 'offer-management-stages-status'
+              : sectionId
+          }
+        />
+      )
 
     case 'talent-crm':
     case 'talent-crm-talent-pool':
@@ -155,12 +234,23 @@ function SettingsSectionContent({
 
     case 'talent-crm-usage-limits':
     case 'talent-crm-candidate':
-    case 'candidates':
     case 'pipeline':
     case 'campaigns':
     case 'reports':
     case 'client-management':
     case 'two-way-interview':
+    case 'two-way-interview-configuration':
+      return <TwoWayConfigurationPanel />
+
+    case 'two-way-interview-rounds':
+      return <TwoWayRoundsPanel />
+
+    case 'two-way-interview-plan-summary':
+      return <TwoWayPlanSummaryPanel />
+
+    case 'two-way-interview-notifications':
+    case 'two-way-interview-connections':
+    case 'two-way-interview-change-history':
     case 'candidate-privacy':
     case 'data-retention':
     case 'audit-activity':

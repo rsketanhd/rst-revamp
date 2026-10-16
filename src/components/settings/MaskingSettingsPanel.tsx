@@ -113,186 +113,182 @@ export function MaskingSettingsPanel() {
       title="Masking"
       description="Hide candidate details inside jobs. Only Super Users can change these settings."
     >
-      <SettingsBlock
-        title="Hide Candidate Details"
-        trailing={
+      <div className="rounded-[8px] bg-[#F8F9FB] px-5 py-4 sm:px-6 sm:py-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="text-sm font-bold text-[#2D2061]">Hide Candidate Details</h3>
+          </div>
           <Switch
             checked={maskingOn}
             onCheckedChange={setMaskingOn}
             aria-label="Hide Candidate Details"
           />
-        }
+        </div>
+      </div>
+
+      <div
+        className={cn(
+          'flex flex-col gap-4 sm:gap-5',
+          !maskingOn && 'pointer-events-none opacity-50',
+        )}
+        aria-disabled={!maskingOn}
       >
-        <div
-          className={cn(
-            'flex flex-col gap-5',
-            !maskingOn && 'pointer-events-none opacity-50',
-          )}
-        >
-          <fieldset>
-            <legend className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#2A2740]">
-              Apply to
-              <InfoHint label="Choose which candidates and jobs masking applies to." />
-            </legend>
-            <div className="mt-2.5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-5">
-              <ApplyRadio
-                name="mask-apply-to"
-                value="all-candidates"
-                checked={applyTo === 'all-candidates'}
-                label="All Candidates"
-                onChange={setApplyTo}
-              />
-              <ApplyRadio
-                name="mask-apply-to"
-                value="all-jobs"
-                checked={applyTo === 'all-jobs'}
-                label="Candidate details in all Jobs"
-                onChange={setApplyTo}
-              />
-              <ApplyRadio
-                name="mask-apply-to"
-                value="specific-jobs"
-                checked={applyTo === 'specific-jobs'}
-                label="Candidate details in Specific Jobs"
-                onChange={setApplyTo}
+        <div className="rounded-[8px] bg-[#F8F9FB] p-5 sm:p-6">
+          <div className="flex flex-col gap-5">
+            <fieldset>
+              <legend className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#2A2740]">
+                Apply to
+                <InfoHint label="Choose which candidates and jobs masking applies to." />
+              </legend>
+              <div className="mt-2.5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-5">
+                <ApplyRadio
+                  name="mask-apply-to"
+                  value="all-candidates"
+                  checked={applyTo === 'all-candidates'}
+                  label="All Candidates"
+                  onChange={setApplyTo}
+                />
+                <ApplyRadio
+                  name="mask-apply-to"
+                  value="all-jobs"
+                  checked={applyTo === 'all-jobs'}
+                  label="Candidate details in all Jobs"
+                  onChange={setApplyTo}
+                />
+                <ApplyRadio
+                  name="mask-apply-to"
+                  value="specific-jobs"
+                  checked={applyTo === 'specific-jobs'}
+                  label="Candidate details in Specific Jobs"
+                  onChange={setApplyTo}
+                />
+              </div>
+              <p className="mt-2 text-xs text-[#8B8B9E]">
+                Jobs created from now on. Existing jobs are not changed.
+              </p>
+            </fieldset>
+
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#2A2740]">
+                  Let recruiters switch it off for a job
+                  <InfoHint label="Allow recruiters to turn masking off on individual jobs." />
+                </p>
+                <p className="mt-0.5 text-xs text-[#8B8B9E]">
+                  Useful when only some roles need blind hiring.
+                </p>
+              </div>
+              <Switch
+                checked={recruiterCanDisable}
+                onCheckedChange={setRecruiterCanDisable}
+                aria-label="Let recruiters switch it off for a job"
+                className="!gap-0"
               />
             </div>
-            <p className="mt-2 text-xs text-[#8B8B9E]">
-              Jobs created from now on. Existing jobs are not changed.
-            </p>
-          </fieldset>
 
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#2A2740]">
-                Let recruiters switch it off for a job
-                <InfoHint label="Allow recruiters to turn masking off on individual jobs." />
-              </p>
-              <p className="mt-0.5 text-xs text-[#8B8B9E]">
-                Useful when only some roles need blind hiring.
-              </p>
+            <div className="max-w-[10rem]">
+              <Select
+                id="masking-character"
+                label="Masking character"
+                labelTooltip="Character used in place of hidden text."
+                value={maskChar}
+                onChange={(event) => setMaskChar(event.target.value)}
+                options={MASK_CHAR_OPTIONS}
+                placeholder=""
+                helperText={`Used in place of hidden text, e.g. ${maskChar.repeat(4)}`}
+              />
             </div>
-            <Switch
-              checked={recruiterCanDisable}
-              onCheckedChange={setRecruiterCanDisable}
-              aria-label="Let recruiters switch it off for a job"
-              className="!gap-0"
-            />
-          </div>
-
-          <div className="max-w-[10rem]">
-            <Select
-              id="masking-character"
-              label="Masking character"
-              labelTooltip="Character used in place of hidden text."
-              value={maskChar}
-              onChange={(event) => setMaskChar(event.target.value)}
-              options={MASK_CHAR_OPTIONS}
-              placeholder=""
-              helperText={`Used in place of hidden text, e.g. ${maskChar.repeat(4)}`}
-            />
           </div>
         </div>
-      </SettingsBlock>
 
-      <SettingsBlock
-        title="Fields to hide"
-        description={`${hiddenCount} of ${fields.length} fields hidden`}
-        trailing={
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setAllHidden(true)}
-              disabled={!maskingOn}
-              className="h-8 rounded-md border border-[#D5D2E2] bg-white px-3 text-xs font-semibold text-[#2D2061] hover:bg-[#F7F6FB] disabled:opacity-50"
-            >
-              Hide all
-            </button>
-            <button
-              type="button"
-              onClick={() => setAllHidden(false)}
-              disabled={!maskingOn}
-              className="h-8 rounded-md border border-[#D5D2E2] bg-white px-3 text-xs font-semibold text-[#2D2061] hover:bg-[#F7F6FB] disabled:opacity-50"
-            >
-              Show all
-            </button>
-          </div>
-        }
-      >
-        <div
-          className={cn(
-            'overflow-x-auto',
-            !maskingOn && 'pointer-events-none opacity-50',
-          )}
+        <SettingsBlock
+          title="Fields to hide"
+          description={`${hiddenCount} of ${fields.length} fields hidden`}
+          trailing={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setAllHidden(true)}
+                disabled={!maskingOn}
+                className="h-8 rounded-md border border-[#D5D2E2] bg-white px-3 text-xs font-semibold text-[#2D2061] hover:bg-[#F7F6FB] disabled:opacity-50"
+              >
+                Hide all
+              </button>
+              <button
+                type="button"
+                onClick={() => setAllHidden(false)}
+                disabled={!maskingOn}
+                className="h-8 rounded-md border border-[#D5D2E2] bg-white px-3 text-xs font-semibold text-[#2D2061] hover:bg-[#F7F6FB] disabled:opacity-50"
+              >
+                Show all
+              </button>
+            </div>
+          }
         >
-          <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
-            <thead>
-              <tr className="border-b border-[#E8E6F0] text-[11px] font-semibold tracking-wide text-[#8B8B9E] uppercase">
-                <th className="w-16 px-2 pb-2.5 font-semibold">Hide</th>
-                <th className="px-2 pb-2.5 font-semibold">Field</th>
-                <th className="px-2 pb-2.5 font-semibold">How to hide</th>
-                <th className="px-2 pb-2.5 font-semibold">Recruiter sees</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fields.map((field) => (
-                <tr
-                  key={field.id}
-                  className="border-b border-[#F0EEF5] last:border-0"
-                >
-                  <td className="px-2 py-3 align-middle">
-                    <Switch
-                      checked={field.hidden}
-                      onCheckedChange={(hidden) => patchField(field.id, { hidden })}
-                      aria-label={`Hide ${field.label}`}
-                      className="!gap-0"
-                    />
-                  </td>
-                  <td className="px-2 py-3 align-middle font-semibold text-[#2A2740]">
-                    {field.label}
-                  </td>
-                  <td className="px-2 py-3 align-middle">
-                    <select
-                      aria-label={`How to hide ${field.label}`}
-                      disabled={!field.hidden}
-                      value={field.mode}
-                      onChange={(event) =>
-                        patchField(field.id, {
-                          mode: event.target.value as HideMode,
-                        })
-                      }
-                      className="h-9 w-full max-w-[14rem] rounded-md border border-[#ddd9e8] bg-white px-2.5 text-[13px] text-[#2D2061] outline-none focus:border-[#2D2061] disabled:opacity-50"
-                    >
-                      <option value="hide-all">Hide all</option>
-                      {field.id === 'email' ? (
-                        <option value="hide-email-keep-domain">
-                          Hide all but @ and ending
-                        </option>
-                      ) : null}
-                    </select>
-                  </td>
-                  <td className="px-2 py-3 align-middle font-mono text-[13px] text-[#6B6B80]">
-                    {field.hidden
-                      ? maskPreview(field, maskChar)
-                      : field.sample}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-b border-[#E8E6F0] text-[11px] font-semibold tracking-wide text-[#8B8B9E] uppercase">
+                  <th className="w-16 px-2 pb-2.5 font-semibold">Hide</th>
+                  <th className="px-2 pb-2.5 font-semibold">Field</th>
+                  <th className="px-2 pb-2.5 font-semibold">How to hide</th>
+                  <th className="px-2 pb-2.5 font-semibold">Recruiter sees</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </SettingsBlock>
+              </thead>
+              <tbody>
+                {fields.map((field) => (
+                  <tr
+                    key={field.id}
+                    className="border-b border-[#F0EEF5] last:border-0"
+                  >
+                    <td className="px-2 py-3 align-middle">
+                      <Switch
+                        checked={field.hidden}
+                        onCheckedChange={(hidden) => patchField(field.id, { hidden })}
+                        aria-label={`Hide ${field.label}`}
+                        className="!gap-0"
+                      />
+                    </td>
+                    <td className="px-2 py-3 align-middle font-semibold text-[#2A2740]">
+                      {field.label}
+                    </td>
+                    <td className="px-2 py-3 align-middle">
+                      <select
+                        aria-label={`How to hide ${field.label}`}
+                        disabled={!field.hidden}
+                        value={field.mode}
+                        onChange={(event) =>
+                          patchField(field.id, {
+                            mode: event.target.value as HideMode,
+                          })
+                        }
+                        className="h-9 w-full max-w-[14rem] rounded-md border border-[#ddd9e8] bg-white px-2.5 text-[13px] text-[#2D2061] outline-none focus:border-[#2D2061] disabled:opacity-50"
+                      >
+                        <option value="hide-all">Hide all</option>
+                        {field.id === 'email' ? (
+                          <option value="hide-email-keep-domain">
+                            Hide all but @ and ending
+                          </option>
+                        ) : null}
+                      </select>
+                    </td>
+                    <td className="px-2 py-3 align-middle font-mono text-[13px] text-[#6B6B80]">
+                      {field.hidden
+                        ? maskPreview(field, maskChar)
+                        : field.sample}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SettingsBlock>
 
-      <SettingsBlock
-        title="Who sees real details"
-        description="Masking is lifted for these roles, and for a candidate once they reach the stage you choose."
-      >
-        <div
-          className={cn(
-            'flex flex-col gap-5',
-            !maskingOn && 'pointer-events-none opacity-50',
-          )}
+        <SettingsBlock
+          title="Who sees real details"
+          description="Masking is lifted for these roles, and for a candidate once they reach the stage you choose."
         >
+          <div className="flex flex-col gap-5">
           <div>
             <p className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#2A2740]">
               Always unmasked
@@ -372,8 +368,9 @@ export function MaskingSettingsPanel() {
             checked={hideResume}
             onChange={setHideResume}
           />
-        </div>
-      </SettingsBlock>
+          </div>
+        </SettingsBlock>
+      </div>
     </SettingsPanel>
   )
 }

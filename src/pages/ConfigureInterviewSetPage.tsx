@@ -1,5 +1,5 @@
 import { useMemo, useState, type DragEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Pencil } from 'lucide-react'
 import {
   AppTopBar,
@@ -19,10 +19,12 @@ import {
   type PanelRound,
   type RoundValues,
 } from '../components/interviews/two-way/CreateRoundPanel'
+import { twoWayInterviewSetToWizardState } from '../components/interviews/two-way/fromInterviewSet'
 import {
   TwoWayRoundCard,
   type PanelMember,
 } from '../components/interviews/two-way/TwoWayRoundCard'
+import { getTwoWayInterviewSetById } from '../data/twoWayInterviewSets'
 import { getPlatformUsers } from '../data/users'
 
 const STEPS = [
@@ -42,6 +44,7 @@ const WORKING_HOURS = [
 const LIST_PATH = '/e2e-interviews/two-way/interview-sets'
 
 const ORGANISER_OPTIONS = [
+  { value: 'Candidate', label: 'Candidate' },
   { value: 'Recruiter', label: 'Recruiter' },
   { value: 'Hiring Manager', label: 'Hiring Manager' },
 ]
@@ -49,14 +52,28 @@ const ORGANISER_OPTIONS = [
 /**
  * Two-Way Interviews → Interview Sets → Configure Interview Set.
  * Same wizard layout as Create (One-Way) Interview: Details → Rounds → Review.
+ * With a `setId` route param it edits that interview set instead.
  */
 export function ConfigureInterviewSetPage() {
   const navigate = useNavigate()
+  const { setId } = useParams()
+  const editing = useMemo(
+    () => (setId ? getTwoWayInterviewSetById(setId) : undefined),
+    [setId],
+  )
+  const initial = useMemo(
+    () =>
+      editing
+        ? twoWayInterviewSetToWizardState(editing)
+        : { jobCode: '', organiser: 'Recruiter', rounds: [] as PanelRound[] },
+    [editing],
+  )
   const [step, setStep] = useState(0)
-  const [maxReached, setMaxReached] = useState(0)
-  const [jobCode, setJobCode] = useState('')
-  const [organiser, setOrganiser] = useState('Recruiter')
-  const [rounds, setRounds] = useState<PanelRound[]>([])
+  // Existing sets are already filled in, so every step is reachable
+  const [maxReached, setMaxReached] = useState(editing ? LAST_STEP : 0)
+  const [jobCode, setJobCode] = useState(initial.jobCode)
+  const [organiser, setOrganiser] = useState(initial.organiser)
+  const [rounds, setRounds] = useState<PanelRound[]>(initial.rounds)
   /** Round being edited in the side panel; 'new' when creating */
   const [roundPanel, setRoundPanel] = useState<PanelRound | 'new' | null>(null)
   /** Expanded round cards (all collapsed initially) */
@@ -74,15 +91,25 @@ export function ConfigureInterviewSetPage() {
   const [jobError, setJobError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  const jobOptions = useMemo(
-    () =>
-      JOBS.filter((job) => job.status === 'active').map((job) => ({
-        value: job.code,
-        label: job.title,
-      })),
-    [],
-  )
-  const jobTitle = jobOptions.find((j) => j.value === jobCode)?.label ?? ''
+  const jobOptions = useMemo(() => {
+    const active = JOBS.filter((job) => job.status === 'active').map((job) => ({
+      value: job.code,
+      label: job.title,
+    }))
+    if (!editing) return active
+
+    const listed = active.some(
+      (j) => j.label === editing.jobTitle || j.value === initial.jobCode,
+    )
+    if (listed) return active
+
+    return [
+      { value: initial.jobCode || editing.jobReqId, label: editing.jobTitle },
+      ...active,
+    ]
+  }, [editing, initial.jobCode])
+  const jobTitle =
+    jobOptions.find((j) => j.value === jobCode)?.label ?? editing?.jobTitle ?? ''
 
   function goTo(next: number) {
     setStep(next)
@@ -180,12 +207,20 @@ export function ConfigureInterviewSetPage() {
       {success ? (
         <div className="flex min-h-0 flex-1 items-center justify-center bg-white p-8">
           <SuccessMessage
-            title="Interview Set Configured Successfully!"
+            title={
+              editing
+                ? 'Interview Set Updated Successfully!'
+                : 'Interview Set Configured Successfully!'
+            }
             primaryAction={{
               label: 'View All Interview Sets',
               onClick: () => navigate(LIST_PATH),
             }}
-            secondaryAction={{ label: 'Configure Another', onClick: resetWizard }}
+            secondaryAction={
+              editing
+                ? undefined
+                : { label: 'Configure Another', onClick: resetWizard }
+            }
           />
         </div>
       ) : (
@@ -202,8 +237,12 @@ export function ConfigureInterviewSetPage() {
               </button>
               <PageHeader
                 className="mt-1"
-                title="Configure Panel"
-                subtitle="Set up the job, rounds and panel for this two-way interview set."
+                title={editing ? 'Edit Interview Set' : 'Configure Panel'}
+                subtitle={
+                  editing
+                    ? `Update rounds and panel settings for “${editing.jobTitle}”.`
+                    : 'Set up the job, rounds and panel for this two-way interview set.'
+                }
               />
             </header>
 

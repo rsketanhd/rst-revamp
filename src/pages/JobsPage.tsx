@@ -4,11 +4,11 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Briefcase,
   Building2,
-  CalendarDays,
   Clock3,
   Loader2,
   MapPin,
   Search,
+  Send,
   SlidersHorizontal,
   Sparkles,
 } from 'lucide-react'
@@ -137,9 +137,7 @@ export function JobsPage() {
     () => navStatusFilter(location.state) ?? 'all',
   )
   const [scope, setScope] = useState<JobScope>('my')
-  const [postedOn, setPostedOn] = useState('')
-  const [updatedOn, setUpdatedOn] = useState('')
-  const [recruiterQuery, setRecruiterQuery] = useState('')
+  const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<Record<string, boolean>>({})
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [appliedFilters, setAppliedFilters] = useState<FilterSortValues>(
@@ -167,21 +165,18 @@ export function JobsPage() {
     setJobs(loadListedJobs())
   }, [location.state])
 
-  const scopeJobs = useMemo(
-    () => jobs.filter((job) => (scope === 'my' ? job.isMine : true)),
-    [jobs, scope],
-  )
+  const myJobs = useMemo(() => jobs.filter((job) => job.isMine), [jobs])
 
-  const stats = useMemo(() => computeJobStats(scopeJobs), [scopeJobs])
+  /** Matrix primary = all jobs; footer badges = my jobs (matches KPI design). */
+  const stats = useMemo(() => computeJobStats(jobs), [jobs])
+  const myStats = useMemo(() => computeJobStats(myJobs), [myJobs])
 
   const filteredJobs = useMemo(
     () =>
       filterJobs(jobs, {
         status,
         scope,
-        recruiterQuery,
-        postedOn,
-        updatedOn,
+        searchQuery: query,
         jobReqIds: appliedFilters.jobReqId,
         jobTitles: appliedFilters.jobTitle,
         leadRecruiters: appliedFilters.leadRecruiter,
@@ -193,15 +188,7 @@ export function JobsPage() {
         brand: appliedFilters.brand,
         project: appliedFilters.project,
       }),
-    [
-      status,
-      scope,
-      recruiterQuery,
-      postedOn,
-      updatedOn,
-      appliedFilters,
-      jobs,
-    ],
+    [status, scope, query, appliedFilters, jobs],
   )
 
   // Reset pagination when any filter changes
@@ -209,14 +196,7 @@ export function JobsPage() {
     setVisibleCount(PAGE_SIZE)
     loadingLockRef.current = false
     setLoadingMore(false)
-  }, [
-    status,
-    scope,
-    recruiterQuery,
-    postedOn,
-    updatedOn,
-    appliedFilters,
-  ])
+  }, [status, scope, query, appliedFilters])
 
   const visibleJobs = useMemo(
     () => filteredJobs.slice(0, visibleCount),
@@ -492,10 +472,34 @@ export function JobsPage() {
   }
 
   const statCards = [
-    { label: 'Active Jobs', value: stats.activeJobs },
-    { label: 'Total Applicants', value: stats.totalApplicants },
-    { label: 'Total Recommendations', value: stats.totalRecommendations },
-    { label: 'Total Offers', value: stats.totalOffers },
+    {
+      id: 'active',
+      label: 'Active jobs',
+      value: stats.activeJobs,
+      footerLabel: 'My active jobs',
+      footerValue: myStats.activeJobs,
+    },
+    {
+      id: 'applicants',
+      label: 'Total applicants',
+      value: stats.totalApplicants,
+      footerLabel: 'On my jobs',
+      footerValue: myStats.totalApplicants,
+    },
+    {
+      id: 'recommendations',
+      label: 'Total recommendations',
+      value: stats.totalRecommendations,
+      footerLabel: 'On my jobs',
+      footerValue: myStats.totalRecommendations,
+    },
+    {
+      id: 'offers',
+      label: 'Total offers',
+      value: stats.totalOffers,
+      footerLabel: 'On my jobs',
+      footerValue: myStats.totalOffers,
+    },
   ]
 
   return (
@@ -519,118 +523,65 @@ export function JobsPage() {
           }
         />
 
-        <div className="mb-5 grid grid-cols-1 gap-2.5 sm:mb-6 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
+        <div className="mb-5 grid grid-cols-1 items-start gap-3 sm:mb-6 sm:grid-cols-2 xl:grid-cols-4">
           {statCards.map((stat) => (
-            <div
-              key={stat.label}
-              className="flex items-center justify-between gap-3 rounded-lg bg-[#F7F7F9] px-3 py-3 shadow-[0_1px_3px_rgba(45,32,97,0.05)] sm:px-4 sm:py-3.5"
+            <article
+              key={stat.id}
+              className="min-w-0 self-start rounded-xl border border-[#E8E6F0] bg-white px-4 pt-2.5 pb-1.5 sm:px-5"
             >
-              <p className="text-[10px] font-medium uppercase tracking-[0.05em] text-[#626889] sm:text-[11px]">
+              <p className="text-[11px] font-semibold uppercase leading-none tracking-[0.04em] text-[#6B6B80]">
                 {stat.label}
               </p>
-              <p className="text-[1.25rem] font-bold leading-none tabular-nums text-[#706BB0] sm:text-[1.5rem]">
+              <p className="mt-1.5 text-[1.5rem] font-bold leading-none tabular-nums text-[#2D2061] sm:text-[1.625rem]">
                 {formatStat(stat.value)}
               </p>
-            </div>
+              <div className="mt-2 flex items-center justify-between gap-3 border-t border-[#ECEAF3] pt-1.5">
+                <p className="text-[12px] font-medium leading-none text-[#6B6B80]">
+                  {stat.footerLabel}
+                </p>
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#DCEBFF] px-1.5 text-[11px] font-semibold leading-none tabular-nums text-[#2F6FD6]">
+                  {formatStat(stat.footerValue)}
+                </span>
+              </div>
+            </article>
           ))}
         </div>
 
-        <div className="mb-5 rounded-xl bg-[#F2F1F6] p-3 sm:mb-6 sm:p-4">
-          <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.35fr)_auto]">
-            <FilterField label="Posted On">
-              <div className="relative">
-                <input
-                  type={postedOn ? 'date' : 'text'}
-                  value={postedOn}
-                  placeholder="Select Date"
-                  onFocus={(event) => {
-                    event.currentTarget.type = 'date'
-                  }}
-                  onBlur={(event) => {
-                    if (!event.currentTarget.value) {
-                      event.currentTarget.type = 'text'
-                    }
-                  }}
-                  onChange={(event) => setPostedOn(event.target.value)}
-                  className={cn(filterInputClass, 'pr-10')}
-                />
-                <CalendarDays
-                  className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[#8B8B9E]"
-                  aria-hidden="true"
-                />
-              </div>
-            </FilterField>
-
-            <FilterField label="Updated On">
-              <div className="relative">
-                <input
-                  type={updatedOn ? 'date' : 'text'}
-                  value={updatedOn}
-                  placeholder="Select Date"
-                  onFocus={(event) => {
-                    event.currentTarget.type = 'date'
-                  }}
-                  onBlur={(event) => {
-                    if (!event.currentTarget.value) {
-                      event.currentTarget.type = 'text'
-                    }
-                  }}
-                  onChange={(event) => setUpdatedOn(event.target.value)}
-                  className={cn(filterInputClass, 'pr-10')}
-                />
-                <CalendarDays
-                  className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[#8B8B9E]"
-                  aria-hidden="true"
-                />
-              </div>
-            </FilterField>
-
-            <FilterField label="Recruiter Name">
-              <div className="relative">
-                <Search
-                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#8B8B9E]"
-                  aria-hidden="true"
-                />
-                <input
-                  type="search"
-                  value={recruiterQuery}
-                  onChange={(event) => setRecruiterQuery(event.target.value)}
-                  placeholder="Search recruiter"
-                  className={cn(filterInputClass, 'pl-9')}
-                />
-              </div>
-            </FilterField>
-
-            <div className="flex w-full min-w-0 items-center gap-2 xl:w-auto">
-              <button
-                type="button"
-                onClick={() => setFiltersOpen(true)}
-                className="relative inline-flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-lg border border-[#2D2061]/25 bg-white px-4 text-sm font-medium text-[#2D2061] shadow-[0_1px_2px_rgba(45,32,97,0.04)] transition-colors hover:bg-[#faf9fd] xl:min-w-[8.75rem] xl:flex-none"
-              >
-                <SlidersHorizontal className="size-4 shrink-0" aria-hidden="true" />
-                More Filters
-                {activeFilterCount > 0 ? (
-                  <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#2D2061] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
-                    {activeFilterCount}
-                  </span>
-                ) : null}
-              </button>
-              {activeFilterCount > 0 ? (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setAppliedFilters((current) => ({
-                      ...emptyFilterSortValues,
-                      sortBy: current.sortBy,
-                    }))
-                  }
-                  className="inline-flex h-11 shrink-0 items-center justify-center rounded-lg border border-transparent px-3 text-sm font-medium text-[#2D2061] underline-offset-2 transition-colors hover:bg-white/70 hover:underline"
-                >
-                  Clear
-                </button>
-              ) : null}
-            </div>
+        <div className="mb-5 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center">
+          <div className="relative min-w-0 flex-1">
+            <Search
+              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#8B8B9E]"
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Type here to search"
+              aria-label="Search jobs"
+              className="h-11 w-full rounded-[5px] border border-[#E0DDEA] bg-white py-2 pl-11 pr-12 text-sm text-[#2D2061] outline-none placeholder:text-[#A0A0B2] focus:border-[#2D2061] focus:ring-2 focus:ring-[#2D2061]/10"
+            />
+            <span
+              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#5B8DEF]"
+              aria-hidden="true"
+            >
+              <Send className="size-4" strokeWidth={1.75} />
+            </span>
           </div>
+          <button
+            type="button"
+            onClick={() => setFiltersOpen(true)}
+            className="relative inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#2D2061]/25 bg-white px-4 text-sm font-medium text-[#2D2061] shadow-[0_1px_2px_rgba(45,32,97,0.04)] transition-colors hover:bg-[#faf9fd]"
+          >
+            <SlidersHorizontal className="size-4 shrink-0" aria-hidden="true" />
+            Filter By
+            {activeFilterCount > 0 ? (
+              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#2D2061] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
+                {activeFilterCount}
+              </span>
+            ) : null}
+          </button>
         </div>
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
@@ -879,24 +830,6 @@ export function JobsPage() {
         }
       />
     </div>
-  )
-}
-
-const filterInputClass =
-  'h-11 w-full rounded-lg border border-[#e0ddea] bg-white px-3 text-sm text-[#2D2061] outline-none transition-colors placeholder:text-[#A0A0B2] focus:border-[#2D2061] focus:ring-2 focus:ring-[#2D2061]/10 shadow-[0_1px_2px_rgba(45,32,97,0.03)]'
-
-function FilterField({
-  label,
-  children,
-}: {
-  label: string
-  children: ReactNode
-}) {
-  return (
-    <label className="flex min-w-0 flex-col gap-1.5">
-      <span className="text-xs font-medium text-[#2D2061]">{label}</span>
-      {children}
-    </label>
   )
 }
 

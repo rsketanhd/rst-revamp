@@ -26,6 +26,24 @@ export type TwoWayInterviewSet = {
   aiRounds: number
 }
 
+/** Round config used by Open / Edit Interview Set */
+export type TwoWayInterviewSetRound = {
+  id: string
+  name: string
+  meetingPlatform: string
+  durationMins: number
+  aiJoins: boolean
+  active: boolean
+  ready: boolean
+  organiser: string | null
+  mandatoryParticipants: string[]
+  optionalParticipants: string[]
+  fallbackTimezone: string
+  gapMins: number
+  slotsOpenAfterDays: number
+  lookAheadDays: number
+}
+
 export const SETUP_STATUS_META: Record<
   InterviewSetSetupStatus,
   { label: string; className: string }
@@ -123,6 +141,172 @@ const SETS: TwoWayInterviewSet[] = [
   },
 ]
 
+const ROUND_DEFAULTS = {
+  active: true,
+  organiser: null as string | null,
+  mandatoryParticipants: [] as string[],
+  optionalParticipants: [] as string[],
+  fallbackTimezone: '(GMT+04:00) Asia/Dubai',
+  gapMins: 30,
+  slotsOpenAfterDays: 0,
+  lookAheadDays: 7,
+}
+
+function round(
+  partial: Pick<
+    TwoWayInterviewSetRound,
+    'id' | 'name' | 'meetingPlatform' | 'durationMins' | 'aiJoins' | 'ready'
+  >,
+): TwoWayInterviewSetRound {
+  return { ...ROUND_DEFAULTS, ...partial }
+}
+
+/** Demo rounds keyed by interview-set id */
+const ROUNDS_BY_SET: Record<string, TwoWayInterviewSetRound[]> = {
+  'tw-1': [
+    round({
+      id: 'tw-1-r1',
+      name: 'Technical Round',
+      meetingPlatform: 'Microsoft Teams',
+      durationMins: 60,
+      aiJoins: true,
+      ready: true,
+    }),
+    round({
+      id: 'tw-1-r2',
+      name: 'Case Study',
+      meetingPlatform: 'Zoom',
+      durationMins: 45,
+      aiJoins: false,
+      ready: true,
+    }),
+    round({
+      id: 'tw-1-r3',
+      name: 'Hiring Manager Round',
+      meetingPlatform: 'Microsoft Teams',
+      durationMins: 45,
+      aiJoins: true,
+      ready: true,
+    }),
+    round({
+      id: 'tw-1-r4',
+      name: 'Final Round',
+      meetingPlatform: 'Microsoft Teams',
+      durationMins: 30,
+      aiJoins: false,
+      ready: false,
+    }),
+  ],
+  'tw-2': [
+    round({
+      id: 'tw-2-r1',
+      name: 'Screening Call',
+      meetingPlatform: 'Microsoft Teams',
+      durationMins: 30,
+      aiJoins: false,
+      ready: false,
+    }),
+    round({
+      id: 'tw-2-r2',
+      name: 'Technical Round',
+      meetingPlatform: 'Microsoft Teams',
+      durationMins: 60,
+      aiJoins: false,
+      ready: false,
+    }),
+  ],
+  'tw-3': [
+    round({
+      id: 'tw-3-r1',
+      name: 'Screening Call',
+      meetingPlatform: 'Microsoft Teams',
+      durationMins: 30,
+      aiJoins: false,
+      ready: true,
+    }),
+    round({
+      id: 'tw-3-r2',
+      name: 'Hiring Manager Round',
+      meetingPlatform: 'Microsoft Teams',
+      durationMins: 45,
+      aiJoins: false,
+      ready: true,
+    }),
+  ],
+  'tw-4': [],
+  'tw-5': [
+    round({
+      id: 'tw-5-r1',
+      name: 'Technical Round',
+      meetingPlatform: 'Microsoft Teams',
+      durationMins: 60,
+      aiJoins: true,
+      ready: true,
+    }),
+    round({
+      id: 'tw-5-r2',
+      name: 'Case Study',
+      meetingPlatform: 'Zoom',
+      durationMins: 45,
+      aiJoins: false,
+      ready: true,
+    }),
+    round({
+      id: 'tw-5-r3',
+      name: 'Hiring Manager Round',
+      meetingPlatform: 'Microsoft Teams',
+      durationMins: 45,
+      aiJoins: false,
+      ready: true,
+    }),
+  ],
+  'tw-6': [
+    round({
+      id: 'tw-6-r1',
+      name: 'Screening Call',
+      meetingPlatform: 'Google Meet',
+      durationMins: 30,
+      aiJoins: false,
+      ready: true,
+    }),
+    round({
+      id: 'tw-6-r2',
+      name: 'Hiring Manager Round',
+      meetingPlatform: 'Microsoft Teams',
+      durationMins: 45,
+      aiJoins: false,
+      ready: false,
+    }),
+  ],
+}
+
 export function getTwoWayInterviewSets(): TwoWayInterviewSet[] {
   return SETS.map((set) => ({ ...set }))
+}
+
+export function getTwoWayInterviewSetById(
+  id: string,
+): TwoWayInterviewSet | undefined {
+  const set = SETS.find((s) => s.id === id)
+  return set ? { ...set } : undefined
+}
+
+export function getTwoWayInterviewSetRounds(
+  setId: string,
+): TwoWayInterviewSetRound[] {
+  return (ROUNDS_BY_SET[setId] ?? []).map((r) => ({ ...r }))
+}
+
+/** Label for the “Two-way on N rounds” badge; null when no AI rounds. */
+export function aiRoundsBadgeLabel(aiRounds: number): string | null {
+  if (aiRounds <= 0) return null
+  const unit = aiRounds === 1 ? 'round' : 'rounds'
+  return `Two-way on ${aiRounds} ${unit}`
+}
+
+/** Default round when scheduling invites (first ready round, else first). */
+export function defaultScheduleRoundId(
+  rounds: TwoWayInterviewSetRound[],
+): string {
+  return rounds.find((r) => r.ready)?.id ?? rounds[0]?.id ?? ''
 }

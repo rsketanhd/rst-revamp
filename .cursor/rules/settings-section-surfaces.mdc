@@ -1,0 +1,15 @@
+---
+description: Keep Settings section card backgrounds consistent across all settings screens
+globs: src/components/settings/**/*.{tsx,ts}
+alwaysApply: false
+---
+
+# Settings section surfaces
+
+Use the shared soft gray section background on all Settings module screens so layouts stay symmetrical.
+
+- Section / card surface: `bg-[#F8F9FB]` with `rounded-[8px]`
+- Prefer `SettingsBlock` from `SettingsPanel.tsx` when the block needs a title, description, trailing action, or footer
+- Untitled sections (e.g. Industry controls) still use the same surface: `rounded-[8px] bg-[#F8F9FB] p-5 sm:p-6` (or `px-5 py-4 sm:px-6 sm:py-5` to match TwoWay `SectionCard`)
+- Do **not** invent alternate tinted section backgrounds (e.g. lavender `#F0EDF8`) for settings content cards
+- Inner list/table shells on top of a section stay white (`bg-white`) with `border border-[#E4E1EE]` when needed

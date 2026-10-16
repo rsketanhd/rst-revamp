@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarClock, EyeOff, FolderOpen, Search, SquarePen } from 'lucide-react'
 import { PageContainer, PageHeader } from '../components/layout'
+import { ViewInterviewSetPanel } from '../components/interviews/two-way/ViewInterviewSetPanel'
+import { ScheduleInterviewsPanel } from '../components/interviews/two-way/ScheduleInterviewsPanel'
 import {
   Button,
   SegmentedControl,
@@ -12,11 +14,13 @@ import {
 import { cn } from '../lib/cn'
 import {
   SETUP_STATUS_META,
+  aiRoundsBadgeLabel,
   getTwoWayInterviewSets,
   type TwoWayInterviewSet,
 } from '../data/twoWayInterviewSets'
 
 type SetStatus = 'active' | 'inactive'
+type SetActionId = 'open' | 'edit' | 'schedule' | 'toggleActive'
 
 /**
  * E2E Interviews → Two-Way Interviews → Interview Sets.
@@ -27,6 +31,8 @@ export function TwoWayInterviewSetsPage() {
   const [sets, setSets] = useState(() => getTwoWayInterviewSets())
   const [status, setStatus] = useState<SetStatus>('active')
   const [query, setQuery] = useState('')
+  const [viewing, setViewing] = useState<TwoWayInterviewSet | null>(null)
+  const [scheduling, setScheduling] = useState<TwoWayInterviewSet | null>(null)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -46,26 +52,41 @@ export function TwoWayInterviewSetsPage() {
     })
   }
 
-  function handleAction(actionId: string, set: TwoWayInterviewSet) {
+  function goEdit(set: TwoWayInterviewSet) {
+    navigate(`/e2e-interviews/two-way/interview-sets/${set.id}/edit`)
+  }
+
+  function goScheduled(set: TwoWayInterviewSet) {
+    navigate(
+      `/e2e-interviews/two-way/scheduled?job=${encodeURIComponent(set.jobTitle)}`,
+    )
+  }
+
+  function closeViewing(next: (set: TwoWayInterviewSet) => void) {
+    if (!viewing) return
+    const target = viewing
+    setViewing(null)
+    next(target)
+  }
+
+  function handleAction(actionId: SetActionId, set: TwoWayInterviewSet) {
     switch (actionId) {
       case 'open':
-        toast.success(`Opening the interview set for “${set.jobTitle}”.`, {
-          title: 'Open interview set',
-        })
+        setViewing(set)
         return
       case 'edit':
-        toast.success(`Configuring “${set.jobTitle}” will open here.`, {
-          title: 'Edit Interview Set',
-        })
+        goEdit(set)
         return
       case 'schedule':
-        toast.success(`Scheduling for “${set.jobTitle}” will open here.`, {
-          title: 'Schedule Interviews',
-        })
+        setScheduling(set)
         return
       case 'toggleActive':
         setActive(set, !set.active)
         return
+      default: {
+        const _exhaustive: never = actionId
+        return _exhaustive
+      }
     }
   }
 
@@ -118,7 +139,8 @@ export function TwoWayInterviewSetsPage() {
           <InterviewSetCard
             key={set.id}
             set={set}
-            onAction={(id) => handleAction(id, set)}
+            onOpen={() => setViewing(set)}
+            onAction={(id) => handleAction(id as SetActionId, set)}
           />
         ))}
 
@@ -133,18 +155,36 @@ export function TwoWayInterviewSetsPage() {
           </div>
         ) : null}
       </div>
+
+      <ViewInterviewSetPanel
+        open={viewing !== null}
+        set={viewing}
+        onClose={() => setViewing(null)}
+        onEdit={() => closeViewing(goEdit)}
+        onSchedule={() => closeViewing(setScheduling)}
+        onViewScheduled={() => closeViewing(goScheduled)}
+      />
+
+      <ScheduleInterviewsPanel
+        open={scheduling !== null}
+        set={scheduling}
+        onClose={() => setScheduling(null)}
+      />
     </PageContainer>
   )
 }
 
 function InterviewSetCard({
   set,
+  onOpen,
   onAction,
 }: {
   set: TwoWayInterviewSet
+  onOpen: () => void
   onAction: (id: string) => void
 }) {
   const statusMeta = SETUP_STATUS_META[set.setupStatus]
+  const aiBadge = aiRoundsBadgeLabel(set.aiRounds)
   const menuItems: ThreeDotsMenuItem[] = [
     {
       id: 'open',
@@ -172,7 +212,13 @@ function InterviewSetCard({
     <article className="rounded-xl border border-line bg-surface p-4 shadow-[0_1px_2px_rgba(45,32,97,0.04)] sm:px-5 sm:py-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <h3 className="text-sm font-bold text-[#2D2061] sm:text-base">{set.jobTitle}</h3>
+          <button
+            type="button"
+            onClick={onOpen}
+            className="text-left text-sm font-bold text-[#2D2061] transition-colors hover:text-[#241a52] sm:text-base"
+          >
+            {set.jobTitle}
+          </button>
           <span
             className={cn(
               'inline-flex h-6 items-center rounded-full px-2.5 text-[11px] font-semibold uppercase',
@@ -181,9 +227,9 @@ function InterviewSetCard({
           >
             {statusMeta.label}
           </span>
-          {set.aiRounds > 0 ? (
+          {aiBadge ? (
             <span className="inline-flex h-6 items-center rounded-full bg-[#FDE7EF] px-2.5 text-[11px] font-semibold text-[#C2185B]">
-              Two-way on {set.aiRounds} {set.aiRounds === 1 ? 'round' : 'rounds'}
+              {aiBadge}
             </span>
           ) : null}
           <span className="text-xs text-[#8B8B9E]">

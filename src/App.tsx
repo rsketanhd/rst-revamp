@@ -102,6 +102,10 @@ export default function App() {
               path="/e2e-interviews/two-way/interview-sets/new"
               element={<ConfigureInterviewSetPage />}
             />
+            <Route
+              path="/e2e-interviews/two-way/interview-sets/:setId/edit"
+              element={<ConfigureInterviewSetPage />}
+            />
             <Route path="/e2e-interviews/two-way/scheduled" element={<ScheduledInterviewsPage />} />
             <Route path="/e2e-interviews/two-way/interviews" element={<TwoWayInterviewsPage />} />
             <Route

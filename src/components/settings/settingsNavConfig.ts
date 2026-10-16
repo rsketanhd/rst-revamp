@@ -1,10 +1,27 @@
 export type SettingsSectionId =
   | 'jobs'
+  | 'jobs-general'
   | 'jobs-pipeline'
+  | 'jobs-job-categories'
+  | 'jobs-industries'
+  | 'jobs-career-page'
   | 'jobs-field-customization'
   | 'candidates'
+  | 'candidates-general'
   | 'candidates-documents'
   | 'candidates-masking'
+  | 'candidate-discovery'
+  | 'candidate-discovery-general'
+  | 'offer-management'
+  | 'offer-management-stages-status'
+  | 'offer-management-pipeline-sync'
+  | 'offer-management-reasons'
+  | 'offer-management-approval-rules'
+  | 'offer-management-templates-emails'
+  | 'offer-management-team-notifications'
+  | 'offer-management-entities-compensation'
+  | 'offer-management-lifecycle-signing'
+  | 'offer-management-audit-log'
   | 'pipeline'
   | 'talent-crm'
   | 'talent-crm-usage-limits'
@@ -19,6 +36,12 @@ export type SettingsSectionId =
   | 'one-way-interview-default'
   | 'one-way-interview-avatar'
   | 'two-way-interview'
+  | 'two-way-interview-configuration'
+  | 'two-way-interview-rounds'
+  | 'two-way-interview-plan-summary'
+  | 'two-way-interview-notifications'
+  | 'two-way-interview-connections'
+  | 'two-way-interview-change-history'
   | 'recruiter-profile'
   | 'company-branding'
   | 'notification-config'
@@ -54,14 +77,47 @@ export const ONE_WAY_INTERVIEW_NAV_CHILDREN: SettingsNavItem[] = [
   { id: 'one-way-interview-avatar', label: 'Avatar Settings' },
 ]
 
+export const TWO_WAY_INTERVIEW_NAV_CHILDREN: SettingsNavItem[] = [
+  { id: 'two-way-interview-configuration', label: 'Configuration' },
+  { id: 'two-way-interview-rounds', label: 'Rounds' },
+  { id: 'two-way-interview-plan-summary', label: 'Interview Plan & Summary' },
+  { id: 'two-way-interview-notifications', label: 'Notifications' },
+  { id: 'two-way-interview-connections', label: 'Two Way Connections' },
+  { id: 'two-way-interview-change-history', label: 'Change History' },
+]
+
 export const JOBS_NAV_CHILDREN: SettingsNavItem[] = [
+  { id: 'jobs-general', label: 'General' },
   { id: 'jobs-pipeline', label: 'Pipeline' },
+  { id: 'jobs-job-categories', label: 'Categories' },
+  { id: 'jobs-industries', label: 'Industries' },
+  { id: 'jobs-career-page', label: 'Career Page' },
   { id: 'jobs-field-customization', label: 'Field Customization' },
 ]
 
 export const CANDIDATES_NAV_CHILDREN: SettingsNavItem[] = [
+  { id: 'candidates-general', label: 'General' },
   { id: 'candidates-documents', label: 'Documents' },
   { id: 'candidates-masking', label: 'Masking' },
+]
+
+export const CANDIDATE_DISCOVERY_NAV_CHILDREN: SettingsNavItem[] = [
+  { id: 'candidate-discovery-general', label: 'General' },
+]
+
+export const OFFER_MANAGEMENT_NAV_CHILDREN: SettingsNavItem[] = [
+  { id: 'offer-management-stages-status', label: 'Stages & Status' },
+  { id: 'offer-management-pipeline-sync', label: 'Pipeline Sync' },
+  { id: 'offer-management-reasons', label: 'Reasons' },
+  { id: 'offer-management-approval-rules', label: 'Approval Rules' },
+  { id: 'offer-management-templates-emails', label: 'Templates & Emails' },
+  { id: 'offer-management-team-notifications', label: 'Team Notifications' },
+  {
+    id: 'offer-management-entities-compensation',
+    label: 'Entities & Compensation',
+  },
+  { id: 'offer-management-lifecycle-signing', label: 'Lifecycle & Signing' },
+  { id: 'offer-management-audit-log', label: 'Audit Log' },
 ]
 
 export const TALENT_CRM_NAV_CHILDREN: SettingsNavItem[] = [
@@ -87,6 +143,16 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
         label: 'Candidates',
         children: CANDIDATES_NAV_CHILDREN,
       },
+      {
+        id: 'candidate-discovery',
+        label: 'Candidate Discovery',
+        children: CANDIDATE_DISCOVERY_NAV_CHILDREN,
+      },
+      {
+        id: 'offer-management',
+        label: 'Offer Management',
+        children: OFFER_MANAGEMENT_NAV_CHILDREN,
+      },
       { id: 'pipeline', label: 'Pipeline' },
       {
         id: 'talent-crm',
@@ -101,7 +167,11 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
         label: '1 Way Interview',
         children: ONE_WAY_INTERVIEW_NAV_CHILDREN,
       },
-      { id: 'two-way-interview', label: '2 Way Interview' },
+      {
+        id: 'two-way-interview',
+        label: '2 Way Interview',
+        children: TWO_WAY_INTERVIEW_NAV_CHILDREN,
+      },
     ],
   },
   {
@@ -144,11 +214,19 @@ export const DEFAULT_CANDIDATE_SETTINGS_SECTION: SettingsSectionId =
   'account-settings'
 
 /** Default landing page when opening Jobs parent. */
-export const DEFAULT_JOBS_SECTION: SettingsSectionId = 'jobs-pipeline'
+export const DEFAULT_JOBS_SECTION: SettingsSectionId = 'jobs-general'
 
 /** Default landing page when opening Candidates parent. */
 export const DEFAULT_CANDIDATES_SECTION: SettingsSectionId =
-  'candidates-documents'
+  'candidates-general'
+
+/** Default landing page when opening Candidate Discovery parent. */
+export const DEFAULT_CANDIDATE_DISCOVERY_SECTION: SettingsSectionId =
+  'candidate-discovery-general'
+
+/** Default landing page when opening Offer Management parent. */
+export const DEFAULT_OFFER_MANAGEMENT_SECTION: SettingsSectionId =
+  'offer-management-stages-status'
 
 /** Default landing page when opening Talent CRM parent. */
 export const DEFAULT_TALENT_CRM_SECTION: SettingsSectionId =
@@ -157,6 +235,10 @@ export const DEFAULT_TALENT_CRM_SECTION: SettingsSectionId =
 /** Default landing page when opening 1 Way Interview parent. */
 export const DEFAULT_ONE_WAY_INTERVIEW_SECTION: SettingsSectionId =
   'one-way-interview-default'
+
+/** Default landing page when opening 2 Way Interview parent. */
+export const DEFAULT_TWO_WAY_INTERVIEW_SECTION: SettingsSectionId =
+  'two-way-interview-configuration'
 
 export const CANDIDATE_SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
   {
@@ -241,7 +323,9 @@ export function isSettingsSectionId(value: string): value is SettingsSectionId {
 
 export function getSettingsSectionLabel(id: SettingsSectionId): string {
   if (id === 'talent-crm') return 'Talent CRM'
+  if (id === 'offer-management') return 'Offer Management'
   if (id === 'one-way-interview') return '1 Way Interview'
+  if (id === 'two-way-interview') return '2 Way Interview'
   for (const item of flattenSettingsNavItems(CANDIDATE_SETTINGS_NAV_GROUPS)) {
     if (item.id === id) return item.label
   }
@@ -257,7 +341,10 @@ export function resolveSettingsSectionId(
 ): SettingsSectionId {
   if (sectionId === 'jobs') return DEFAULT_JOBS_SECTION
   if (sectionId === 'candidates') return DEFAULT_CANDIDATES_SECTION
+  if (sectionId === 'candidate-discovery') return DEFAULT_CANDIDATE_DISCOVERY_SECTION
+  if (sectionId === 'offer-management') return DEFAULT_OFFER_MANAGEMENT_SECTION
   if (sectionId === 'talent-crm') return DEFAULT_TALENT_CRM_SECTION
   if (sectionId === 'one-way-interview') return DEFAULT_ONE_WAY_INTERVIEW_SECTION
+  if (sectionId === 'two-way-interview') return DEFAULT_TWO_WAY_INTERVIEW_SECTION
   return sectionId
 }

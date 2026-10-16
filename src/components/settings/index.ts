@@ -4,6 +4,17 @@ export { SettingsPanel, SettingsBlock } from './SettingsPanel'
 export type { SettingsPanelProps, SettingsBlockProps } from './SettingsPanel'
 export { JobsModulePanel } from './JobsModulePanel'
 export { JobsPipelinePanel } from './JobsPipelinePanel'
+export { JobsGeneralPanel } from './JobsGeneralPanel'
+export { JobsJobCategoriesPanel } from './JobsJobCategoriesPanel'
+export { JobsIndustriesPanel } from './JobsIndustriesPanel'
+export { JobsCareerPagePanel } from './JobsCareerPagePanel'
+export { CandidatesGeneralPanel } from './CandidatesGeneralPanel'
+export { CandidateDiscoveryGeneralPanel } from './CandidateDiscoveryGeneralPanel'
+export { JobCategoryFormPanel } from './JobCategoryFormPanel'
+export type {
+  JobCategoryFormPanelProps,
+  JobCategoryFormValues,
+} from './JobCategoryFormPanel'
 export { CampaignSettingsPanel } from './CampaignSettingsPanel'
 export { AddSmsPhonePanel } from './AddSmsPhonePanel'
 export type {
@@ -56,6 +67,15 @@ export { ClientModuleConfigPanel } from './ClientModuleConfigPanel'
 export { SettingsPlaceholderPanel } from './SettingsPlaceholderPanel'
 export { OneWayDefaultSettingsPanel } from './OneWayDefaultSettingsPanel'
 export { OneWayAvatarSettingsPanel } from './OneWayAvatarSettingsPanel'
+export { TwoWayConfigurationPanel } from './TwoWayConfigurationPanel'
+export { TwoWayRoundsPanel } from './TwoWayRoundsPanel'
+export { TwoWayPlanSummaryPanel } from './TwoWayPlanSummaryPanel'
+export {
+  ViewEditRoundPanel,
+  BLANK_VIEW_EDIT_ROUND_VALUES,
+  DEFAULT_VIEW_EDIT_ROUND_VALUES,
+} from './ViewEditRoundPanel'
+export type { ViewEditRoundValues, ViewEditRoundPanelProps } from './ViewEditRoundPanel'
 export {
   SETTINGS_NAV_GROUPS,
   CANDIDATE_SETTINGS_NAV_GROUPS,
@@ -63,9 +83,13 @@ export {
   DEFAULT_SETTINGS_SECTION,
   DEFAULT_CANDIDATE_SETTINGS_SECTION,
   DEFAULT_CANDIDATES_SECTION,
+  DEFAULT_CANDIDATE_DISCOVERY_SECTION,
+  DEFAULT_OFFER_MANAGEMENT_SECTION,
   DEFAULT_JOBS_SECTION,
   DEFAULT_TALENT_CRM_SECTION,
   DEFAULT_ONE_WAY_INTERVIEW_SECTION,
+  DEFAULT_TWO_WAY_INTERVIEW_SECTION,
+  TWO_WAY_INTERVIEW_NAV_CHILDREN,
   isSettingsSectionId,
   isSettingsSectionIdForRole,
   getDefaultSettingsSectionForRole,

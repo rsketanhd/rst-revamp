@@ -415,7 +415,7 @@ function ItemListCard({
   }
 
   return (
-    <section className="rounded-xl border border-[#E4E1EE] bg-white p-5 sm:p-6">
+    <section className="rounded-[8px] border border-[#E4E1EE] bg-white p-5 sm:p-6">
       <h3 className="text-base font-semibold text-[#1A1A2E]">{title}</h3>
       <p className="mt-0.5 text-[13px] text-[#6B6B80]">{description}</p>
 
@@ -565,7 +565,7 @@ function StageMovesCard({
   }
 
   return (
-    <section className="rounded-xl border border-[#E4E1EE] bg-white p-5 sm:p-6">
+    <section className="rounded-[8px] border border-[#E4E1EE] bg-white p-5 sm:p-6">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="text-base font-semibold text-[#1A1A2E]">Stage moves</h3>
@@ -711,7 +711,7 @@ function StatusesPerStageCard({
   onReset: (stageId: string) => void
 }) {
   return (
-    <section className="rounded-xl border border-[#E4E1EE] bg-white p-5 sm:p-6">
+    <section className="rounded-[8px] border border-[#E4E1EE] bg-white p-5 sm:p-6">
       <h3 className="text-base font-semibold text-[#1A1A2E]">Statuses per stage</h3>
       <p className="mt-0.5 mb-5 text-[13px] text-[#6B6B80]">
         Green: the status can be used in that stage. Click to hide it there.
@@ -795,7 +795,7 @@ function StatusMovesCard({
   onReset: (fromId: string) => void
 }) {
   return (
-    <section className="rounded-xl border border-[#E4E1EE] bg-white p-5 sm:p-6">
+    <section className="rounded-[8px] border border-[#E4E1EE] bg-white p-5 sm:p-6">
       <h3 className="text-base font-semibold text-[#1A1A2E]">Status moves</h3>
       <p className="mt-0.5 mb-5 text-[13px] text-[#6B6B80]">
         Read across. A candidate with the row status can change to the green
@@ -915,7 +915,7 @@ function RecruiterDropdownPreview({ workflow }: { workflow: Workflow }) {
   }
 
   return (
-    <section className="rounded-xl border border-[#E4E1EE] bg-white p-5 shadow-[0_2px_8px_rgba(45,32,97,0.06)] sm:p-6">
+    <section className="rounded-[8px] border border-[#E4E1EE] bg-white p-5 shadow-[0_2px_8px_rgba(45,32,97,0.06)] sm:p-6">
       <h3 className="text-base font-semibold text-[#1A1A2E]">Recruiter dropdown</h3>
       <p className="mt-1 text-[13px] leading-relaxed text-[#6B6B80]">
         One list sets stage and status together. Try it: it only shows the moves

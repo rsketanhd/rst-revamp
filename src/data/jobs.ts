@@ -228,7 +228,7 @@ function metricTotal(jobs: JobListing[], label: string): number {
   }, 0)
 }
 
-/** KPI cards — based on jobs in the current My/All scope (not the status list filter). */
+/** KPI totals for a job list (Jobs matrix uses all jobs + my-jobs subset). */
 export function computeJobStats(jobs: JobListing[]): JobStats {
   return {
     activeJobs: jobs.filter((job) => job.status === 'active').length,
@@ -241,9 +241,8 @@ export function computeJobStats(jobs: JobListing[]): JobStats {
 export type JobListFilters = {
   status: JobStatusFilter
   scope: 'my' | 'all'
-  recruiterQuery: string
-  postedOn: string
-  updatedOn: string
+  /** Free-text search across title, req id, recruiter, location, client */
+  searchQuery: string
   jobReqIds: string[]
   jobTitles: string[]
   leadRecruiters: string[]
@@ -268,18 +267,29 @@ export function filterJobs(
   jobs: JobListing[],
   filters: JobListFilters,
 ): JobListing[] {
-  const recruiterQ = filters.recruiterQuery.trim().toLowerCase()
+  const searchQ = filters.searchQuery.trim().toLowerCase()
 
   return jobs.filter((job) => {
     if (filters.status !== 'all' && job.status !== filters.status) return false
     if (filters.scope === 'my' && !job.isMine) return false
-    if (recruiterQ && !job.recruiter.toLowerCase().includes(recruiterQ)) {
+    if (
+      searchQ &&
+      ![
+        job.title,
+        job.code,
+        job.recruiter,
+        job.location,
+        job.client,
+        job.department,
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(searchQ)
+    ) {
       return false
     }
 
     return (
-      matchesOptional(filters.postedOn, job.createdAt) &&
-      matchesOptional(filters.updatedOn, job.updatedAt) &&
       matchesSelected(filters.jobReqIds, job.code) &&
       matchesSelected(filters.jobTitles, job.title) &&
       matchesSelected(filters.leadRecruiters, job.recruiter) &&

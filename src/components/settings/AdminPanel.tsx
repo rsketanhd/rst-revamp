@@ -472,7 +472,7 @@ export function AdminPanel() {
             {disabledModules.map((module) => (
               <li
                 key={module.id}
-                className="flex flex-wrap items-center gap-3 rounded-xl border border-dashed border-[#E0DDEA] bg-white px-4 py-4 sm:flex-nowrap sm:gap-4 sm:px-5"
+                className="flex flex-wrap items-center gap-3 rounded-[8px] border border-dashed border-[#E0DDEA] bg-white px-4 py-4 sm:flex-nowrap sm:gap-4 sm:px-5"
               >
                 <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#2D2061]/45 text-white">
                   {module.icon}
@@ -539,7 +539,7 @@ function ModuleCard({
   const showSubFeatures = module.enabled && isExpanded && hasSubFeatures
 
   return (
-    <li className="overflow-hidden rounded-xl border border-[#E8E6F0] bg-white shadow-[0_1px_3px_rgba(45,32,97,0.04)]">
+    <li className="overflow-hidden rounded-[8px] border border-[#E8E6F0] bg-white shadow-[0_1px_3px_rgba(45,32,97,0.04)]">
       {/* Main feature header — pure white */}
       <div className="flex flex-wrap items-center gap-3 bg-white px-4 py-4 sm:flex-nowrap sm:gap-4 sm:px-5">
         <button
@@ -686,7 +686,7 @@ function RsPlusUpgradePlanSection() {
   }
 
   return (
-    <div className="mt-5 rounded-xl border border-[#E8E6F0] bg-white p-4 shadow-[0_1px_2px_rgba(45,32,97,0.03)] sm:p-5">
+    <div className="mt-5 rounded-[8px] border border-[#E8E6F0] bg-white p-4 shadow-[0_1px_2px_rgba(45,32,97,0.03)] sm:p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="inline-flex items-center gap-1.5">
           <h4 className="text-sm font-bold text-[#2D2061]">Upgrade Plan</h4>

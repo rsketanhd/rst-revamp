@@ -12,7 +12,7 @@ export function OneWaySettingsShell({
   children: ReactNode
 }) {
   return (
-    <section className="rounded-xl border border-[#E4E1EE] bg-white p-5 sm:p-6">
+    <section className="rounded-[8px] border border-[#E4E1EE] bg-white p-5 sm:p-6">
       <header className="mb-5 border-b border-[#ECEAF3] pb-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9A98A8]">
           1 Way Interview
@@ -41,7 +41,7 @@ export function OneWayCard({
   className?: string
 }) {
   return (
-    <div className={cn('rounded-xl bg-[#F7F8FB] px-4 py-4 sm:px-5', className)}>
+    <div className={cn('rounded-[8px] bg-[#F7F8FB] px-4 py-4 sm:px-5', className)}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-bold text-[#1A1A2E]">{title}</h3>

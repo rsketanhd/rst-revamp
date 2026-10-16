@@ -18,7 +18,17 @@ export function SettingsPlaceholderPanel({
           ? 'Talent CRM'
           : sectionId.startsWith('candidates-')
             ? 'Candidates'
-            : undefined
+            : sectionId.startsWith('candidate-discovery')
+              ? 'Candidate Discovery'
+              : sectionId.startsWith('offer-management')
+                ? 'Offer Management'
+                : sectionId.startsWith('jobs-')
+                  ? 'Jobs'
+                  : sectionId.startsWith('two-way-interview')
+                    ? '2 Way Interview'
+                    : sectionId.startsWith('one-way-interview')
+                      ? '1 Way Interview'
+                      : undefined
       }
       title={title}
       description="This settings module is ready for content. Configuration will appear here."

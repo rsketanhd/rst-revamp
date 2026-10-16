@@ -147,7 +147,7 @@ export function ClientModuleConfigPanel({
     >
       <div className="flex flex-col gap-4">
         {/* Module configuration card */}
-        <section className="rounded-xl border border-[#E4E1EE] bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-[8px] border border-[#E4E1EE] bg-white p-4 shadow-sm sm:p-5">
           <h3 className="mb-4 text-sm font-bold text-[#2A2740]">
             Client Module Configuration
           </h3>
@@ -227,7 +227,7 @@ export function ClientModuleConfigPanel({
         </section>
 
         {/* Form fields configuration card */}
-        <section className="rounded-xl border border-[#E4E1EE] bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-[8px] border border-[#E4E1EE] bg-white p-4 shadow-sm sm:p-5">
           <h3 className="mb-1 inline-flex items-center gap-1.5 text-sm font-bold text-[#2A2740]">
             Submission Form Fields Configuration
             <HelpCircle

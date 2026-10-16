@@ -5,7 +5,9 @@ export type SettingsPanelProps = {
   /** Small uppercase parent label above the title (e.g. "Talent CRM"). */
   eyebrow?: string
   title: string
-  description?: string
+  /** Optional chip/badge rendered beside the title (e.g. hosted status). */
+  titleAside?: ReactNode
+  description?: ReactNode
   /** Optional header trailing actions (e.g. Import / Invite buttons). */
   actions?: ReactNode
   children: ReactNode
@@ -18,6 +20,7 @@ export type SettingsPanelProps = {
 export function SettingsPanel({
   eyebrow,
   title,
+  titleAside,
   description,
   actions,
   children,
@@ -26,7 +29,7 @@ export function SettingsPanel({
   return (
     <section
       className={cn(
-        'rounded-xl border border-[#E4E1EE] bg-white p-5 sm:p-6',
+        'rounded-[8px] border border-[#E4E1EE] bg-white p-5 sm:p-6',
         className,
       )}
     >
@@ -37,7 +40,10 @@ export function SettingsPanel({
               {eyebrow}
             </p>
           ) : null}
-          <h2 className="text-lg font-bold text-[#2D2061]">{title}</h2>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h2 className="text-lg font-bold text-[#2D2061]">{title}</h2>
+            {titleAside}
+          </div>
           {description ? (
             <p className="mt-1 text-sm leading-relaxed text-[#8B8B9E]">
               {description}
@@ -57,7 +63,7 @@ export function SettingsPanel({
 
 export type SettingsBlockProps = {
   title: string
-  description?: string
+  description?: ReactNode
   trailing?: ReactNode
   children: ReactNode
   footer?: ReactNode
@@ -79,7 +85,7 @@ export function SettingsBlock({
   return (
     <div
       className={cn(
-        'rounded-xl bg-[#F8F9FB] p-5 sm:p-6',
+        'rounded-[8px] bg-[#F8F9FB] p-5 sm:p-6',
         className,
       )}
     >

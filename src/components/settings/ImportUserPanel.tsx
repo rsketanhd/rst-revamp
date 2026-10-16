@@ -198,7 +198,7 @@ export function ImportUserPanel({ open, onClose }: ImportUserPanelProps) {
               pickFile(e.dataTransfer.files?.[0])
             }}
             className={cn(
-              'flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed px-5 py-10 text-center transition-colors',
+              'flex cursor-pointer flex-col items-center justify-center rounded-[8px] border border-dashed px-5 py-10 text-center transition-colors',
               dragging
                 ? 'border-[#2D2061] bg-[#F4F2FA]'
                 : 'border-[#C8C5D6] bg-[#FAFAFC] hover:border-[#2D2061]/50 hover:bg-[#F7F6FA]',
