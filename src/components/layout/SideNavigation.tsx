@@ -276,7 +276,7 @@ export function SideNavigation({
   return (
     <aside
       className={cn(
-        'relative flex h-full shrink-0 flex-col border-r border-line bg-[#f0f0f4]',
+        'relative z-40 flex h-full shrink-0 flex-col border-r border-line bg-[#f0f0f4]',
         'transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
         collapsed ? 'w-[4.75rem]' : 'w-[17.5rem]',
         className,
@@ -306,7 +306,7 @@ export function SideNavigation({
           onClick={() => setCollapsed(!collapsed)}
           aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
           className={cn(
-            'absolute top-1/2 right-0 z-20 flex size-7 -translate-y-1/2 translate-x-1/2',
+            'absolute top-1/2 right-0 z-50 flex size-7 -translate-y-1/2 translate-x-1/2',
             'items-center justify-center rounded-full',
             'border border-line bg-surface text-brand-800 shadow-sm',
             'transition-all duration-300 hover:bg-surface-soft',

@@ -14,6 +14,8 @@ import { DashboardPage } from './pages/DashboardPage'
 import { JobApplicationsPage } from './pages/JobApplicationsPage'
 import { JobsPage } from './pages/JobsPage'
 import { JeevesAiPage } from './pages/JeevesAiPage'
+import { KnowledgebaseArticlePage } from './pages/KnowledgebaseArticlePage'
+import { KnowledgebasePage } from './pages/KnowledgebasePage'
 import { LoginPage } from './pages/LoginPage'
 import { ModulePage } from './pages/ModulePage'
 import { MyApplicationsPage } from './pages/MyApplicationsPage'
@@ -49,6 +51,11 @@ export default function App() {
             }
           >
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/knowledgebase" element={<KnowledgebasePage />} />
+            <Route
+              path="/knowledgebase/:articleId"
+              element={<KnowledgebaseArticlePage />}
+            />
             <Route path="/my-applications" element={<MyApplicationsPage />} />
             <Route path="/my-documents" element={<MyDocumentsPage />} />
             <Route path="/my-jobs" element={<MyJobsPage />} />

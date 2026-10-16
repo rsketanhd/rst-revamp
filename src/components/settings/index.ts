@@ -10,6 +10,7 @@ export { JobsIndustriesPanel } from './JobsIndustriesPanel'
 export { JobsCareerPagePanel } from './JobsCareerPagePanel'
 export { CandidatesGeneralPanel } from './CandidatesGeneralPanel'
 export { CandidateDiscoveryGeneralPanel } from './CandidateDiscoveryGeneralPanel'
+export { OfferManagementPanel } from './OfferManagementPanel'
 export { JobCategoryFormPanel } from './JobCategoryFormPanel'
 export type {
   JobCategoryFormPanelProps,
@@ -63,10 +64,14 @@ export { MaskingSettingsPanel } from './MaskingSettingsPanel'
 export { LicenseLimitsPanel } from './LicenseLimitsPanel'
 export { TalentCrmConfigPanel } from './TalentCrmConfigPanel'
 export { JeevesAiConfigPanel } from './JeevesAiConfigPanel'
+export { JeevesAiGeneralPanel } from './JeevesAiGeneralPanel'
+export { JeevesAiQuestionSetsPanel } from './JeevesAiQuestionSetsPanel'
 export { ClientModuleConfigPanel } from './ClientModuleConfigPanel'
 export { SettingsPlaceholderPanel } from './SettingsPlaceholderPanel'
 export { OneWayDefaultSettingsPanel } from './OneWayDefaultSettingsPanel'
 export { OneWayAvatarSettingsPanel } from './OneWayAvatarSettingsPanel'
+export { OneWayPipelineSyncPanel } from './OneWayPipelineSyncPanel'
+export { OneWayCompetencyPanel } from './OneWayCompetencyPanel'
 export { TwoWayConfigurationPanel } from './TwoWayConfigurationPanel'
 export { TwoWayRoundsPanel } from './TwoWayRoundsPanel'
 export { TwoWayPlanSummaryPanel } from './TwoWayPlanSummaryPanel'
@@ -87,6 +92,8 @@ export {
   DEFAULT_OFFER_MANAGEMENT_SECTION,
   DEFAULT_JOBS_SECTION,
   DEFAULT_TALENT_CRM_SECTION,
+  DEFAULT_JEEVES_AI_SECTION,
+  DEFAULT_COMMUNICATION_HUB_SECTION,
   DEFAULT_ONE_WAY_INTERVIEW_SECTION,
   DEFAULT_TWO_WAY_INTERVIEW_SECTION,
   TWO_WAY_INTERVIEW_NAV_CHILDREN,

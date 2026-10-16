@@ -14,6 +14,8 @@ import {
   DEFAULT_CANDIDATE_DISCOVERY_SECTION,
   DEFAULT_OFFER_MANAGEMENT_SECTION,
   DEFAULT_JOBS_SECTION,
+  DEFAULT_JEEVES_AI_SECTION,
+  DEFAULT_COMMUNICATION_HUB_SECTION,
   DEFAULT_ONE_WAY_INTERVIEW_SECTION,
   DEFAULT_TWO_WAY_INTERVIEW_SECTION,
   DEFAULT_TALENT_CRM_SECTION,
@@ -28,15 +30,20 @@ import {
   JobsJobCategoriesPanel,
   JobsModulePanel,
   JobsPipelinePanel,
+  JeevesAiGeneralPanel,
+  JeevesAiQuestionSetsPanel,
   LicenseLimitsPanel,
   MaskingSettingsPanel,
   OneWayAvatarSettingsPanel,
+  OneWayCompetencyPanel,
   OneWayDefaultSettingsPanel,
+  OneWayPipelineSyncPanel,
   TwoWayConfigurationPanel,
   TwoWayRoundsPanel,
   TwoWayPlanSummaryPanel,
   NotificationConfigPanel,
   NotificationPreferencesPanel,
+  OfferManagementPanel,
   RecruiterProfilePanel,
   resolveSettingsSectionId,
   RoleManagementPanel,
@@ -91,6 +98,19 @@ export function SettingsPage() {
   if (role === 'recruiter' && activeSectionId === 'talent-crm') {
     return (
       <Navigate to={`/settings/${DEFAULT_TALENT_CRM_SECTION}`} replace />
+    )
+  }
+
+  if (role === 'recruiter' && activeSectionId === 'jeeves-ai') {
+    return <Navigate to={`/settings/${DEFAULT_JEEVES_AI_SECTION}`} replace />
+  }
+
+  if (role === 'recruiter' && activeSectionId === 'communication-hub') {
+    return (
+      <Navigate
+        to={`/settings/${DEFAULT_COMMUNICATION_HUB_SECTION}`}
+        replace
+      />
     )
   }
 
@@ -205,15 +225,7 @@ function SettingsSectionContent({
     case 'offer-management-entities-compensation':
     case 'offer-management-lifecycle-signing':
     case 'offer-management-audit-log':
-      return (
-        <SettingsPlaceholderPanel
-          sectionId={
-            sectionId === 'offer-management'
-              ? 'offer-management-stages-status'
-              : sectionId
-          }
-        />
-      )
+      return <OfferManagementPanel sectionId={sectionId} />
 
     case 'talent-crm':
     case 'talent-crm-talent-pool':
@@ -231,6 +243,12 @@ function SettingsSectionContent({
 
     case 'one-way-interview-avatar':
       return <OneWayAvatarSettingsPanel />
+
+    case 'one-way-interview-pipeline-sync':
+      return <OneWayPipelineSyncPanel />
+
+    case 'one-way-interview-competency':
+      return <OneWayCompetencyPanel />
 
     case 'talent-crm-usage-limits':
     case 'talent-crm-candidate':
@@ -251,6 +269,22 @@ function SettingsSectionContent({
     case 'two-way-interview-notifications':
     case 'two-way-interview-connections':
     case 'two-way-interview-change-history':
+    case 'jeeves-ai':
+    case 'jeeves-ai-general':
+      return <JeevesAiGeneralPanel />
+
+    case 'jeeves-ai-question-sets':
+      return <JeevesAiQuestionSetsPanel />
+
+    case 'jeeves-ai-triggers':
+    case 'jeeves-ai-change-history':
+    case 'communication-hub':
+    case 'communication-hub-assignment-handover':
+    case 'communication-hub-unassigned-chats':
+    case 'communication-hub-topic-status':
+    case 'communication-hub-notes-priority':
+    case 'communication-hub-document-requests':
+    case 'communication-hub-retention-export':
     case 'candidate-privacy':
     case 'data-retention':
     case 'audit-activity':

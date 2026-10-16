@@ -18,7 +18,7 @@ export function OneWaySettingsShell({
           1 Way Interview
         </p>
         <h2 className="mt-1 text-lg font-bold text-[#1A1A2E]">{title}</h2>
-        <p className="mt-1 max-w-3xl text-sm leading-relaxed text-[#8B8B9E]">
+        <p className="mt-1 whitespace-nowrap text-sm text-[#8B8B9E]">
           {description}
         </p>
       </header>

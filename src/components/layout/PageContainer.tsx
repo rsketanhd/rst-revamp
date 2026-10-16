@@ -33,14 +33,14 @@ export function PageContainer({
   return (
     <div
       className={cn(
-        'flex h-full min-h-0 w-full min-w-0 flex-col overflow-x-hidden overflow-y-auto bg-white',
+        'flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden bg-white',
         className,
       )}
     >
       {showTopBar ? <AppTopBar /> : null}
       <div
         className={cn(
-          'flex min-w-0 flex-1 flex-col bg-white p-4 sm:p-6 lg:p-8',
+          'flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-white p-4 sm:p-6 lg:p-8',
           contentClassName,
         )}
       >

@@ -1,12 +1,13 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, RefreshCw } from 'lucide-react'
+import { Bell, BookOpen, RefreshCw } from 'lucide-react'
 import {
   getMyProfile,
   getProfileDesignation,
   getProfileDisplayName,
   getProfileInitials,
 } from '../../data/myProfile'
+import { hasUnseenKnowledgeRelease } from '../../data/releaseNotes'
 import { cn } from '../../lib/cn'
 import {
   DEFAULT_NOTIFICATIONS,
@@ -158,7 +159,7 @@ export function AppTopBar({
   return (
     <div
       className={cn(
-        'flex h-shell-header shrink-0 items-center justify-between gap-2 border-b border-[#ececf1] bg-[#F5F5F5] px-3 sm:gap-3 sm:px-5 lg:px-8',
+        'sticky top-0 z-30 flex h-shell-header shrink-0 items-center justify-between gap-2 border-b border-[#ececf1] bg-[#F5F5F5] px-3 sm:gap-3 sm:px-5 lg:px-8',
         className,
       )}
     >
@@ -184,6 +185,26 @@ export function AppTopBar({
       </button>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+        <button
+          type="button"
+          onClick={() => navigate('/knowledgebase')}
+          aria-label="Knowledgebase"
+          className="relative inline-flex h-8 items-center gap-1.5 rounded-full border border-[#D5D2E2] bg-white px-2.5 text-xs font-semibold text-[#2D2061] shadow-sm transition-colors hover:border-[#2D2061] hover:bg-[#F5F5F8] sm:px-3 sm:text-sm"
+        >
+          <BookOpen
+            className="size-4 shrink-0"
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
+          <span className="hidden sm:inline">Knowledgebase</span>
+          {hasUnseenKnowledgeRelease() ? (
+            <span
+              className="absolute right-1 top-1 size-1.5 rounded-full bg-[#E91E8C] ring-2 ring-white sm:right-1.5 sm:top-1"
+              aria-hidden="true"
+            />
+          ) : null}
+        </button>
+
         <button
           ref={bellRef}
           type="button"

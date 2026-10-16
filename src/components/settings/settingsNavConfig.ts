@@ -32,9 +32,23 @@ export type SettingsSectionId =
   | 'campaigns'
   | 'reports'
   | 'client-management'
+  | 'jeeves-ai'
+  | 'jeeves-ai-general'
+  | 'jeeves-ai-question-sets'
+  | 'jeeves-ai-triggers'
+  | 'jeeves-ai-change-history'
+  | 'communication-hub'
+  | 'communication-hub-assignment-handover'
+  | 'communication-hub-unassigned-chats'
+  | 'communication-hub-topic-status'
+  | 'communication-hub-notes-priority'
+  | 'communication-hub-document-requests'
+  | 'communication-hub-retention-export'
   | 'one-way-interview'
   | 'one-way-interview-default'
+  | 'one-way-interview-pipeline-sync'
   | 'one-way-interview-avatar'
+  | 'one-way-interview-competency'
   | 'two-way-interview'
   | 'two-way-interview-configuration'
   | 'two-way-interview-rounds'
@@ -72,9 +86,30 @@ export type SettingsNavGroup = {
   items: SettingsNavItem[]
 }
 
+export const JEEVES_AI_NAV_CHILDREN: SettingsNavItem[] = [
+  { id: 'jeeves-ai-general', label: 'General' },
+  { id: 'jeeves-ai-question-sets', label: 'Question Sets' },
+  { id: 'jeeves-ai-triggers', label: 'Triggers' },
+  { id: 'jeeves-ai-change-history', label: 'Change History' },
+]
+
+export const COMMUNICATION_HUB_NAV_CHILDREN: SettingsNavItem[] = [
+  {
+    id: 'communication-hub-assignment-handover',
+    label: 'Assignment & Handover',
+  },
+  { id: 'communication-hub-unassigned-chats', label: 'Unassigned Chats' },
+  { id: 'communication-hub-topic-status', label: 'Topic Status' },
+  { id: 'communication-hub-notes-priority', label: 'Notes & Priority' },
+  { id: 'communication-hub-document-requests', label: 'Document Requests' },
+  { id: 'communication-hub-retention-export', label: 'Retention & Export' },
+]
+
 export const ONE_WAY_INTERVIEW_NAV_CHILDREN: SettingsNavItem[] = [
   { id: 'one-way-interview-default', label: 'Default Settings' },
+  { id: 'one-way-interview-pipeline-sync', label: 'Pipeline Sync' },
   { id: 'one-way-interview-avatar', label: 'Avatar Settings' },
+  { id: 'one-way-interview-competency', label: 'Competency' },
 ]
 
 export const TWO_WAY_INTERVIEW_NAV_CHILDREN: SettingsNavItem[] = [
@@ -106,7 +141,7 @@ export const CANDIDATE_DISCOVERY_NAV_CHILDREN: SettingsNavItem[] = [
 ]
 
 export const OFFER_MANAGEMENT_NAV_CHILDREN: SettingsNavItem[] = [
-  { id: 'offer-management-stages-status', label: 'Stages & Status' },
+  { id: 'offer-management-stages-status', label: 'Statuses & Stages' },
   { id: 'offer-management-pipeline-sync', label: 'Pipeline Sync' },
   { id: 'offer-management-reasons', label: 'Reasons' },
   { id: 'offer-management-approval-rules', label: 'Approval Rules' },
@@ -162,6 +197,16 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
       { id: 'campaigns', label: 'Campaigns' },
       { id: 'reports', label: 'Reports' },
       { id: 'client-management', label: 'Client Management' },
+      {
+        id: 'jeeves-ai',
+        label: 'Jeeves AI',
+        children: JEEVES_AI_NAV_CHILDREN,
+      },
+      {
+        id: 'communication-hub',
+        label: 'Communication Hub',
+        children: COMMUNICATION_HUB_NAV_CHILDREN,
+      },
       {
         id: 'one-way-interview',
         label: '1 Way Interview',
@@ -231,6 +276,13 @@ export const DEFAULT_OFFER_MANAGEMENT_SECTION: SettingsSectionId =
 /** Default landing page when opening Talent CRM parent. */
 export const DEFAULT_TALENT_CRM_SECTION: SettingsSectionId =
   'talent-crm-usage-limits'
+
+/** Default landing page when opening Jeeves AI parent. */
+export const DEFAULT_JEEVES_AI_SECTION: SettingsSectionId = 'jeeves-ai-general'
+
+/** Default landing page when opening Communication Hub parent. */
+export const DEFAULT_COMMUNICATION_HUB_SECTION: SettingsSectionId =
+  'communication-hub-assignment-handover'
 
 /** Default landing page when opening 1 Way Interview parent. */
 export const DEFAULT_ONE_WAY_INTERVIEW_SECTION: SettingsSectionId =
@@ -324,6 +376,8 @@ export function isSettingsSectionId(value: string): value is SettingsSectionId {
 export function getSettingsSectionLabel(id: SettingsSectionId): string {
   if (id === 'talent-crm') return 'Talent CRM'
   if (id === 'offer-management') return 'Offer Management'
+  if (id === 'jeeves-ai') return 'Jeeves AI'
+  if (id === 'communication-hub') return 'Communication Hub'
   if (id === 'one-way-interview') return '1 Way Interview'
   if (id === 'two-way-interview') return '2 Way Interview'
   for (const item of flattenSettingsNavItems(CANDIDATE_SETTINGS_NAV_GROUPS)) {
@@ -344,6 +398,8 @@ export function resolveSettingsSectionId(
   if (sectionId === 'candidate-discovery') return DEFAULT_CANDIDATE_DISCOVERY_SECTION
   if (sectionId === 'offer-management') return DEFAULT_OFFER_MANAGEMENT_SECTION
   if (sectionId === 'talent-crm') return DEFAULT_TALENT_CRM_SECTION
+  if (sectionId === 'jeeves-ai') return DEFAULT_JEEVES_AI_SECTION
+  if (sectionId === 'communication-hub') return DEFAULT_COMMUNICATION_HUB_SECTION
   if (sectionId === 'one-way-interview') return DEFAULT_ONE_WAY_INTERVIEW_SECTION
   if (sectionId === 'two-way-interview') return DEFAULT_TWO_WAY_INTERVIEW_SECTION
   return sectionId

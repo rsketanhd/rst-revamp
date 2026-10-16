@@ -24,11 +24,15 @@ export function SettingsPlaceholderPanel({
                 ? 'Offer Management'
                 : sectionId.startsWith('jobs-')
                   ? 'Jobs'
-                  : sectionId.startsWith('two-way-interview')
-                    ? '2 Way Interview'
-                    : sectionId.startsWith('one-way-interview')
-                      ? '1 Way Interview'
-                      : undefined
+                  : sectionId.startsWith('jeeves-ai')
+                    ? 'Jeeves AI'
+                    : sectionId.startsWith('communication-hub')
+                      ? 'Communication Hub'
+                      : sectionId.startsWith('two-way-interview')
+                        ? '2 Way Interview'
+                        : sectionId.startsWith('one-way-interview')
+                          ? '1 Way Interview'
+                          : undefined
       }
       title={title}
       description="This settings module is ready for content. Configuration will appear here."
