@@ -144,7 +144,7 @@ export function AppTopBar({
         navigate(
           role === 'candidate'
             ? '/settings/account-settings'
-            : '/settings/recruiter-profile',
+            : '/settings',
         )
         return
       case 'logout':

@@ -32,6 +32,7 @@ import { HiringStageTimeAnalyticsPage } from './pages/HiringStageTimeAnalyticsPa
 import { OfferHiredDistributionPage } from './pages/OfferHiredDistributionPage'
 import { CreateOfferPage } from './pages/CreateOfferPage'
 import { OfferManagementPage } from './pages/OfferManagementPage'
+import { SettingsLandingPage } from './pages/SettingsLandingPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { ClientsPage } from './pages/ClientsPage'
 import { CreateClientPage } from './pages/CreateClientPage'
@@ -143,11 +144,8 @@ export default function App() {
               path="/reports/offer-hired-distribution"
               element={<OfferHiredDistributionPage />}
             />
+            <Route path="/settings" element={<SettingsLandingPage />} />
             <Route path="/settings/:sectionId" element={<SettingsPage />} />
-            <Route
-              path="/settings"
-              element={<Navigate to="/settings/recruiter-profile" replace />}
-            />
           </Route>
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

@@ -176,7 +176,7 @@ const RECRUITER_NAV_SECTIONS: NavSection[] = [
       {
         id: 'settings',
         label: 'Settings',
-        to: '/settings/recruiter-profile',
+        to: '/settings',
         icon: navIcon(Settings),
       },
     ],

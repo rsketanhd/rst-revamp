@@ -1,4 +1,5 @@
-import { Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { PageContainer, PageHeader } from '../components/layout'
 import { getUserRole } from '../lib/auth'
 import {
@@ -141,6 +142,15 @@ export function SettingsPage() {
 
   return (
     <PageContainer contentClassName="gap-5">
+      {role === 'recruiter' ? (
+        <Link
+          to="/settings"
+          className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-[#6B6B80] transition-colors hover:text-[#2D2061]"
+        >
+          <ArrowLeft className="size-3.5" strokeWidth={2} aria-hidden="true" />
+          Back to Settings
+        </Link>
+      ) : null}
       <PageHeader title="Settings" subtitle={pageSubtitle} />
 
       <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
