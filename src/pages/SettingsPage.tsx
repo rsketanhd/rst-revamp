@@ -7,7 +7,7 @@ import {
   AdminPanel,
   ApprovalsGeneralPanel,
   ApprovalsJobApprovalsPanel,
-  ApprovalsPanel,
+  ApprovalsOfferApprovalsPanel,
   CampaignSettingsPanel,
   CandidatesGeneralPanel,
   CandidateDiscoveryGeneralPanel,
@@ -330,7 +330,7 @@ function SettingsSectionContent({
       return <ApprovalsJobApprovalsPanel />
 
     case 'approvals-offer-approvals':
-      return <ApprovalsPanel sectionId={sectionId} />
+      return <ApprovalsOfferApprovalsPanel />
 
     case 'user-management':
       return <UserManagementPanel />

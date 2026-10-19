@@ -4,6 +4,7 @@ import {
   getDelegateLabel,
   type ApprovalDelegationForm,
 } from '../components/approvals/ApprovalDelegationPanel'
+import { ViewApprovalDelegationPanel } from '../components/approvals/ViewApprovalDelegationPanel'
 import { JobViewEditPanel } from '../components/jobs/JobViewEditPanel'
 import { PageContainer, PageHeader } from '../components/layout'
 import { Button, SegmentedControl, toast } from '../components/ui'
@@ -53,6 +54,7 @@ export function ApprovalsPage() {
     INITIAL_DELEGATION,
   )
   const [delegationPanelOpen, setDelegationPanelOpen] = useState(false)
+  const [viewDelegationOpen, setViewDelegationOpen] = useState(false)
   const [detailJob, setDetailJob] = useState<JobListing | null>(null)
   const [jobViewFooter, setJobViewFooter] = useState<'default' | 'edit-only'>(
     'default',
@@ -104,67 +106,48 @@ export function ApprovalsPage() {
   return (
     <PageContainer contentClassName="gap-5">
       <PageHeader
+        className="sm:items-center"
         title="Approvals"
         subtitle="Jobs and offers waiting for a decision, in one place. Open one to approve, request changes or reject."
-      />
-
-      {delegation ? (
-        <div
-          className={cn(
-            'flex flex-col gap-3 rounded-[10px] border border-[#D8D2EF] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5',
-            'bg-[linear-gradient(135deg,#F5F2FC_0%,#EEF4FC_55%,#F8F9FB_100%)]',
-          )}
-        >
-          <p className="text-sm text-[#4A4A60]">
-            <span className="font-semibold text-[#2D2061]">
-              {getDelegateLabel(delegation.delegateId)}
-            </span>{' '}
-            is approving jobs and offers for you from {delegation.from} to{' '}
-            {delegation.to}.
-          </p>
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+        actions={
+          delegation ? (
+            <div
+              className={cn(
+                'flex max-w-full flex-nowrap items-center gap-2.5 rounded-[8px] border border-[#D8D2EF] bg-[#F8F7FC] px-3 py-1.5',
+              )}
+            >
+              <p className="min-w-0 truncate whitespace-nowrap text-sm text-[#4A4A60]">
+                <span className="font-semibold text-[#2D2061]">
+                  {getDelegateLabel(delegation.delegateId)}
+                </span>
+                <span className="text-[#8B8B9E]">
+                  {' '}
+                  · {delegation.from} – {delegation.to}
+                </span>
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shrink-0 !h-8 !rounded-md !px-3 !text-xs"
+                onClick={() => setViewDelegationOpen(true)}
+              >
+                View Delegate
+              </Button>
+            </div>
+          ) : (
             <Button
               type="button"
               variant="outline"
-              className="!bg-white/80"
+              size="sm"
+              className="shrink-0 !h-8 !rounded-md !px-3 !text-xs"
               onClick={() => setDelegationPanelOpen(true)}
             >
-              Change delegate
+              Set delegate
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="!border-[#F5C2C2] !bg-white/80 !text-[#C44B4B] hover:!bg-[#FFF5F5]"
-              onClick={() => {
-                setDelegation(null)
-                toast.success('Delegation ended.', { title: 'Approvals' })
-              }}
-            >
-              End delegation
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div
-          className={cn(
-            'flex flex-col gap-3 rounded-[10px] border border-[#E4E1EE] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5',
-            'bg-[linear-gradient(135deg,#F7F8FB_0%,#F0EEF8_50%,#EEF4FC_100%)]',
-          )}
-        >
-          <p className="text-sm leading-relaxed text-[#4A4A60]">
-            Going out of office? Nominate a delegate to approve jobs and offers
-            on your behalf for a date range.
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            className="shrink-0 !bg-white"
-            onClick={() => setDelegationPanelOpen(true)}
-          >
-            Set delegate
-          </Button>
-        </div>
-      )}
+          )
+        }
+      />
 
       <div className="flex flex-col gap-4">
         <SettingsUnderlineTabs
@@ -182,7 +165,7 @@ export function ApprovalsPage() {
           value={kindFilter}
           options={kindSwitchOptions}
           onChange={setKindFilter}
-          className="w-auto shrink-0 self-start"
+          className="w-auto shrink-0 self-end"
         />
       </div>
 
@@ -223,10 +206,27 @@ export function ApprovalsPage() {
         </ul>
       )}
 
+      {delegation ? (
+        <ViewApprovalDelegationPanel
+          open={viewDelegationOpen}
+          delegation={delegation}
+          onClose={() => setViewDelegationOpen(false)}
+          onSave={(next) => {
+            setDelegation(next)
+            toast.success('Delegate saved.', { title: 'Approvals' })
+          }}
+          onEndDelegation={() => {
+            setDelegation(null)
+            setViewDelegationOpen(false)
+            toast.success('Delegation ended.', { title: 'Approvals' })
+          }}
+        />
+      ) : null}
+
       <ApprovalDelegationPanel
         open={delegationPanelOpen}
         onClose={() => setDelegationPanelOpen(false)}
-        initial={delegation}
+        initial={null}
         onSave={(next) => {
           setDelegation(next)
           toast.success('Delegate saved.', { title: 'Approvals' })

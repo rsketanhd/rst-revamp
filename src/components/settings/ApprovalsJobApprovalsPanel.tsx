@@ -391,7 +391,37 @@ export function ApprovalsJobApprovalsPanel() {
                   <p className="text-sm font-semibold text-[#2D2061]">
                     {rule.form.name}
                   </p>
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      aria-label={`Edit ${rule.form.name}`}
+                      onClick={() =>
+                        setEditor({
+                          mode: 'edit',
+                          ruleId: rule.id,
+                          form: rule.form,
+                        })
+                      }
+                      className="inline-flex size-8 items-center justify-center rounded-[8px] text-[#6B6B80] transition-colors hover:bg-[#F5F4FA] hover:text-[#2D2061]"
+                    >
+                      <Pencil
+                        className="size-4"
+                        strokeWidth={1.75}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Delete ${rule.form.name}`}
+                      onClick={() => setPendingDelete(rule)}
+                      className="inline-flex size-8 items-center justify-center rounded-[8px] text-[#6B6B80] transition-colors hover:bg-[#F5F4FA] hover:text-[#C44B4B]"
+                    >
+                      <Trash2
+                        className="size-4"
+                        strokeWidth={1.75}
+                        aria-hidden="true"
+                      />
+                    </button>
                     <Switch
                       checked={rule.enabled}
                       onCheckedChange={(checked) =>
@@ -400,36 +430,6 @@ export function ApprovalsJobApprovalsPanel() {
                       aria-label={`${rule.form.name} enabled`}
                       className="!gap-0"
                     />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setEditor({
-                          mode: 'edit',
-                          ruleId: rule.id,
-                          form: rule.form,
-                        })
-                      }
-                      className="inline-flex items-center gap-1 text-sm font-medium text-[#2F5AA8] transition-colors hover:text-[#1E3F85]"
-                    >
-                      <Pencil
-                        className="size-3.5"
-                        strokeWidth={1.75}
-                        aria-hidden="true"
-                      />
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Delete ${rule.form.name}`}
-                      onClick={() => setPendingDelete(rule)}
-                      className="inline-flex size-8 items-center justify-center rounded-md text-[#8B8B9E] transition-colors hover:bg-[#F7F6FB] hover:text-[#C44B4B]"
-                    >
-                      <Trash2
-                        className="size-4"
-                        strokeWidth={1.75}
-                        aria-hidden="true"
-                      />
-                    </button>
                   </div>
                 </div>
 

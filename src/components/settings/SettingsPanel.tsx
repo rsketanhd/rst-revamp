@@ -91,7 +91,7 @@ export function SettingsBlock({
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-bold text-[#1F1F2E]">{title}</h3>
+          <h3 className="text-sm font-bold text-[#2D2061]">{title}</h3>
           {description ? (
             <p className="mt-0.5 text-xs leading-relaxed text-[#8B8B9E]">
               {description}

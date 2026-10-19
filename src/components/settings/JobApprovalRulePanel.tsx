@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import {
   Button,
   Checkbox,
   Input,
   MultiSelect,
+  SegmentedControl,
   Select,
   SidePanel,
 } from '../ui'
@@ -13,6 +14,14 @@ import { cn } from '../../lib/cn'
 export type JobStepId = 'draft-to-active' | 'active-to-careers' | 'reactivate'
 
 export type ApprovalLevelMode = 'any-one' | 'all'
+
+export type ConditionMatchMode = 'and' | 'or'
+
+export type JobApprovalCondition = {
+  id: string
+  field: string
+  label: string
+}
 
 export type JobApprovalLevel = {
   id: string
@@ -31,7 +40,10 @@ export type JobApprovalRuleForm = {
   name: string
   stepIds: JobStepId[]
   allJobs: boolean
+  /** Legacy free-text summary; preferred source is `conditions`. */
   appliesTo: string
+  matchMode: ConditionMatchMode
+  conditions: JobApprovalCondition[]
   levels: JobApprovalLevel[]
 }
 
@@ -68,6 +80,22 @@ const NAMED_USER_OPTIONS = [
   { value: 'priya-nair', label: 'Priya Nair' },
 ]
 
+const MATCH_MODE_OPTIONS: Array<{ value: ConditionMatchMode; label: string }> =
+  [
+    { value: 'and', label: 'All conditions (AND)' },
+    { value: 'or', label: 'Any condition (OR)' },
+  ]
+
+const CONDITION_FIELD_OPTIONS = [
+  { value: 'country', label: 'Country' },
+  { value: 'department', label: 'Department' },
+  { value: 'client', label: 'Client' },
+  { value: 'job-type', label: 'Job type' },
+  { value: 'job-category', label: 'Job category' },
+  { value: 'industry', label: 'Industry' },
+  { value: 'recruiter', label: 'Support recruiter' },
+]
+
 function emptyLevel(index: number): JobApprovalLevel {
   return {
     id: `level-${index + 1}-${Math.random().toString(36).slice(2, 7)}`,
@@ -85,7 +113,21 @@ export function emptyJobApprovalRuleForm(): JobApprovalRuleForm {
     stepIds: ['draft-to-active'],
     allJobs: true,
     appliesTo: '',
+    matchMode: 'and',
+    conditions: [],
     levels: [emptyLevel(0)],
+  }
+}
+
+function normalizeJobApprovalRuleForm(
+  form: JobApprovalRuleForm,
+): JobApprovalRuleForm {
+  return {
+    ...emptyJobApprovalRuleForm(),
+    ...form,
+    matchMode: form.matchMode ?? 'and',
+    conditions: form.conditions ?? [],
+    levels: form.levels.length > 0 ? form.levels : [emptyLevel(0)],
   }
 }
 
@@ -97,6 +139,11 @@ export function stepLabels(stepIds: JobStepId[]): string {
 
 export function appliesToLabel(form: JobApprovalRuleForm): string {
   if (form.allJobs) return 'All jobs'
+  if (form.conditions.length > 0) {
+    return form.conditions.map((condition) => condition.label).join(
+      form.matchMode === 'and' ? ' AND ' : ' OR ',
+    )
+  }
   return form.appliesTo.trim() || 'Conditions not set'
 }
 
@@ -149,13 +196,30 @@ export function JobApprovalRulePanel({
   const [form, setForm] = useState<JobApprovalRuleForm>(emptyJobApprovalRuleForm)
   const [nameError, setNameError] = useState<string | undefined>()
   const [stepsError, setStepsError] = useState<string | undefined>()
+  const [conditionMenuOpen, setConditionMenuOpen] = useState(false)
+  const conditionMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!open) return
-    setForm(initial ?? emptyJobApprovalRuleForm())
+    setForm(normalizeJobApprovalRuleForm(initial ?? emptyJobApprovalRuleForm()))
     setNameError(undefined)
     setStepsError(undefined)
+    setConditionMenuOpen(false)
   }, [open, initial])
+
+  useEffect(() => {
+    if (!conditionMenuOpen) return
+    function handlePointerDown(event: MouseEvent) {
+      if (
+        conditionMenuRef.current &&
+        !conditionMenuRef.current.contains(event.target as Node)
+      ) {
+        setConditionMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handlePointerDown)
+    return () => document.removeEventListener('mousedown', handlePointerDown)
+  }, [conditionMenuOpen])
 
   const levelErrors = useMemo(
     () =>
@@ -217,9 +281,29 @@ export function JobApprovalRulePanel({
     onSave({
       ...form,
       name: form.name.trim(),
-      appliesTo: form.allJobs ? '' : form.appliesTo.trim(),
+      appliesTo: form.allJobs
+        ? ''
+        : form.conditions.length > 0
+          ? appliesToLabel({ ...form, allJobs: false })
+          : form.appliesTo.trim(),
+      conditions: form.allJobs ? [] : form.conditions,
     })
     onClose()
+  }
+
+  function addCondition(field: string, label: string) {
+    setForm((current) => ({
+      ...current,
+      conditions: [
+        ...current.conditions,
+        {
+          id: `condition-${Math.random().toString(36).slice(2, 8)}`,
+          field,
+          label,
+        },
+      ],
+    }))
+    setConditionMenuOpen(false)
   }
 
   return (
@@ -284,16 +368,100 @@ export function JobApprovalRulePanel({
             onChange={(event) => patchForm({ allJobs: event.target.checked })}
           />
           {!form.allJobs ? (
-            <div className="mt-3">
-              <Input
-                id="job-rule-applies-to"
-                label="Applies to"
-                placeholder="e.g. Country is India"
-                value={form.appliesTo}
-                onChange={(event) =>
-                  patchForm({ appliesTo: event.target.value })
-                }
-              />
+            <div className="mt-3 rounded-[8px] border border-[#E4E1EE] bg-white p-4">
+              <p className="text-xs leading-relaxed text-[#8B8B9E]">
+                Conditions use the fields from Create New Job. Within a
+                condition, any of its values will do.
+              </p>
+
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                <p className="text-sm font-semibold text-[#2D2061]">Match</p>
+                <SegmentedControl
+                  aria-label="Condition match mode"
+                  value={form.matchMode}
+                  options={MATCH_MODE_OPTIONS}
+                  onChange={(matchMode) => patchForm({ matchMode })}
+                  className="w-fit"
+                />
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-[#8B8B9E]">
+                {form.matchMode === 'and'
+                  ? "The rule applies only when every condition holds. It's one setting for the whole rule; AND and OR can't be mixed."
+                  : "The rule applies when any condition holds. It's one setting for the whole rule; AND and OR can't be mixed."}
+              </p>
+
+              {form.conditions.length === 0 ? (
+                <p className="mt-4 text-sm text-[#8B8B9E]">No conditions yet.</p>
+              ) : (
+                <ul className="mt-4 flex flex-col gap-2">
+                  {form.conditions.map((condition) => (
+                    <li
+                      key={condition.id}
+                      className="flex items-center justify-between gap-3 rounded-[8px] border border-[#E4E1EE] bg-[#F8F9FB] px-3 py-2"
+                    >
+                      <p className="text-sm font-medium text-[#2D2061]">
+                        {condition.label}
+                      </p>
+                      <button
+                        type="button"
+                        aria-label={`Remove ${condition.label} condition`}
+                        onClick={() =>
+                          setForm((current) => ({
+                            ...current,
+                            conditions: current.conditions.filter(
+                              (item) => item.id !== condition.id,
+                            ),
+                          }))
+                        }
+                        className="text-xs font-semibold text-[#8B8B9E] transition-colors hover:text-[#C44B4B]"
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div ref={conditionMenuRef} className="relative mt-3">
+                <button
+                  type="button"
+                  aria-expanded={conditionMenuOpen}
+                  aria-haspopup="listbox"
+                  onClick={() => setConditionMenuOpen((prev) => !prev)}
+                  className="flex h-10 w-full items-center justify-between gap-2 rounded-[8px] border border-[#D5D2E2] bg-white px-3 text-left text-sm text-[#6B6B80] transition-colors hover:border-[#2D2061] hover:text-[#2D2061]"
+                >
+                  <span>Add a condition...</span>
+                  <ChevronDown
+                    className={cn(
+                      'size-4 shrink-0 transition-transform',
+                      conditionMenuOpen && 'rotate-180',
+                    )}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                </button>
+                {conditionMenuOpen ? (
+                  <ul
+                    role="listbox"
+                    aria-label="Condition fields"
+                    className="absolute left-0 right-0 z-10 mt-1 max-h-48 overflow-auto rounded-[8px] border border-[#E4E1EE] bg-white py-1 shadow-[0_8px_24px_rgba(45,32,97,0.12)]"
+                  >
+                    {CONDITION_FIELD_OPTIONS.map((option) => (
+                      <li key={option.value} role="option">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            addCondition(option.value, option.label)
+                          }
+                          className="flex w-full px-3 py-2 text-left text-sm text-[#2D2061] transition-colors hover:bg-[#F5F4FA]"
+                        >
+                          {option.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
             </div>
           ) : null}
         </div>
@@ -423,7 +591,6 @@ export function JobApprovalRulePanel({
             onClick={addLevel}
             className="mt-3 !h-9 !rounded-md !border-[#2D2061] !px-3.5 !text-[#2D2061] hover:!bg-white"
           >
-            <Plus className="size-4" strokeWidth={2.25} aria-hidden="true" />
             Add level
           </Button>
         </div>
