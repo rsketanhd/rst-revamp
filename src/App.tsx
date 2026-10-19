@@ -15,6 +15,8 @@ import { DashboardPage } from './pages/DashboardPage'
 import { JobApplicationsPage } from './pages/JobApplicationsPage'
 import { JobsPage } from './pages/JobsPage'
 import { JeevesAiPage } from './pages/JeevesAiPage'
+import { CreatePreInterviewSetPage } from './pages/CreatePreInterviewSetPage'
+import { PreInterviewSetDetailPage } from './pages/PreInterviewSetDetailPage'
 import { KnowledgebaseArticlePage } from './pages/KnowledgebaseArticlePage'
 import { KnowledgebasePage } from './pages/KnowledgebasePage'
 import { LoginPage } from './pages/LoginPage'
@@ -86,6 +88,18 @@ export default function App() {
             />
             <Route path="/talent-crm" element={<ModulePage />} />
             <Route path="/jeeves-ai" element={<JeevesAiPage />} />
+            <Route
+              path="/jeeves-ai/pre-interview-sets/new"
+              element={<CreatePreInterviewSetPage />}
+            />
+            <Route
+              path="/jeeves-ai/pre-interview-sets/:setId/edit"
+              element={<CreatePreInterviewSetPage />}
+            />
+            <Route
+              path="/jeeves-ai/pre-interview-sets/:setId"
+              element={<PreInterviewSetDetailPage />}
+            />
             <Route path="/e2e-interviews" element={<ModulePage />} />
             <Route
               path="/e2e-interviews/one-way"
