@@ -89,14 +89,16 @@ export function SettingsBlock({
         className,
       )}
     >
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
           <h3 className="text-sm font-bold text-[#1F1F2E]">{title}</h3>
           {description ? (
-            <p className="mt-0.5 text-xs text-[#8B8B9E]">{description}</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-[#8B8B9E]">
+              {description}
+            </p>
           ) : null}
         </div>
-        {trailing}
+        {trailing ? <div className="shrink-0">{trailing}</div> : null}
       </div>
       {children}
       {footer ? (

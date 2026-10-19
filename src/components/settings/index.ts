@@ -52,6 +52,9 @@ export { TemplatesPanel } from './TemplatesPanel'
 export { DomainRulesPanel } from './DomainRulesPanel'
 export { TriggersPanel } from './TriggersPanel'
 export { ApprovalsPanel } from './ApprovalsPanel'
+export { ApprovalsGeneralPanel } from './ApprovalsGeneralPanel'
+export { ApprovalsJobApprovalsPanel } from './ApprovalsJobApprovalsPanel'
+export { JobApprovalRulePanel } from './JobApprovalRulePanel'
 export { EmailConfigPanel } from './EmailConfigPanel'
 export { UserManagementPanel } from './UserManagementPanel'
 export { InviteUserPanel } from './InviteUserPanel'
@@ -89,6 +92,7 @@ export {
   DEFAULT_CANDIDATE_SETTINGS_SECTION,
   DEFAULT_CANDIDATES_SECTION,
   DEFAULT_CANDIDATE_DISCOVERY_SECTION,
+  DEFAULT_APPROVALS_SECTION,
   DEFAULT_OFFER_MANAGEMENT_SECTION,
   DEFAULT_JOBS_SECTION,
   DEFAULT_TALENT_CRM_SECTION,

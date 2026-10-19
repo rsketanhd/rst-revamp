@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell, RequireAuth } from './components/layout'
 import { ToastProvider } from './components/ui'
+import { ApprovalsPage } from './pages/ApprovalsPage'
 import { CandidateDiscoveryPage } from './pages/CandidateDiscoveryPage'
 import { CandidateProfilePage } from './pages/CandidateProfilePage'
 import { CandidatesPage } from './pages/CandidatesPage'
@@ -77,6 +78,7 @@ export default function App() {
               path="/candidate-discovery"
               element={<CandidateDiscoveryPage />}
             />
+            <Route path="/approvals" element={<ApprovalsPage />} />
             <Route path="/client-management" element={<ClientsPage />} />
             <Route
               path="/client-management/new"

@@ -1,5 +1,5 @@
 import { useRef, useState, type ChangeEvent, type ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   ArrowDown,
   ArrowUp,
@@ -41,7 +41,6 @@ import {
   type SettingsSectionId,
 } from './settingsNavConfig'
 import { SettingsPanel } from './SettingsPanel'
-import { SettingsUnderlineTabs } from './SettingsUnderlineTabs'
 
 type OfferTab =
   | 'offer-management-stages-status'
@@ -219,62 +218,76 @@ function isOfferTab(id: SettingsSectionId): id is OfferTab {
   return OFFER_TABS.some((tab) => tab.value === id)
 }
 
+const OFFER_SECTION_DESCRIPTIONS: Record<OfferTab, string> = {
+  'offer-management-stages-status':
+    'Define offer statuses and custom stages for your hiring pipeline.',
+  'offer-management-pipeline-sync':
+    'Map offer outcomes to application pipeline stages.',
+  'offer-management-reasons':
+    'Manage decline, withdraw, and other offer reason lists.',
+  'offer-management-approval-rules':
+    'Configure who must approve offers before they are sent.',
+  'offer-management-templates-emails':
+    'Offer letter templates and candidate email copy.',
+  'offer-management-team-notifications':
+    'Choose who is notified when offer status changes.',
+  'offer-management-entities-compensation':
+    'Legal entities, currencies, and compensation display rules.',
+  'offer-management-lifecycle-signing':
+    'Joining dates, e-sign, and offer lifecycle controls.',
+  'offer-management-audit-log':
+    'Review offer settings changes and activity history.',
+}
+
 /**
  * Settings → Module Configuration → Offer Management.
+ * Each submenu route shows its own screen (no in-panel tabs).
  */
 export function OfferManagementPanel({
   sectionId,
 }: {
   sectionId: SettingsSectionId
 }) {
-  const navigate = useNavigate()
-  const activeTab: OfferTab = isOfferTab(sectionId)
+  const activeSection: OfferTab = isOfferTab(sectionId)
     ? sectionId
     : 'offer-management-stages-status'
 
   return (
     <SettingsPanel
-      title="Offer Settings"
-      description="Statuses, approvals, templates, legal entities and signing for Offer Management."
+      eyebrow="Offer Management"
+      title={getSettingsSectionLabel(activeSection)}
+      description={OFFER_SECTION_DESCRIPTIONS[activeSection]}
     >
-      <SettingsUnderlineTabs
-        aria-label="Offer settings sections"
-        value={activeTab}
-        onChange={(value) => navigate(getSettingsSectionPath(value))}
-        options={OFFER_TABS}
-      />
-
-      {activeTab === 'offer-management-stages-status' ? (
-        <StatusesStagesTab />
-      ) : activeTab === 'offer-management-pipeline-sync' ? (
-        <PipelineSyncTab />
-      ) : activeTab === 'offer-management-reasons' ? (
-        <ReasonsTab />
-      ) : activeTab === 'offer-management-approval-rules' ? (
-        <ApprovalRulesTab />
-      ) : activeTab === 'offer-management-templates-emails' ? (
-        <TemplatesEmailsTab />
-      ) : activeTab === 'offer-management-team-notifications' ? (
-        <TeamNotificationsTab />
-      ) : activeTab === 'offer-management-entities-compensation' ? (
-        <EntitiesCompensationTab />
-      ) : activeTab === 'offer-management-lifecycle-signing' ? (
-        <LifecycleSigningTab />
-      ) : activeTab === 'offer-management-audit-log' ? (
-        <AuditLogTab />
-      ) : (
-        <div className="rounded-[8px] bg-[#F8F9FB] p-5 sm:p-6">
-          <h3 className="text-sm font-bold text-[#2D2061]">
-            {getSettingsSectionLabel(activeTab)}
-          </h3>
-          <p className="mt-1 text-sm text-[#6B6B80]">
-            Configure {getSettingsSectionLabel(activeTab).toLowerCase()} options
-            here. Details will be added in a future iteration.
-          </p>
-        </div>
-      )}
+      <OfferSectionContent section={activeSection} />
     </SettingsPanel>
   )
+}
+
+function OfferSectionContent({ section }: { section: OfferTab }) {
+  switch (section) {
+    case 'offer-management-stages-status':
+      return <StatusesStagesTab />
+    case 'offer-management-pipeline-sync':
+      return <PipelineSyncTab />
+    case 'offer-management-reasons':
+      return <ReasonsTab />
+    case 'offer-management-approval-rules':
+      return <ApprovalRulesTab />
+    case 'offer-management-templates-emails':
+      return <TemplatesEmailsTab />
+    case 'offer-management-team-notifications':
+      return <TeamNotificationsTab />
+    case 'offer-management-entities-compensation':
+      return <EntitiesCompensationTab />
+    case 'offer-management-lifecycle-signing':
+      return <LifecycleSigningTab />
+    case 'offer-management-audit-log':
+      return <AuditLogTab />
+    default: {
+      const _exhaustive: never = section
+      return _exhaustive
+    }
+  }
 }
 
 function InfoTip({ content }: { content: string }) {

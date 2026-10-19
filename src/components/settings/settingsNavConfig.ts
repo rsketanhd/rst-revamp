@@ -62,6 +62,9 @@ export type SettingsSectionId =
   | 'templates'
   | 'triggers'
   | 'approvals'
+  | 'approvals-general'
+  | 'approvals-job-approvals'
+  | 'approvals-offer-approvals'
   | 'user-management'
   | 'role-management'
   | 'admin-panel'
@@ -163,6 +166,12 @@ export const TALENT_CRM_NAV_CHILDREN: SettingsNavItem[] = [
   { id: 'talent-crm-campaign', label: 'Campaign Settings' },
 ]
 
+export const APPROVALS_NAV_CHILDREN: SettingsNavItem[] = [
+  { id: 'approvals-general', label: 'General' },
+  { id: 'approvals-job-approvals', label: 'Job Approvals' },
+  { id: 'approvals-offer-approvals', label: 'Offer Approvals' },
+]
+
 /**
  * Secondary settings navigation —
  * Module Configuration + Settings Hub + Platform Administration + Security & Privacy.
@@ -187,6 +196,11 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
         id: 'offer-management',
         label: 'Offer Management',
         children: OFFER_MANAGEMENT_NAV_CHILDREN,
+      },
+      {
+        id: 'approvals',
+        label: 'Approvals',
+        children: APPROVALS_NAV_CHILDREN,
       },
       { id: 'pipeline', label: 'Pipeline' },
       {
@@ -228,7 +242,6 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
       { id: 'notification-config', label: 'Notification Config' },
       { id: 'templates', label: 'Templates' },
       { id: 'triggers', label: 'Triggers' },
-      { id: 'approvals', label: 'Approvals' },
     ],
   },
   {
@@ -272,6 +285,9 @@ export const DEFAULT_CANDIDATE_DISCOVERY_SECTION: SettingsSectionId =
 /** Default landing page when opening Offer Management parent. */
 export const DEFAULT_OFFER_MANAGEMENT_SECTION: SettingsSectionId =
   'offer-management-stages-status'
+
+/** Default landing page when opening Approvals parent. */
+export const DEFAULT_APPROVALS_SECTION: SettingsSectionId = 'approvals-general'
 
 /** Default landing page when opening Talent CRM parent. */
 export const DEFAULT_TALENT_CRM_SECTION: SettingsSectionId =
@@ -380,6 +396,7 @@ export function getSettingsSectionLabel(id: SettingsSectionId): string {
   if (id === 'communication-hub') return 'Communication Hub'
   if (id === 'one-way-interview') return '1 Way Interview'
   if (id === 'two-way-interview') return '2 Way Interview'
+  if (id === 'approvals') return 'Approvals'
   for (const item of flattenSettingsNavItems(CANDIDATE_SETTINGS_NAV_GROUPS)) {
     if (item.id === id) return item.label
   }
@@ -402,5 +419,6 @@ export function resolveSettingsSectionId(
   if (sectionId === 'communication-hub') return DEFAULT_COMMUNICATION_HUB_SECTION
   if (sectionId === 'one-way-interview') return DEFAULT_ONE_WAY_INTERVIEW_SECTION
   if (sectionId === 'two-way-interview') return DEFAULT_TWO_WAY_INTERVIEW_SECTION
+  if (sectionId === 'approvals') return DEFAULT_APPROVALS_SECTION
   return sectionId
 }

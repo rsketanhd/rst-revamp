@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   type LucideIcon,
+  BadgeCheck,
   Briefcase,
   Building2,
   ChevronDown,
@@ -94,6 +95,12 @@ const RECRUITER_NAV_SECTIONS: NavSection[] = [
         label: 'Candidate Discovery',
         to: '/candidate-discovery',
         icon: navIcon(Search),
+      },
+      {
+        id: 'approvals',
+        label: 'Approvals',
+        to: '/approvals',
+        icon: navIcon(BadgeCheck),
       },
       {
         id: 'client-management',
@@ -456,7 +463,7 @@ function isGroupRouteActive(item: NavItem, pathname: string): boolean {
 
 function navItemBaseClass(collapsed: boolean): string {
   return cn(
-    'group flex items-center text-[13px] font-medium text-[#2D2061]',
+    'group flex items-center text-[14px] font-medium text-[#2D2061]',
     'transition-colors duration-200',
     'rounded-lg',
     'hover:bg-[#2D2061] hover:text-white',
@@ -565,7 +572,7 @@ function NavGroupItem({
         aria-expanded={isGroupOpen}
         onClick={() => onToggleGroup(item.id)}
         className={cn(
-          'flex w-full min-h-10 items-center gap-2.5 px-2.5 py-2 text-[13px] font-medium transition-colors duration-200',
+          'flex w-full min-h-10 items-center gap-2.5 px-2.5 py-2 text-[14px] font-medium transition-colors duration-200',
           groupTriggerClass(groupSelected, isGroupOpen),
         )}
       >
@@ -600,7 +607,7 @@ function NavGroupItem({
                     title={child.label}
                     className={({ isActive }) =>
                       cn(
-                        'flex min-h-9 items-center truncate py-2 pl-10 pr-3 text-[13px] transition-colors',
+                        'flex min-h-9 items-center truncate py-2 pl-10 pr-3 text-[14px] transition-colors',
                         isActive
                           ? 'font-semibold text-[#2D2061]'
                           : 'font-medium text-[#6B7280] hover:text-[#2D2061]',
@@ -671,7 +678,7 @@ function CollapsedGroupFlyout({
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
-      'flex min-h-8 items-center rounded-md px-2.5 py-1.5 text-[13px] transition-colors',
+      'flex min-h-8 items-center rounded-md px-2.5 py-1.5 text-[14px] transition-colors',
       isActive
         ? 'bg-[#F1F0F7] font-semibold text-[#2D2061]'
         : 'font-medium text-[#4B5563] hover:bg-[#F7F6FA] hover:text-[#2D2061]',
@@ -714,7 +721,7 @@ function CollapsedGroupFlyout({
                 {item.children?.map((child) =>
                   child.children?.length ? (
                     <li key={child.id}>
-                      <p className="px-2.5 pb-1 pt-2 text-[13px] font-semibold text-[#2D2061]">
+                      <p className="px-2.5 pb-1 pt-2 text-[14px] font-semibold text-[#2D2061]">
                         {child.label}
                       </p>
                       <ul className="ml-3.5 border-l border-[#D5D2E2] pl-2">
@@ -762,7 +769,7 @@ function NavSubGroup({ child }: { child: NavChild }) {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          'flex min-h-9 w-full items-center gap-2 py-2 pl-10 pr-3 text-left text-[13px] transition-colors',
+          'flex min-h-9 w-full items-center gap-2 py-2 pl-10 pr-3 text-left text-[14px] transition-colors',
           routeActive
             ? 'font-semibold text-[#2D2061]'
             : 'font-medium text-[#6B7280] hover:text-[#2D2061]',
@@ -794,7 +801,7 @@ function NavSubGroup({ child }: { child: NavChild }) {
                   title={grandchild.label}
                   className={({ isActive }) =>
                     cn(
-                      'group/tree relative flex min-h-8 items-center gap-2 truncate py-1.5 pl-3 pr-3 text-[13px] transition-colors',
+                      'group/tree relative flex min-h-8 items-center gap-2 truncate py-1.5 pl-3 pr-3 text-[14px] transition-colors',
                       isActive
                         ? 'font-semibold text-[#2D2061]'
                         : 'font-medium text-[#6B7280] hover:text-[#2D2061]',

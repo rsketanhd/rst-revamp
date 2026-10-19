@@ -5,6 +5,8 @@ import { getUserRole } from '../lib/auth'
 import {
   AccountSettingsPanel,
   AdminPanel,
+  ApprovalsGeneralPanel,
+  ApprovalsJobApprovalsPanel,
   ApprovalsPanel,
   CampaignSettingsPanel,
   CandidatesGeneralPanel,
@@ -13,6 +15,7 @@ import {
   CompanyBrandingPanel,
   DEFAULT_CANDIDATES_SECTION,
   DEFAULT_CANDIDATE_DISCOVERY_SECTION,
+  DEFAULT_APPROVALS_SECTION,
   DEFAULT_OFFER_MANAGEMENT_SECTION,
   DEFAULT_JOBS_SECTION,
   DEFAULT_JEEVES_AI_SECTION,
@@ -131,6 +134,10 @@ export function SettingsPage() {
         replace
       />
     )
+  }
+
+  if (role === 'recruiter' && activeSectionId === 'approvals') {
+    return <Navigate to={`/settings/${DEFAULT_APPROVALS_SECTION}`} replace />
   }
 
   const resolvedId = resolveSettingsSectionId(activeSectionId)
@@ -316,7 +323,14 @@ function SettingsSectionContent({
       return <TriggersPanel />
 
     case 'approvals':
-      return <ApprovalsPanel />
+    case 'approvals-general':
+      return <ApprovalsGeneralPanel />
+
+    case 'approvals-job-approvals':
+      return <ApprovalsJobApprovalsPanel />
+
+    case 'approvals-offer-approvals':
+      return <ApprovalsPanel sectionId={sectionId} />
 
     case 'user-management':
       return <UserManagementPanel />

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { SquarePen } from 'lucide-react'
+import { ApprovalDecisionSection } from '../approvals/ApprovalDecisionSection'
+import type { ApprovalRecord } from '../../data/approvals'
 import type { JobListing } from '../../data/jobs'
 import { Button, SidePanel } from '../ui'
 import { StepCreateJob } from './create/StepCreateJob'
@@ -22,6 +24,17 @@ export type JobViewEditPanelProps = {
   onSave?: (job: JobListing, form: CreateJobFormState) => void
   /** Mode the panel opens in (default: view) */
   initialMode?: PanelMode
+  /**
+   * View-mode footer. `edit-only` shows Edit Job alone (e.g. Approvals → Submitted by me).
+   */
+  viewFooter?: 'default' | 'edit-only'
+  /**
+   * When set (Approvals → Waiting for me), show the decision card above job details.
+   */
+  approvalRecord?: ApprovalRecord | null
+  onApprovalDecided?: (
+    decision: 'approve' | 'request-changes' | 'reject',
+  ) => void
 }
 
 type PanelMode = 'view' | 'edit'
@@ -35,6 +48,9 @@ export function JobViewEditPanel({
   onClose,
   onSave,
   initialMode = 'view',
+  viewFooter = 'default',
+  approvalRecord = null,
+  onApprovalDecided,
 }: JobViewEditPanelProps) {
   const [mode, setMode] = useState<PanelMode>('view')
   const [form, setForm] = useState<CreateJobFormState>(defaultCreateJobForm)
@@ -83,19 +99,25 @@ export function JobViewEditPanel({
       title={title}
       widthClassName="w-full max-w-full sm:max-w-[min(100%,40rem)] lg:max-w-[50vw]"
       bodyClassName="bg-white"
-      footerClassName="justify-between"
+      footerClassName={
+        mode === 'view' && viewFooter === 'edit-only'
+          ? 'justify-end'
+          : 'justify-between'
+      }
       footer={
         mode === 'view' ? (
           <>
-            <Button
-              type="button"
-              variant="outline"
-              size="md"
-              onClick={handleClose}
-              className="!h-10 !min-w-[5.5rem] !rounded-md border-[#d5d2e2] bg-white px-4 text-sm font-medium text-[#2D2061] hover:bg-[#f7f6fb]"
-            >
-              Close
-            </Button>
+            {viewFooter === 'default' ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                onClick={handleClose}
+                className="!h-10 !min-w-[5.5rem] !rounded-md border-[#d5d2e2] bg-white px-4 text-sm font-medium text-[#2D2061] hover:bg-[#f7f6fb]"
+              >
+                Close
+              </Button>
+            ) : null}
             <Button
               type="button"
               variant="primary"
@@ -132,12 +154,20 @@ export function JobViewEditPanel({
       }
     >
       {mode === 'view' ? (
-        <StepReview
-          value={form}
-          onChange={patchForm}
-          readOnly
-          hideHeader
-        />
+        <div className="flex flex-col gap-5">
+          {approvalRecord ? (
+            <ApprovalDecisionSection
+              record={approvalRecord}
+              onDecided={onApprovalDecided}
+            />
+          ) : null}
+          <StepReview
+            value={form}
+            onChange={patchForm}
+            readOnly
+            hideHeader
+          />
+        </div>
       ) : (
         <div className="flex flex-col gap-10">
           <StepCreateJob value={form} onChange={patchForm} />
