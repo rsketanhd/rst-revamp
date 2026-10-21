@@ -236,7 +236,7 @@ export function StepReview({
                     <span>
                       Source:{' '}
                       <span className="font-semibold text-[#2D2061]">
-                        {item.source === 'new' ? 'New' : 'Old'}
+                        {item.source === 'new' ? 'Accept New' : 'Keep Existing'}
                       </span>
                     </span>
                     <span>
@@ -254,6 +254,26 @@ export function StepReview({
             ))}
           </div>
         )}
+        <div className="mt-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.04em] text-[#8B8B9E]">
+            Penalty criteria
+          </p>
+          {value.penaltyCriteria.length === 0 ? (
+            <p className="mt-1.5 text-sm text-[#8B8B9E]">None</p>
+          ) : (
+            <div className="mt-2 flex flex-col gap-2">
+              {value.penaltyCriteria.map((item) => (
+                <p key={item.id} className="text-sm text-[#1a1a2e]">
+                  <span className="font-semibold text-[#2D2061]">
+                    {item.label}
+                  </span>
+                  {' — '}
+                  {criteriaText(item)}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
       </ReviewSection>
 
       {/* 4. Client Details */}

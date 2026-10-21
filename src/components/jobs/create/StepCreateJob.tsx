@@ -6,6 +6,7 @@ import { JOBS, type JobListing } from '../../../data/jobs'
 import { getExtraJobs } from '../../../data/jobStore'
 import {
   defaultCreateJobForm,
+  jobTitleAnalyzerTags,
   type CreateJobFormState,
   type CreateMethod,
 } from './types'
@@ -230,6 +231,15 @@ function CopyFromExisting({ value, onChange }: Props) {
       sourceJobId: row.id,
       jobTitle: row.title,
       department: row.department,
+      criteria: value.criteria.map((item) =>
+        item.id === 'jobTitle'
+          ? {
+              ...item,
+              value: row.title,
+              tags: jobTitleAnalyzerTags(row.title),
+            }
+          : item,
+      ),
     })
   }
 

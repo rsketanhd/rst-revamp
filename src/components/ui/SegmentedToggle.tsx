@@ -16,7 +16,7 @@ export type SegmentedToggleProps<T extends string> = {
 }
 
 /**
- * Compact two/three-option pill toggle (e.g. Old / New on Job Analyzer).
+ * Compact two/three-option pill toggle (e.g. Keep Existing / Accept New).
  */
 export function SegmentedToggle<T extends string>({
   value,
@@ -31,7 +31,7 @@ export function SegmentedToggle<T extends string>({
       role="group"
       aria-label={ariaLabel}
       className={cn(
-        'inline-flex shrink-0 rounded-full border border-[#E0DFE8] bg-[#F4F4F8] p-0.5',
+        'inline-flex shrink-0 rounded-full border border-[#E0DFE8] bg-white p-0.5',
         disabled && 'opacity-50',
         className,
       )}
@@ -45,10 +45,10 @@ export function SegmentedToggle<T extends string>({
             disabled={disabled}
             onClick={() => onChange(option.value)}
             className={cn(
-              'inline-flex h-6 min-w-[2.5rem] items-center justify-center rounded-full px-2.5 text-[11px] font-semibold transition-colors',
+              'inline-flex h-7 items-center justify-center rounded-full px-3 text-[11px] font-semibold whitespace-nowrap transition-colors',
               active
                 ? 'bg-[#2D2061] text-white shadow-sm'
-                : 'text-[#8B8FA3] hover:text-[#2D2061]',
+                : 'bg-transparent text-[#8B8FA3] hover:text-[#2D2061]',
             )}
           >
             {option.label}

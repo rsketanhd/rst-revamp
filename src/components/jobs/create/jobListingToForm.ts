@@ -3,6 +3,7 @@ import { getExtraJobs, upsertExtraJob } from '../../../data/jobStore'
 import type { AiCreateJobNavState } from './aiCreateJobData'
 import {
   defaultCreateJobForm,
+  jobTitleAnalyzerTags,
   type CreateJobFormState,
 } from './types'
 
@@ -72,7 +73,11 @@ Lead Recruiter: ${job.recruiter}`,
 
     criteria: defaultCreateJobForm.criteria.map((item) =>
       item.id === 'jobTitle'
-        ? { ...item, value: job.title }
+        ? {
+            ...item,
+            value: job.title,
+            tags: jobTitleAnalyzerTags(job.title),
+          }
         : item,
     ),
 

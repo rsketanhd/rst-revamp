@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ClipboardList,
@@ -19,6 +19,16 @@ import { ViewQuestionsPanel } from '../components/jeeves/ViewQuestionsPanel'
 import { SettingsUnderlineTabs } from '../components/settings/SettingsUnderlineTabs'
 import {
   Button,
+  DataTable,
+  DataTableBody,
+  DataTableEmpty,
+  DataTableHead,
+  DataTablePaginationBar,
+  DataTableRow,
+  DataTableSortHeader,
+  DataTableTd,
+  DataTableTh,
+  Pagination,
   SegmentedControl,
   ThreeDotsMenu,
   toast,
@@ -37,6 +47,7 @@ import {
 } from '../data/jeevesPreInterviewSets'
 
 const TOAST_TITLE = 'Jeeves AI'
+const COL_SPAN = 7
 
 const VIEW_TABS: Array<{ value: PreInterviewView; label: string }> = [
   { value: 'sets', label: 'Pre-Interview Sets' },
@@ -49,20 +60,21 @@ const LIBRARY_TABS: Array<{ value: PreInterviewLibraryTab; label: string }> = [
   { value: 'assessment', label: 'Assessments' },
 ]
 
-const BADGE_CLASS =
-  'rounded-full px-2 py-0.5 text-[10px] font-semibold'
-
-const LIST_PANEL_CLASS =
-  'overflow-hidden rounded-[10px] border border-[#E8E6F0] bg-white shadow-[0_4px_18px_rgba(45,32,97,0.04)]'
+const BADGE_CLASS = 'rounded-full px-2 py-0.5 text-[10px] font-semibold'
 
 const SEARCH_INPUT_CLASS =
   'h-10 w-full rounded-md border border-[#E0DDEA] bg-white py-2 pl-10 pr-3 text-sm text-[#2D2061] outline-none placeholder:text-[#A0A0B2] focus:border-[#2D2061] focus:ring-2 focus:ring-[#2D2061]/10'
 
-const SET_HEADER_CLASS =
-  'hidden grid-cols-[auto_minmax(0,1.6fr)_4.5rem_8.5rem_3.5rem_7rem_2.5rem] gap-3 border-b border-[#E8E6F0] bg-[#FAFAFC] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.04em] text-[#8B8B9E] lg:grid'
+type SortKey = 'name' | 'questions' | 'passMark' | 'sent' | 'updatedOn'
+type SortDir = 'asc' | 'desc'
 
-const SET_ROW_CLASS =
-  'grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-4 py-3.5 lg:grid-cols-[auto_minmax(0,1.6fr)_4.5rem_8.5rem_3.5rem_7rem_2.5rem] lg:items-center'
+const TABLE_COLUMNS: Array<{ id: SortKey; label: string }> = [
+  { id: 'name', label: 'Set' },
+  { id: 'questions', label: 'Questions' },
+  { id: 'passMark', label: 'Pass mark' },
+  { id: 'sent', label: 'Sent' },
+  { id: 'updatedOn', label: 'Updated on' },
+]
 
 /**
  * Jeeves AI (Chatbot) — Pre-Interview Sets library and sent interviews.
@@ -78,6 +90,10 @@ export function JeevesAiPage() {
   const [selected, setSelected] = useState<Record<string, boolean>>({})
   const [questionsSet, setQuestionsSet] = useState<PreInterviewSet | null>(null)
   const [inviteSet, setInviteSet] = useState<PreInterviewSet | null>(null)
+  const [page, setPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [sortKey, setSortKey] = useState<SortKey>('name')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
 
   const filteredSets = useMemo(
     () =>
@@ -85,6 +101,26 @@ export function JeevesAiPage() {
         matchesSetQuery(set, query),
       ),
     [allSets, libraryTab, query],
+  )
+
+  const sortedSets = useMemo(() => {
+    const rows = [...filteredSets]
+    rows.sort((a, b) => {
+      const cmp = sortValue(a, sortKey).localeCompare(
+        sortValue(b, sortKey),
+        undefined,
+        { numeric: true },
+      )
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+    return rows
+  }, [filteredSets, sortKey, sortDir])
+
+  const totalPages = Math.max(1, Math.ceil(sortedSets.length / rowsPerPage))
+  const currentPage = Math.min(page, totalPages)
+  const pageRows = sortedSets.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage,
   )
 
   const viewOptions = VIEW_TABS.map((tab) => ({
@@ -97,27 +133,33 @@ export function JeevesAiPage() {
     label: `${tab.label} (${countSetsByLibrary(allSets, tab.value)})`,
   }))
 
-  const allVisibleSelected =
-    filteredSets.length > 0 && filteredSets.every((set) => selected[set.id])
-  const someVisibleSelected =
-    filteredSets.some((set) => selected[set.id]) && !allVisibleSelected
-  const selectAllRef = useRef<HTMLInputElement>(null)
+  const allPageSelected =
+    pageRows.length > 0 && pageRows.every((set) => selected[set.id])
 
-  useEffect(() => {
-    if (selectAllRef.current) {
-      selectAllRef.current.indeterminate = someVisibleSelected
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((dir) => (dir === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
     }
-  }, [someVisibleSelected])
+  }
 
   function toggleAll(checked: boolean) {
-    setSelected((current) => {
-      const next = { ...current }
-      for (const set of filteredSets) {
-        if (checked) next[set.id] = true
-        else delete next[set.id]
-      }
-      return next
-    })
+    if (!checked) {
+      setSelected((current) => {
+        const next = { ...current }
+        pageRows.forEach((set) => {
+          delete next[set.id]
+        })
+        return next
+      })
+      return
+    }
+    setSelected((current) => ({
+      ...current,
+      ...Object.fromEntries(pageRows.map((set) => [set.id, true])),
+    }))
   }
 
   function toggleOne(id: string) {
@@ -159,6 +201,7 @@ export function JeevesAiPage() {
           setView(next)
           setQuery('')
           setSelected({})
+          setPage(1)
         }}
       />
 
@@ -171,6 +214,7 @@ export function JeevesAiPage() {
             onChange={(next) => {
               setLibraryTab(next)
               setSelected({})
+              setPage(1)
             }}
             className="w-auto shrink-0 self-start"
           />
@@ -192,7 +236,10 @@ export function JeevesAiPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <SearchField
               value={query}
-              onChange={setQuery}
+              onChange={(next) => {
+                setQuery(next)
+                setPage(1)
+              }}
               placeholder="Search by set name or question"
               aria-label="Search by set name or question"
               className="min-w-0 flex-1"
@@ -218,34 +265,58 @@ export function JeevesAiPage() {
             </p>
           </div>
 
-          <div className={LIST_PANEL_CLASS}>
-            <div className={SET_HEADER_CLASS}>
-              <div className="flex items-center">
+          <DataTable
+            minWidthClassName="min-w-[64rem] lg:min-w-[72rem]"
+            footer={
+              <DataTablePaginationBar
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={(next) => {
+                  setRowsPerPage(next)
+                  setPage(1)
+                }}
+                pagination={
+                  <Pagination
+                    page={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                  />
+                }
+              />
+            }
+          >
+            <DataTableHead>
+              <DataTableTh checkbox>
                 <input
-                  ref={selectAllRef}
                   type="checkbox"
-                  checked={allVisibleSelected}
+                  checked={allPageSelected}
                   onChange={(e) => toggleAll(e.target.checked)}
-                  className="size-4 shrink-0 rounded border-line accent-[#2D2061]"
-                  aria-label="Select all sets"
+                  aria-label="Select all on this page"
+                  className="size-4 shrink-0 rounded border-[#C8C5D6] accent-[#2D2061]"
                 />
-              </div>
-              <span>Set</span>
-              <span className="text-center">Questions</span>
-              <span>Pass mark</span>
-              <span className="text-center">Sent</span>
-              <span>Updated on</span>
-              <span className="sr-only">Actions</span>
-            </div>
-
-            {filteredSets.length === 0 ? (
-              <EmptyState message="No Pre-Interview Sets match this view." />
-            ) : (
-              <ul className="divide-y divide-[#E8E6F0]">
-                {filteredSets.map((set) => (
+              </DataTableTh>
+              {TABLE_COLUMNS.map((column) => (
+                <DataTableSortHeader
+                  key={column.id}
+                  label={column.label}
+                  direction={sortKey === column.id ? sortDir : null}
+                  onSort={() => toggleSort(column.id)}
+                />
+              ))}
+              <DataTableTh className="w-12 text-center">
+                <span className="sr-only">Actions</span>
+              </DataTableTh>
+            </DataTableHead>
+            <DataTableBody>
+              {pageRows.length === 0 ? (
+                <DataTableEmpty colSpan={COL_SPAN}>
+                  No Pre-Interview Sets match this view.
+                </DataTableEmpty>
+              ) : (
+                pageRows.map((set, index) => (
                   <PreInterviewSetRow
                     key={set.id}
                     set={set}
+                    zebra={index % 2 === 1}
                     checked={Boolean(selected[set.id])}
                     onCheckedChange={() => toggleOne(set.id)}
                     onOpen={() =>
@@ -259,10 +330,10 @@ export function JeevesAiPage() {
                       )
                     }
                   />
-                ))}
-              </ul>
-            )}
-          </div>
+                ))
+              )}
+            </DataTableBody>
+          </DataTable>
         </>
       ) : (
         <AllPreInterviewsPanel />
@@ -314,16 +385,9 @@ function SearchField({
   )
 }
 
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="px-5 py-10 text-center text-sm text-[#6B6B80]">
-      {message}
-    </div>
-  )
-}
-
 function PreInterviewSetRow({
   set,
+  zebra,
   checked,
   onCheckedChange,
   onOpen,
@@ -332,6 +396,7 @@ function PreInterviewSetRow({
   onEdit,
 }: {
   set: PreInterviewSet
+  zebra: boolean
   checked: boolean
   onCheckedChange: () => void
   onOpen: () => void
@@ -340,6 +405,9 @@ function PreInterviewSetRow({
   onEdit: () => void
 }) {
   const nextVersion = set.version + 1
+  const progressPct =
+    set.total === 0 ? 0 : Math.round((set.completed / set.total) * 100)
+
   const menuItems: ThreeDotsMenuItem[] = [
     {
       id: 'preview',
@@ -394,27 +462,23 @@ function PreInterviewSetRow({
     },
   ]
 
-  const progressPct =
-    set.total === 0 ? 0 : Math.round((set.completed / set.total) * 100)
-
   return (
-    <li className={SET_ROW_CLASS}>
-      <div className="flex items-center pt-0.5 lg:pt-0">
+    <DataTableRow className={zebra ? 'bg-[#FAFAFC]' : undefined}>
+      <DataTableTd checkbox>
         <input
           type="checkbox"
           checked={checked}
           onChange={onCheckedChange}
-          className="size-4 shrink-0 rounded border-line accent-[#2D2061]"
           aria-label={`Select ${set.name}`}
+          className="size-4 shrink-0 rounded border-[#C8C5D6] accent-[#2D2061]"
         />
-      </div>
-
-      <div className="min-w-0">
+      </DataTableTd>
+      <DataTableTd className="!whitespace-normal">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onOpen}
-            className="text-left text-sm font-bold text-[#1A1A2E] hover:text-[#2D2061] hover:underline"
+            className="text-left text-[13px] font-semibold text-[#1A1A2E] hover:text-[#2D2061] hover:underline"
           >
             {set.name}
           </button>
@@ -443,47 +507,25 @@ function PreInterviewSetRow({
             {set.completed} of {set.total} completed
           </span>
         </div>
-
-        <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-[#6B6B80] lg:hidden">
-          <MetaCell label="Questions" value={String(set.questionCount)} />
-          <div>
-            <span className="font-semibold text-[#8B8B9E]">Pass mark</span>
-            <p className="mt-0.5 font-medium text-[#2D2061]">
-              <PassMarkCell set={set} />
-            </p>
-          </div>
-          <MetaCell label="Sent" value={String(set.sentCount)} />
-          <MetaCell label="Updated on" value={set.updatedOn} />
-        </div>
-      </div>
-
-      <p className="hidden text-center text-sm font-medium tabular-nums text-[#2D2061] lg:block">
+      </DataTableTd>
+      <DataTableTd className="text-center tabular-nums">
         {set.questionCount}
-      </p>
-      <div className="hidden text-sm text-[#2D2061] lg:block">
+      </DataTableTd>
+      <DataTableTd className="!whitespace-normal">
         <PassMarkCell set={set} />
-      </div>
-      <p className="hidden text-center text-sm font-medium tabular-nums text-[#2D2061] lg:block">
+      </DataTableTd>
+      <DataTableTd className="text-center tabular-nums">
         {set.sentCount}
-      </p>
-      <p className="hidden text-sm text-[#6B6B80] lg:block">{set.updatedOn}</p>
-
-      <div className="flex justify-end">
+      </DataTableTd>
+      <DataTableTd muted>{set.updatedOn}</DataTableTd>
+      <DataTableTd className="text-center">
         <ThreeDotsMenu
           triggerLabel={`Actions for ${set.name}`}
+          side="left"
           items={menuItems}
         />
-      </div>
-    </li>
-  )
-}
-
-function MetaCell({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <span className="font-semibold text-[#8B8B9E]">{label}</span>
-      <p className="mt-0.5 font-medium text-[#2D2061]">{value}</p>
-    </div>
+      </DataTableTd>
+    </DataTableRow>
   )
 }
 
@@ -502,8 +544,8 @@ function KindBadge({ kind }: { kind: PreInterviewSet['kind'] }) {
         </span>
       )
     default: {
-      const _exhaustive: never = kind
-      return _exhaustive
+      const exhaustive: never = kind
+      return exhaustive
     }
   }
 }
@@ -516,8 +558,30 @@ function PassMarkCell({ set }: { set: PreInterviewSet }) {
     <span>
       <span className="font-semibold">{set.passMarkPercent}%</span>
       {set.bestScorePts != null ? (
-        <span className="text-[#8B8B9E]"> Best score {set.bestScorePts} pts</span>
+        <span className="text-[#8B8B9E]">
+          {' '}
+          Best score {set.bestScorePts} pts
+        </span>
       ) : null}
     </span>
   )
+}
+
+function sortValue(set: PreInterviewSet, key: SortKey): string {
+  switch (key) {
+    case 'name':
+      return set.name
+    case 'questions':
+      return String(set.questionCount)
+    case 'passMark':
+      return set.passMarkPercent == null ? '' : String(set.passMarkPercent)
+    case 'sent':
+      return String(set.sentCount)
+    case 'updatedOn':
+      return set.updatedOn
+    default: {
+      const exhaustive: never = key
+      return exhaustive
+    }
+  }
 }

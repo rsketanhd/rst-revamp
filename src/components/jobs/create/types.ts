@@ -25,6 +25,31 @@ export type AnalyzerCriteria = {
   info?: string
 }
 
+/** Suggested alternate titles shown on the Job Title analyzer card. */
+export const JOB_TITLE_SUGGESTIONS = [
+  'Data Scientist',
+  'Data Science Specialist',
+  'Data Science Professional',
+  'Data Science Analyst',
+  'Data Science Researcher',
+  'Data Science Consultant',
+  'Data Science Expert',
+  'Data Science Practitioner',
+] as const
+
+/**
+ * Build the Job Title chip list — primary title first, then related suggestions.
+ */
+export function jobTitleAnalyzerTags(primaryTitle = ''): string[] {
+  const primary = primaryTitle.trim()
+  const suggestions = [...JOB_TITLE_SUGGESTIONS]
+  if (!primary) return suggestions
+  const rest = suggestions.filter(
+    (title) => title.toLowerCase() !== primary.toLowerCase(),
+  )
+  return [primary, ...rest]
+}
+
 export type CreateJobFormState = {
   method: CreateMethod
   /** Catalog job copied on step 1; empty until one is selected */
@@ -66,6 +91,8 @@ export type CreateJobFormState = {
 
   // Analyzer
   criteria: AnalyzerCriteria[]
+  /** Criteria that lower a candidate’s score. */
+  penaltyCriteria: AnalyzerCriteria[]
 
   // Client details
   clientContact: string
@@ -125,17 +152,17 @@ export const defaultCreateJobForm: CreateJobFormState = {
   aiEntry: false,
   providedRole: '',
   jobReqId: '',
-  jobTitle: 'Head of Engineering',
-  jobDescription: `Job Title: Head of Engineering
-Department: Engineering / Technology
-Industry: SaaS / Software Technology
+  jobTitle: 'Data Scientist',
+  jobDescription: `Job Title: Data Scientist
+Department: Data / Analytics
+Industry: Data Science
 Employment Type: Full-Time
 Number of Positions: 2
 Hiring Priority: High`,
 
-  primaryCity: 'London',
+  primaryCity: 'Jaipur',
   primaryState: '',
-  primaryCountry: 'UK',
+  primaryCountry: 'India',
   secondaryCity: '',
   secondaryState: '',
   secondaryCountry: '',
@@ -152,7 +179,7 @@ Hiring Priority: High`,
   startDate: '',
   endDate: '',
   maskRecruitment: false,
-  industry: '',
+  industry: 'Data Science',
   jobCategory: '',
   jobSubCategory: '',
   maskClassification: false,
@@ -163,47 +190,89 @@ Hiring Priority: High`,
     {
       id: 'jobTitle',
       label: 'Job Title',
-      source: 'new',
-      value: 'Software Developer',
-      weight: 5,
+      source: 'old',
+      value: 'Data Scientist',
+      weight: 10,
+      tags: [...JOB_TITLE_SUGGESTIONS],
       info: 'Official job title used for matching, boards, and candidate search.',
-    },
-    {
-      id: 'jobPurpose',
-      label: 'Job Purpose',
-      source: 'new',
-      value: 'Develop high-quality software solutions',
-      weight: 25,
-      info: 'High-level purpose of the role and its impact on the organization.',
     },
     {
       id: 'duties',
       label: 'Job Duties and Responsibilities',
       source: 'new',
       value:
-        'Write clean, maintainable code; Collaborate with team members; Troubleshoot and debug applications; Perform code reviews; Participate in software development life cycle',
-      weight: 50,
+        'Develop and implement data models and algorithms, analyze large datasets, collaborate with cross-functional teams, and mentor junior data scientists.',
+      weight: 20,
       info: 'Day-to-day responsibilities evaluated when scoring candidate fit.',
+    },
+    {
+      id: 'qualifications',
+      label: 'Required Qualifications',
+      source: 'new',
+      value:
+        'Degrees: Bachelor, Master, PhD with Specialization: Data Science, Statistics, Mathematics, Computer Science.',
+      weight: 10,
+      info: 'Education and specialization requirements for this role.',
     },
     {
       id: 'skills',
       label: 'Must Have Skills',
       source: 'new',
       value: '',
-      tags: ['Programming', 'Problem-solving'],
-      badge: 'Client',
+      tags: [
+        'Python',
+        'R',
+        'Machine Learning',
+        'Statistical Modeling',
+        'Data Visualization',
+        'SQL',
+        'Data Manipulation',
+      ],
       weight: 25,
       info: 'Required skills that candidates must meet for shortlisting.',
+    },
+    {
+      id: 'goodToHaveSkills',
+      label: 'Good to have Skills',
+      source: 'new',
+      value: '',
+      tags: [
+        'Problem Solving',
+        'Attention to Detail',
+        'Communication',
+        'Hadoop',
+        'Spark',
+        'AWS',
+        'Azure',
+        'Google Cloud',
+        'Natural Language Processing',
+        'Deep Learning',
+        'Leadership',
+        'Mentoring',
+      ],
+      weight: 10,
+      info: 'Nice-to-have skills that strengthen a candidate’s fit score.',
     },
     {
       id: 'industry',
       label: 'Industry',
       source: 'new',
-      value: 'Data Analysis',
-      weight: 5,
+      value: 'Data Science',
+      tags: ['Data Science'],
+      weight: 10,
       info: 'Primary industry context used for benchmarks and recommendations.',
     },
+    {
+      id: 'location',
+      label: 'Location',
+      source: 'new',
+      value: 'Jaipur, India',
+      tags: ['Jaipur', 'India'],
+      weight: 15,
+      info: 'Preferred work location used when matching candidates.',
+    },
   ],
+  penaltyCriteria: [],
 
   clientContact: '',
   clientContactSecondary: '',
@@ -222,7 +291,7 @@ Hiring Priority: High`,
   companyCurrent: true,
   companyPast: false,
   excludeCompanies: [],
-  locations: ['Ahmedabad, Gujarat, India'],
+  locations: ['Jaipur, India'],
   rsPlusCandidatesCount: 6,
 
   visibleOnCareerPage: true,

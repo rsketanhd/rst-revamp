@@ -7,6 +7,8 @@ import {
 } from 'react'
 import { cn } from '../../lib/cn'
 
+export type PercentSliderTone = 'success' | 'danger'
+
 export type PercentSliderProps = {
   value: number
   onChange: (value: number) => void
@@ -17,10 +19,34 @@ export type PercentSliderProps = {
   className?: string
   /** Accessible name */
   'aria-label'?: string
+  /** Green for general criteria; red for penalty criteria. */
+  tone?: PercentSliderTone
+}
+
+const TONE_STYLES: Record<
+  PercentSliderTone,
+  { fill: string; tip: string; caret: string; thumb: string; focus: string; shadow: string }
+> = {
+  success: {
+    fill: 'bg-[#22A45A]',
+    tip: 'bg-[#22A45A]',
+    caret: 'border-t-[#22A45A]',
+    thumb: 'bg-[#22A45A]',
+    focus: 'focus-visible:ring-[#22A45A]/40',
+    shadow: 'shadow-[0_1px_3px_rgba(34,164,90,0.45)]',
+  },
+  danger: {
+    fill: 'bg-[#D92D20]',
+    tip: 'bg-[#D92D20]',
+    caret: 'border-t-[#D92D20]',
+    thumb: 'bg-[#D92D20]',
+    focus: 'focus-visible:ring-[#D92D20]/40',
+    shadow: 'shadow-[0_1px_3px_rgba(217,45,32,0.45)]',
+  },
 }
 
 /**
- * Single-thumb percent slider with green fill, solid green thumb,
+ * Single-thumb percent slider with fill, solid thumb,
  * and tooltip + caret above the handle (Job Analyzer).
  */
 export function PercentSlider({
@@ -32,7 +58,9 @@ export function PercentSlider({
   disabled = false,
   className,
   'aria-label': ariaLabel = 'Weight',
+  tone = 'success',
 }: PercentSliderProps) {
+  const toneClass = TONE_STYLES[tone]
   const id = useId()
   const trackRef = useRef<HTMLDivElement>(null)
 
@@ -115,7 +143,10 @@ export function PercentSlider({
         {/* Track */}
         <div className="absolute left-0 right-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-[#E6E8EE]" />
         <div
-          className="absolute left-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-[#22A45A]"
+          className={cn(
+            'absolute left-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full',
+            toneClass.fill,
+          )}
           style={{ width: `${pct}%` }}
         />
 
@@ -124,11 +155,19 @@ export function PercentSlider({
           className="pointer-events-none absolute bottom-full z-10 flex -translate-x-1/2 flex-col items-center"
           style={{ left: `${pct}%` }}
         >
-          <span className="inline-flex min-w-[2rem] items-center justify-center rounded-[4px] bg-[#22A45A] px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+          <span
+            className={cn(
+              'inline-flex min-w-[2rem] items-center justify-center rounded-[4px] px-1.5 py-0.5 text-[11px] font-bold leading-none text-white',
+              toneClass.tip,
+            )}
+          >
             {value}%
           </span>
           <span
-            className="size-0 border-x-[5px] border-t-[5px] border-x-transparent border-t-[#22A45A]"
+            className={cn(
+              'size-0 border-x-[5px] border-t-[5px] border-x-transparent',
+              toneClass.caret,
+            )}
             aria-hidden="true"
           />
         </div>
@@ -145,9 +184,11 @@ export function PercentSlider({
           onKeyDown={onKey}
           onPointerDown={startDrag}
           className={cn(
-            'absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#22A45A] shadow-[0_1px_3px_rgba(34,164,90,0.45)]',
-            'ring-2 ring-white',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22A45A]/40 focus-visible:ring-offset-1',
+            'absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white',
+            toneClass.thumb,
+            toneClass.shadow,
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
+            toneClass.focus,
             !disabled && 'cursor-grab active:cursor-grabbing',
           )}
           style={{ left: `${pct}%` }}
