@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import logo from '../../assets/Logo.png'
 import { getUserRole, setAuthenticated, type UserRole } from '../../lib/auth'
+import { clearAuthEmail } from '../../lib/copilot'
 import { cn } from '../../lib/cn'
 import { Collapse } from '../ui'
 
@@ -60,6 +61,7 @@ export type SideNavigationProps = {
   onCollapsedChange?: (collapsed: boolean) => void
   sections?: NavSection[]
   showAiCopilot?: boolean
+  onAiCopilotClick?: () => void
 }
 
 const RECRUITER_NAV_SECTIONS: NavSection[] = [
@@ -241,6 +243,7 @@ export function SideNavigation({
   onCollapsedChange,
   sections,
   showAiCopilot,
+  onAiCopilotClick,
 }: SideNavigationProps) {
   const [uncontrolledCollapsed, setUncontrolledCollapsed] =
     useState(defaultCollapsed)
@@ -277,6 +280,7 @@ export function SideNavigation({
 
   function handleLogout() {
     setAuthenticated(false)
+    clearAuthEmail()
     navigate('/login', { replace: true })
   }
 
@@ -374,6 +378,7 @@ export function SideNavigation({
         {aiCopilotVisible ? (
           <button
             type="button"
+            onClick={onAiCopilotClick}
             title={collapsed ? 'AI Copilot' : undefined}
             className={cn(
               'inline-flex items-center text-sm font-semibold text-white shadow-sm',

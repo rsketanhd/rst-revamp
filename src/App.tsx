@@ -19,6 +19,7 @@ import { CreatePreInterviewSetPage } from './pages/CreatePreInterviewSetPage'
 import { PreInterviewSetDetailPage } from './pages/PreInterviewSetDetailPage'
 import { KnowledgebaseArticlePage } from './pages/KnowledgebaseArticlePage'
 import { KnowledgebasePage } from './pages/KnowledgebasePage'
+import { CopilotSetupPage } from './pages/CopilotSetupPage'
 import { LoginPage } from './pages/LoginPage'
 import { ModulePage } from './pages/ModulePage'
 import { MyApplicationsPage } from './pages/MyApplicationsPage'
@@ -46,6 +47,15 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+
+          <Route
+            path="/copilot-setup"
+            element={
+              <RequireAuth>
+                <CopilotSetupPage />
+              </RequireAuth>
+            }
+          />
 
           <Route
             element={

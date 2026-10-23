@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, BookOpen, RefreshCw } from 'lucide-react'
+import { Bell, BookOpen, CircleHelp, RefreshCw } from 'lucide-react'
 import {
   getMyProfile,
   getProfileDesignation,
@@ -14,8 +14,12 @@ import {
   NotificationsPanel,
   type AppNotification,
 } from './NotificationsPanel'
+import { HelpFeedbackModal } from './HelpFeedbackModal'
 import { ProfileMenu, type ProfileMenuItemId, type ProfileMenuProps } from './ProfileMenu'
 import { getUserRole, setAuthenticated } from '../../lib/auth'
+
+const TOP_BAR_PILL =
+  'inline-flex h-8 items-center gap-1.5 rounded-full border border-[#D5D2E2] bg-white px-2.5 text-xs font-semibold text-[#2D2061] shadow-sm transition-colors hover:border-[#2D2061] hover:bg-[#F5F5F8] sm:px-3 sm:text-sm'
 
 export type AppTopBarProps = {
   /** ISO or display string, e.g. `"08/14/2023 9:23 PM"` */
@@ -64,6 +68,7 @@ export function AppTopBar({
   const [internalSyncing, setInternalSyncing] = useState(false)
   const [panelOpen, setPanelOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const [notifications, setNotifications] = useState<AppNotification[]>(
     () => notificationsProp ?? DEFAULT_NOTIFICATIONS,
   )
@@ -187,9 +192,27 @@ export function AppTopBar({
       <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
         <button
           type="button"
+          onClick={() => {
+            setPanelOpen(false)
+            setProfileOpen(false)
+            setHelpOpen(true)
+          }}
+          aria-label="Help"
+          className={TOP_BAR_PILL}
+        >
+          <CircleHelp
+            className="size-4 shrink-0"
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
+          <span className="hidden sm:inline">Help</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => navigate('/knowledgebase')}
           aria-label="Knowledgebase"
-          className="relative inline-flex h-8 items-center gap-1.5 rounded-full border border-[#D5D2E2] bg-white px-2.5 text-xs font-semibold text-[#2D2061] shadow-sm transition-colors hover:border-[#2D2061] hover:bg-[#F5F5F8] sm:px-3 sm:text-sm"
+          className={cn('relative', TOP_BAR_PILL)}
         >
           <BookOpen
             className="size-4 shrink-0"
@@ -258,6 +281,14 @@ export function AppTopBar({
           candidateSummary={
             profileSummary ?? (onItemSelect ? undefined : candidateSummary)
           }
+        />
+
+        <HelpFeedbackModal
+          open={helpOpen}
+          onClose={() => setHelpOpen(false)}
+          onSubmit={async (payload) => {
+            console.info('feedback submit', payload)
+          }}
         />
       </div>
     </div>

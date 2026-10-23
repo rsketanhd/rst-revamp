@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react'
-import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { CopilotChatPanel } from '../copilot'
+import { getUserRole } from '../../lib/auth'
+import { getAuthEmail, hasCompletedCopilotSetup } from '../../lib/copilot'
 import { SideNavigation } from './SideNavigation'
 import { cn } from '../../lib/cn'
 
@@ -17,6 +20,11 @@ function getInitialCollapsed() {
 
 export function AppShell({ className }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(getInitialCollapsed)
+  const [copilotOpen, setCopilotOpen] = useState(false)
+  const collapsedBeforeMaximize = useRef<boolean | null>(null)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const userRole = getUserRole()
 
   // Auto-collapse sidebar on mobile/tablet so main content has usable width.
   useEffect(() => {
@@ -29,6 +37,44 @@ export function AppShell({ className }: AppShellProps) {
     return () => media.removeEventListener('change', syncCollapsed)
   }, [])
 
+  // Open chat after first-run setup navigates here with openCopilot state.
+  useEffect(() => {
+    const state = location.state as { openCopilot?: boolean } | null
+    if (!state?.openCopilot) return
+    setCopilotOpen(true)
+    navigate(
+      { pathname: location.pathname, search: location.search },
+      { replace: true, state: {} },
+    )
+  }, [location.pathname, location.search, location.state, navigate])
+
+  function handleCopilotMaximizedChange(maximized: boolean) {
+    if (maximized) {
+      collapsedBeforeMaximize.current = collapsed
+      setCollapsed(true)
+      return
+    }
+    if (collapsedBeforeMaximize.current != null) {
+      setCollapsed(collapsedBeforeMaximize.current)
+      collapsedBeforeMaximize.current = null
+      return
+    }
+    if (!window.matchMedia(COMPACT_SHELL_MQ).matches) {
+      setCollapsed(false)
+    }
+  }
+
+  function handleCopilotClose() {
+    handleCopilotMaximizedChange(false)
+    setCopilotOpen(false)
+  }
+
+  const needsCopilotSetup =
+    userRole === 'candidate' && !hasCompletedCopilotSetup(getAuthEmail())
+  if (needsCopilotSetup) {
+    return <Navigate to="/copilot-setup" replace />
+  }
+
   return (
     <div
       className={cn(
@@ -39,6 +85,7 @@ export function AppShell({ className }: AppShellProps) {
       <SideNavigation
         collapsed={collapsed}
         onCollapsedChange={setCollapsed}
+        onAiCopilotClick={() => setCopilotOpen(true)}
       />
 
       {/* Right content fills remaining width; pages control their own scroll */}
@@ -47,6 +94,12 @@ export function AppShell({ className }: AppShellProps) {
           <Outlet />
         </main>
       </div>
+
+      <CopilotChatPanel
+        open={copilotOpen}
+        onClose={handleCopilotClose}
+        onMaximizedChange={handleCopilotMaximizedChange}
+      />
     </div>
   )
 }

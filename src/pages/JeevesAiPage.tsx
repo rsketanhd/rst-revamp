@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import {
   ClipboardList,
   Copy,
-  Info,
   Play,
   QrCode,
   Search,
@@ -218,20 +217,6 @@ export function JeevesAiPage() {
             }}
             className="w-auto shrink-0 self-start"
           />
-
-          <div className="flex items-start gap-2.5 rounded-lg border border-[#D4DCF0] bg-[#EEF2FA] px-3.5 py-3">
-            <Info
-              className="mt-0.5 size-4 shrink-0 text-[#3B6BC4]"
-              strokeWidth={2}
-              aria-hidden="true"
-            />
-            <p className="text-sm leading-relaxed text-[#3A4A6B]">
-              The Default set is used for every chat unless a recruiter or a
-              trigger picks another one. Send an assessment on its own, or
-              straight after a chat in the same link (choose it when sending, or
-              in a trigger).
-            </p>
-          </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <SearchField

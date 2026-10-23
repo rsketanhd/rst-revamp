@@ -20,6 +20,10 @@ import {
   setAuthenticated,
   validateEmail,
 } from '../lib/auth'
+import {
+  hasCompletedCopilotSetup,
+  setAuthEmail,
+} from '../lib/copilot'
 import { reactivateAccountOnLogin } from '../data/accountSettings'
 
 type AuthView = 'sign-in' | 'sign-up' | 'forgot-password' | 'check-mail'
@@ -51,7 +55,14 @@ export function LoginPage() {
       }
 
       setAuthenticated(true, values.role)
-      navigate('/dashboard', { replace: true })
+      setAuthEmail(values.email)
+
+      const needsCopilotSetup =
+        values.role === 'candidate' &&
+        !hasCompletedCopilotSetup(values.email)
+      navigate(needsCopilotSetup ? '/copilot-setup' : '/dashboard', {
+        replace: true,
+      })
     } finally {
       setIsSubmitting(false)
     }
