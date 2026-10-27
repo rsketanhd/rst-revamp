@@ -41,17 +41,6 @@ export function AiCreateJobFlow({ open, onClose }: AiCreateJobFlowProps) {
     })
   }
 
-  function handleSkipFromDuplicates(selected: SimilarJobMatch | null) {
-    const text = prompt.trim()
-    goToWizard({
-      manualEntry: true,
-      aiPrompt: text || undefined,
-      similarJobId: selected?.id,
-      similarJobTitle: selected?.title,
-      similarJobDepartment: selected?.department,
-    })
-  }
-
   function handlePromptContinue(nextPrompt: string) {
     setPrompt(nextPrompt.trim())
     setStep('duplicates')
@@ -88,7 +77,7 @@ export function AiCreateJobFlow({ open, onClose }: AiCreateJobFlowProps) {
       <AiCreateJobDuplicatePanel
         open={open && step === 'duplicates'}
         onClose={resetAndClose}
-        onSkipToManual={handleSkipFromDuplicates}
+        onPrevious={() => setStep('prompt')}
         onSkipAndContinue={handleSkipAndContinue}
         onSaveDraft={handleSaveDraft}
       />

@@ -9,13 +9,21 @@ import {
 } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '../../lib/cn'
-import type { PipelineStage, PipelineStageId } from '../../data/applications'
+/** Shared chevron-pipeline stage shape (Applications + Talent Pool). */
+export type FunnelStage = {
+  id: string
+  label: string
+  count: number
+  /** Weekly delta; null = no change */
+  weeklyChange: number | null
+}
 
 export type PipelineFunnelProps = {
-  stages: PipelineStage[]
-  activeId: PipelineStageId
-  onChange: (id: PipelineStageId) => void
+  stages: FunnelStage[]
+  activeId: string
+  onChange: (id: string) => void
   className?: string
+  'aria-label'?: string
 }
 
 /** Depth of each arrow point / notch, in px */
@@ -43,6 +51,7 @@ export function PipelineFunnel({
   activeId,
   onChange,
   className,
+  'aria-label': ariaLabel = 'Application pipeline',
 }: PipelineFunnelProps) {
   const scrollerRef = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState({ left: false, right: false })
@@ -142,7 +151,7 @@ export function PipelineFunnel({
 
   return (
     <section
-      aria-label="Application pipeline"
+      aria-label={ariaLabel}
       className={cn('relative w-full min-w-0', className)}
     >
       {edges.left ? (

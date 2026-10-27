@@ -15,8 +15,8 @@ const primaryBtnClass =
 export type AiCreateJobDuplicatePanelProps = {
   open: boolean
   onClose: () => void
-  /** Skip AI flow and open the manual wizard, keeping any selected job */
-  onSkipToManual: (selected: SimilarJobMatch | null) => void
+  /** Return to the AI prompt panel */
+  onPrevious: () => void
   /**
    * Continue into the wizard. Passes the selected similar job when one
    * was chosen; otherwise continues without copying.
@@ -32,7 +32,7 @@ export type AiCreateJobDuplicatePanelProps = {
 export function AiCreateJobDuplicatePanel({
   open,
   onClose,
-  onSkipToManual,
+  onPrevious,
   onSkipAndContinue,
   onSaveDraft,
   similarJobs = AI_SIMILAR_JOBS,
@@ -59,10 +59,10 @@ export function AiCreateJobDuplicatePanel({
           <Button
             type="button"
             variant="outline"
-            onClick={() => onSkipToManual(selected)}
+            onClick={onPrevious}
             className={outlineBtnClass}
           >
-            Skip to Manual
+            Previous
           </Button>
           <div className="flex gap-3">
             <Button

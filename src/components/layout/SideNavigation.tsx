@@ -121,6 +121,18 @@ const RECRUITER_NAV_SECTIONS: NavSection[] = [
         label: 'Talent CRM',
         to: '/talent-crm',
         icon: navIcon(UserRoundCog),
+        children: [
+          {
+            id: 'talent-pool',
+            label: 'Talent Pool',
+            to: '/talent-crm/talent-pool',
+          },
+          {
+            id: 'campaigns',
+            label: 'Campaigns',
+            to: '/talent-crm/campaigns',
+          },
+        ],
       },
       {
         id: 'jeeves-ai',
