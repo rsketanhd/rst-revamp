@@ -6,6 +6,7 @@ import {
   ProfileCompletenessBanner,
   RecentActivityList,
   RecentlyAppliedList,
+  ReplayCopilotSetupBanner,
 } from '../components/candidate-dashboard'
 import {
   CANDIDATE_DASHBOARD_STATS,
@@ -46,6 +47,8 @@ export function CandidateDashboardPage() {
         title="Dashboard"
         subtitle="Track your applications, profile views, and recent activity."
       />
+
+      <ReplayCopilotSetupBanner />
 
       <CandidateStatCards stats={stats} />
 

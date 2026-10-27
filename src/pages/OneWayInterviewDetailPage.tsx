@@ -248,9 +248,9 @@ export function OneWayInterviewDetailPage() {
   function handleRowAction(actionId: string, invite: OneWayInvite) {
     switch (actionId) {
       case 'viewAssessment':
-        toast.success(`Opening assessment for ${invite.name}.`, {
-          title: 'View Assessment',
-        })
+        navigate(
+          `/e2e-interviews/one-way/${interviewId}/assessment/${invite.id}`,
+        )
         return
       case 'sendReminder':
         toast.success(`Reminder sent to ${invite.email}.`, {

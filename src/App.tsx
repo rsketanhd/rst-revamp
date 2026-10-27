@@ -29,6 +29,7 @@ import { MyProfilePage } from './pages/MyProfilePage'
 import { CreateOneWayInterviewPage } from './pages/CreateOneWayInterviewPage'
 import { InterviewSchedulerPage } from './pages/InterviewSchedulerPage'
 import { OneWayInterviewDetailPage } from './pages/OneWayInterviewDetailPage'
+import { OneWayViewAssessmentPage } from './pages/OneWayViewAssessmentPage'
 import { OneWayInterviewsPage } from './pages/OneWayInterviewsPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { JobStatisticsOverviewPage } from './pages/JobStatisticsOverviewPage'
@@ -122,6 +123,10 @@ export default function App() {
             <Route
               path="/e2e-interviews/one-way/:interviewId"
               element={<OneWayInterviewDetailPage />}
+            />
+            <Route
+              path="/e2e-interviews/one-way/:interviewId/assessment/:inviteId"
+              element={<OneWayViewAssessmentPage />}
             />
             <Route
               path="/e2e-interviews/one-way/:interviewId/edit"
