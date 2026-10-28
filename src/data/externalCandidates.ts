@@ -163,3 +163,57 @@ export function fetchCandidateSearchResults(
     hasMore: start + pageSize < all.length,
   }
 }
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+}
+
+function buildExternalCandidateCvHtml(candidate: ExternalCandidate): string {
+  const name = escapeHtml(candidate.name)
+  const location = escapeHtml(candidate.location)
+  const headline = escapeHtml(candidate.headline)
+  const skills = candidate.skills.map(escapeHtml).join(', ')
+  const linkedin = candidate.linkedinUrl
+    ? `<p><a href="${escapeHtml(candidate.linkedinUrl)}" target="_blank" rel="noopener noreferrer">LinkedIn profile</a></p>`
+    : ''
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>${name} — CV</title>
+  <style>
+    body { font-family: Georgia, 'Times New Roman', serif; max-width: 720px; margin: 40px auto; padding: 0 24px; color: #1a1a2e; line-height: 1.5; }
+    h1 { font-size: 28px; margin: 0 0 4px; color: #2D2061; }
+    .meta { color: #6B6B80; font-size: 14px; margin-bottom: 24px; }
+    h2 { font-size: 16px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #D5D2E2; padding-bottom: 6px; margin: 28px 0 12px; color: #2D2061; }
+    p { margin: 0 0 10px; }
+  </style>
+</head>
+<body>
+  <h1>${name}</h1>
+  <p class="meta">${location}</p>
+  <h2>Summary</h2>
+  <p>${headline}</p>
+  ${linkedin}
+  <h2>Skills</h2>
+  <p>${skills}</p>
+</body>
+</html>`
+}
+
+/** Opens a printable CV preview for an external search candidate in a new window. */
+export function openExternalCandidateCv(candidate: ExternalCandidate): void {
+  const url = URL.createObjectURL(
+    new Blob([buildExternalCandidateCvHtml(candidate)], { type: 'text/html' }),
+  )
+  if (!window.open(url, '_blank', 'noopener,noreferrer')) {
+    URL.revokeObjectURL(url)
+    return
+  }
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
+}

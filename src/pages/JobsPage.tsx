@@ -476,28 +476,28 @@ export function JobsPage() {
       id: 'active',
       label: 'Active jobs',
       value: stats.activeJobs,
-      footerLabel: 'My active jobs',
+      footerLabel: 'My Active Jobs',
       footerValue: myStats.activeJobs,
     },
     {
       id: 'applicants',
       label: 'Total applicants',
       value: stats.totalApplicants,
-      footerLabel: 'On my jobs',
+      footerLabel: 'On My Jobs',
       footerValue: myStats.totalApplicants,
     },
     {
       id: 'recommendations',
       label: 'Total recommendations',
       value: stats.totalRecommendations,
-      footerLabel: 'On my jobs',
+      footerLabel: 'On My Jobs',
       footerValue: myStats.totalRecommendations,
     },
     {
       id: 'offers',
       label: 'Total offers',
       value: stats.totalOffers,
-      footerLabel: 'On my jobs',
+      footerLabel: 'On My Jobs',
       footerValue: myStats.totalOffers,
     },
   ]
@@ -523,29 +523,17 @@ export function JobsPage() {
           }
         />
 
-        <div className="mb-5 grid grid-cols-1 items-start gap-3 sm:mb-6 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="mb-5 grid grid-cols-1 gap-2.5 sm:mb-6 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
           {statCards.map((stat) => (
-            <article
+            <JobStatCard
               key={stat.id}
-              className="min-w-0 self-start rounded-xl border border-[#E8E6F0] bg-white px-4 pt-2.5 pb-1.5 sm:px-5"
-            >
-              <p className="text-[11px] font-semibold uppercase leading-none tracking-[0.04em] text-[#6B6B80]">
-                {stat.label}
-              </p>
-              <p className="mt-1.5 text-[1.5rem] font-bold leading-none tabular-nums text-[#2D2061] sm:text-[1.625rem]">
-                {formatStat(stat.value)}
-              </p>
-              <div className="mt-2 flex items-center justify-between gap-3 border-t border-[#ECEAF3] pt-1.5">
-                <p className="text-[12px] font-medium leading-none text-[#6B6B80]">
-                  {stat.footerLabel}
-                </p>
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#DCEBFF] px-1.5 text-[11px] font-semibold leading-none tabular-nums text-[#2F6FD6]">
-                  {formatStat(stat.footerValue)}
-                </span>
-              </div>
-            </article>
+              label={stat.label}
+              value={stat.value}
+              footerLabel={stat.footerLabel}
+              footerValue={stat.footerValue}
+            />
           ))}
-        </div>
+        </section>
 
         <div className="mb-5 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center">
           <div className="relative min-w-0 flex-1">
@@ -830,6 +818,32 @@ export function JobsPage() {
         }
       />
     </div>
+  )
+}
+
+function JobStatCard({
+  label,
+  value,
+  footerLabel,
+  footerValue,
+}: {
+  label: string
+  value: number
+  footerLabel: string
+  footerValue: number
+}) {
+  return (
+    <article className="flex min-w-0 flex-col gap-1.5 rounded-lg border border-[#E8EAF0] bg-[#F8FAFC] px-3.5 py-3 sm:px-4 sm:py-3.5">
+      <p className="text-[14px] font-medium uppercase tracking-[0.02em] text-[#626889]">
+        {label}
+      </p>
+      <p className="text-[1.5rem] font-bold leading-none tabular-nums text-[#2D2061] sm:text-[1.625rem]">
+        {formatStat(value)}
+      </p>
+      <p className="text-[14px] font-medium text-[#666666]">
+        {footerLabel} ({formatStat(footerValue)})
+      </p>
+    </article>
   )
 }
 

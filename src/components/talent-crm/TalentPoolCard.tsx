@@ -7,7 +7,7 @@ import {
   type TalentPool,
   type TalentPoolVisibility,
 } from '../../data/talentCrm'
-import { ThreeDotsMenu, toast, type ThreeDotsMenuItem } from '../ui'
+import { ThreeDotsMenu, type ThreeDotsMenuItem } from '../ui'
 
 export type TalentPoolCardProps = {
   pool: TalentPool
@@ -16,8 +16,6 @@ export type TalentPoolCardProps = {
   onEdit?: (pool: TalentPool) => void
   onDelete?: (pool: TalentPool) => void
 }
-
-const TOAST_TITLE = 'Talent CRM'
 
 /**
  * Single talent pool row card — title, visibility, metrics, and actions.
@@ -34,20 +32,14 @@ export function TalentPoolCard({
       id: 'edit',
       label: 'Edit',
       icon: <Pencil strokeWidth={1.75} aria-hidden="true" />,
-      onSelect: () => {
-        onEdit?.(pool)
-        toast.success(`Editing “${pool.name}”.`, { title: TOAST_TITLE })
-      },
+      onSelect: () => onEdit?.(pool),
     },
     {
       id: 'delete',
       label: 'Delete',
       destructive: true,
       icon: <Trash2 strokeWidth={1.75} aria-hidden="true" />,
-      onSelect: () => {
-        onDelete?.(pool)
-        toast.success(`“${pool.name}” deleted.`, { title: TOAST_TITLE })
-      },
+      onSelect: () => onDelete?.(pool),
     },
   ]
 

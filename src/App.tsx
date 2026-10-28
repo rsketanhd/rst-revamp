@@ -44,6 +44,9 @@ import { CreateClientPage } from './pages/CreateClientPage'
 import { TalentCrmPage } from './pages/TalentCrmPage'
 import { CreateTalentPoolPage } from './pages/CreateTalentPoolPage'
 import { TalentPoolDetailPage } from './pages/TalentPoolDetailPage'
+import { CampaignDetailPage } from './pages/CampaignDetailPage'
+import { CampaignsPage } from './pages/CampaignsPage'
+import { CreateCampaignPage } from './pages/CreateCampaignPage'
 
 export default function App() {
   return (
@@ -104,6 +107,15 @@ export default function App() {
               path="/talent-crm"
               element={<Navigate to="/talent-crm/talent-pool" replace />}
             />
+            <Route path="/talent-crm/campaigns" element={<CampaignsPage />} />
+            <Route
+              path="/talent-crm/campaigns/new"
+              element={<CreateCampaignPage />}
+            />
+            <Route
+              path="/talent-crm/campaigns/:campaignId"
+              element={<CampaignDetailPage />}
+            />
             <Route
               path="/talent-crm/talent-pool"
               element={<TalentCrmPage />}
@@ -116,7 +128,6 @@ export default function App() {
               path="/talent-crm/talent-pool/:poolId"
               element={<TalentPoolDetailPage />}
             />
-            <Route path="/talent-crm/campaigns" element={<ModulePage />} />
             <Route path="/jeeves-ai" element={<JeevesAiPage />} />
             <Route
               path="/jeeves-ai/pre-interview-sets/new"

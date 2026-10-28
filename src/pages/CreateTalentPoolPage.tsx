@@ -15,6 +15,7 @@ import { StepPoolReview } from '../components/talent-crm/create/StepPoolReview'
 import {
   CREATE_TALENT_POOL_STEPS,
   createTalentPoolFormFromNavState,
+  saveEditedTalentPool,
   type CreateTalentPoolFormState,
   type CreateTalentPoolNavState,
 } from '../components/talent-crm/createTalentPoolData'
@@ -52,12 +53,14 @@ function canLeaveAutoUpdate(form: CreateTalentPoolFormState): boolean {
 }
 
 /**
- * Create New Talent Pool wizard — Details → Auto Update → Review.
+ * Create / Edit Talent Pool wizard — Details → Auto Update → Review.
  */
 export function CreateTalentPoolPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const navState = (location.state as CreateTalentPoolNavState | null) ?? null
+  const editPoolId = navState?.editPoolId
+  const isEditing = Boolean(editPoolId)
 
   const [step, setStep] = useState(0)
   const [maxReached, setMaxReached] = useState(0)
@@ -82,11 +85,23 @@ export function CreateTalentPoolPage() {
     setSuccess(false)
   }
 
+  function finishWizard() {
+    if (editPoolId) {
+      const saved = saveEditedTalentPool(editPoolId, form)
+      if (!saved) {
+        fail('Talent pool could not be updated.')
+        return
+      }
+      toast.success(`“${saved.name}” was updated.`, { title: TOAST_TITLE })
+    }
+    setSuccess(true)
+  }
+
   function handleContinue() {
     if (step === 0 && !canLeaveDetails(form)) return
     if (step === 1 && !canLeaveAutoUpdate(form)) return
     if (step >= LAST_STEP) {
-      setSuccess(true)
+      finishWizard()
       return
     }
     goTo(step + 1)
@@ -100,6 +115,9 @@ export function CreateTalentPoolPage() {
     setStep((current) => Math.max(0, current - 1))
   }
 
+  const continueLabel =
+    step >= LAST_STEP ? (isEditing ? 'Save' : 'Create') : 'Continue'
+
   return (
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col bg-white">
       <AppTopBar />
@@ -107,15 +125,23 @@ export function CreateTalentPoolPage() {
       {success ? (
         <div className="flex min-h-0 flex-1 items-center justify-center bg-white p-8">
           <SuccessMessage
-            title="Talent Pool Created Successfully!"
+            title={
+              isEditing
+                ? 'Talent Pool Updated Successfully!'
+                : 'Talent Pool Created Successfully!'
+            }
             primaryAction={{
               label: 'View All Pools',
               onClick: () => navigate(LIST_PATH),
             }}
-            secondaryAction={{
-              label: 'Add New Pool',
-              onClick: resetWizard,
-            }}
+            secondaryAction={
+              isEditing
+                ? undefined
+                : {
+                    label: 'Add New Pool',
+                    onClick: resetWizard,
+                  }
+            }
           />
         </div>
       ) : (
@@ -137,8 +163,12 @@ export function CreateTalentPoolPage() {
 
               <PageHeader
                 className="mt-1"
-                title="Create New Talent Pool"
-                subtitle="Set up outreach to your talent pool."
+                title={isEditing ? 'Edit Talent Pool' : 'Create New Talent Pool'}
+                subtitle={
+                  isEditing
+                    ? 'Update this talent pool details and criteria.'
+                    : 'Set up outreach to your talent pool.'
+                }
               />
             </header>
 
@@ -187,7 +217,7 @@ export function CreateTalentPoolPage() {
                 onClick={handleContinue}
                 className="min-w-[6.5rem] !bg-[#2D2061] hover:!bg-[#241a52]"
               >
-                {step >= LAST_STEP ? 'Create' : 'Continue'}
+                {continueLabel}
               </Button>
             </div>
           </footer>

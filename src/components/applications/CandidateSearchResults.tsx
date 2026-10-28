@@ -3,6 +3,7 @@ import { CornerDownRight, Loader2 } from 'lucide-react'
 import { Button, toast } from '../ui'
 import {
   fetchCandidateSearchResults,
+  openExternalCandidateCv,
   type CandidateSearchSource,
   type ExternalCandidate,
 } from '../../data/externalCandidates'
@@ -75,9 +76,7 @@ export function CandidateSearchResults({
           key={candidate.id}
           candidate={candidate}
           added={addedIds.includes(candidate.id)}
-          onViewCv={() =>
-            toast.success(`Opening ${candidate.name}'s CV.`, { title: 'View CV' })
-          }
+          onViewCv={() => openExternalCandidateCv(candidate)}
           onAddToJob={() => addToJob(candidate)}
         />
       ))}

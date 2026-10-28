@@ -1,3 +1,10 @@
+import {
+  getTalentPoolById,
+  updateTalentPool,
+  type TalentPool,
+  type TalentPoolVisibility,
+} from '../../data/talentCrm'
+
 export type TalentPoolPromptCriterionId =
   | 'skills'
   | 'experience'
@@ -293,6 +300,8 @@ export type CreateTalentPoolNavState = {
   similarPoolId?: string
   similarPoolName?: string
   refineCriteria?: TalentPoolRefineCriteria
+  /** Edit existing pool — open wizard prefilled from catalog/session */
+  editPoolId?: string
 }
 
 const DEFAULT_AI_OWNER = 'Sarah Johnson'
@@ -380,13 +389,87 @@ function skillsFromPrompt(prompt: string): string[] {
   return []
 }
 
-/**
- * Build wizard form from AI prompt / similar pool, or blank for manual entry.
- */
+function privacyFromVisibility(
+  visibility: TalentPoolVisibility,
+): TalentPoolPrivacy {
+  switch (visibility) {
+    case 'private':
+      return 'private'
+    case 'public':
+    case 'shared':
+      return 'public'
+    default: {
+      const exhaustive: never = visibility
+      return exhaustive
+    }
+  }
+}
+
+function visibilityFromPrivacy(
+  privacy: TalentPoolPrivacy,
+  fallback: TalentPoolVisibility,
+): TalentPoolVisibility {
+  switch (privacy) {
+    case 'private':
+      return 'private'
+    case 'public':
+      return 'public'
+    case '':
+      return fallback
+    default: {
+      const exhaustive: never = privacy
+      return exhaustive
+    }
+  }
+}
+
+/** Prefill the create wizard when editing an existing talent pool. */
+export function createTalentPoolFormFromPool(
+  pool: TalentPool,
+): CreateTalentPoolFormState {
+  return {
+    ...blankCreateTalentPoolForm(),
+    name: pool.name,
+    owners: [...pool.owners],
+    description: `Curated talent pool: ${pool.name}`,
+    privacy: privacyFromVisibility(pool.visibility),
+    autoUpdate: false,
+  }
+}
+
+/** Apply wizard fields onto an existing pool after Edit → Save. */
+export function applyFormToTalentPool(
+  pool: TalentPool,
+  form: CreateTalentPoolFormState,
+): TalentPool {
+  return {
+    ...pool,
+    name: form.name.trim(),
+    owners: [...form.owners],
+    visibility: visibilityFromPrivacy(form.privacy, pool.visibility),
+  }
+}
+
+/** Persist edited pool details from the wizard. */
+export function saveEditedTalentPool(
+  poolId: string,
+  form: CreateTalentPoolFormState,
+): TalentPool | null {
+  const existing = getTalentPoolById(poolId)
+  if (!existing) return null
+  return updateTalentPool(applyFormToTalentPool(existing, form))
+}
+
+/** Build wizard form from AI prompt / similar pool, edit target, or blank. */
 export function createTalentPoolFormFromNavState(
   state: CreateTalentPoolNavState | null,
 ): CreateTalentPoolFormState {
-  if (!state || state.manualEntry || !state.aiContinue) {
+  if (state?.editPoolId) {
+    const pool = getTalentPoolById(state.editPoolId)
+    if (pool) return createTalentPoolFormFromPool(pool)
+  }
+
+  if (!state?.aiContinue || state.manualEntry) {
     return blankCreateTalentPoolForm()
   }
 

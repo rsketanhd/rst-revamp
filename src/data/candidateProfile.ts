@@ -1,5 +1,6 @@
 import { getApplicantsForJob, getJobByCode } from './applications'
 import { getCandidates } from './candidates'
+import { TALENT_POOL_CANDIDATES } from './talentPoolDetail'
 
 export type ProfileOrigin = 'application' | 'candidate'
 
@@ -197,10 +198,86 @@ function neighbors<T extends { id: string }>(
   }
 }
 
+/** Profile URL; includes `poolId` when opened from a talent pool. */
+export function candidateProfilePath(
+  candidateId: string,
+  poolId?: string,
+): string {
+  if (!poolId) return `/candidates/${candidateId}`
+  return `/candidates/${candidateId}?poolId=${encodeURIComponent(poolId)}`
+}
+
+function talentPoolBackPath(poolId?: string): string {
+  return poolId
+    ? `/talent-crm/talent-pool/${poolId}`
+    : '/talent-crm/talent-pool'
+}
+
+function resolveDirectoryCandidate(
+  candidateId: string,
+): ProfileNavigation | null {
+  const candidates = getCandidates()
+  const candidate = candidates.find((item) => item.id === candidateId)
+  if (!candidate) return null
+  const { previousTo, nextTo } = neighbors(
+    candidates,
+    candidate.id,
+    (id) => candidateProfilePath(id),
+  )
+  return {
+    origin: 'candidate',
+    identity: {
+      id: candidate.id,
+      name: candidate.name,
+      email: candidate.email,
+      headline: `${candidate.designation} at ${candidate.currentCompany}`,
+      location: `${candidate.city}, ${candidate.country}`,
+      appliedAgo: 'Applied 3 days ago',
+    },
+    backTo: '/candidates',
+    backLabel: 'Back to "Candidates"',
+    previousTo,
+    nextTo,
+    showScoreSummary: false,
+  }
+}
+
+function resolveTalentPoolCandidate(
+  candidateId: string,
+  poolId?: string,
+): ProfileNavigation | null {
+  const poolCandidate = TALENT_POOL_CANDIDATES.find(
+    (item) => item.id === candidateId,
+  )
+  if (!poolCandidate) return null
+  const { previousTo, nextTo } = neighbors(
+    TALENT_POOL_CANDIDATES,
+    poolCandidate.id,
+    (id) => candidateProfilePath(id, poolId),
+  )
+  return {
+    origin: 'candidate',
+    identity: {
+      id: poolCandidate.id,
+      name: poolCandidate.name,
+      email: poolCandidate.email,
+      headline: `${poolCandidate.experience} · ${poolCandidate.source}`,
+      location: poolCandidate.location,
+      appliedAgo: `Updated ${poolCandidate.updatedOn}`,
+    },
+    backTo: talentPoolBackPath(poolId),
+    backLabel: 'Back to "Talent Pool"',
+    previousTo,
+    nextTo,
+    showScoreSummary: false,
+  }
+}
+
 export function resolveProfileNavigation(input: {
   jobCode?: string
   applicantId?: string
   candidateId?: string
+  poolId?: string
 }): ProfileNavigation | null {
   if (input.jobCode && input.applicantId) {
     const job = getJobByCode(input.jobCode)
@@ -231,32 +308,10 @@ export function resolveProfileNavigation(input: {
     }
   }
 
-  if (input.candidateId) {
-    const candidates = getCandidates()
-    const candidate = candidates.find((item) => item.id === input.candidateId)
-    if (!candidate) return null
-    const { previousTo, nextTo } = neighbors(
-      candidates,
-      candidate.id,
-      (id) => `/candidates/${id}`,
-    )
-    return {
-      origin: 'candidate',
-      identity: {
-        id: candidate.id,
-        name: candidate.name,
-        email: candidate.email,
-        headline: `${candidate.designation} at ${candidate.currentCompany}`,
-        location: `${candidate.city}, ${candidate.country}`,
-        appliedAgo: 'Applied 3 days ago',
-      },
-      backTo: '/candidates',
-      backLabel: 'Back to "Candidates"',
-      previousTo,
-      nextTo,
-      showScoreSummary: false,
-    }
-  }
+  if (!input.candidateId) return null
 
-  return null
+  return (
+    resolveDirectoryCandidate(input.candidateId) ??
+    resolveTalentPoolCandidate(input.candidateId, input.poolId)
+  )
 }

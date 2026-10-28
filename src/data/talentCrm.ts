@@ -8,6 +8,10 @@ export type TalentCrmMetric = {
   value: number
   change: number
   changeLabel: string
+  /** Appended to the main value, e.g. `%` for rates */
+  valueSuffix?: string
+  /** Appended to the change amount, e.g. `%` */
+  changeSuffix?: string
 }
 
 export type TalentPool = {
@@ -154,8 +158,43 @@ export const TALENT_POOLS: TalentPool[] = [
   },
 ]
 
+const TALENT_POOLS_STORAGE_KEY = 'rst_talent_pools'
+
+function sessionStore(): Storage | null {
+  return typeof sessionStorage === 'undefined' ? null : sessionStorage
+}
+
+function readStore(): TalentPool[] | null {
+  const raw = sessionStore()?.getItem(TALENT_POOLS_STORAGE_KEY)
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    return Array.isArray(parsed) ? (parsed as TalentPool[]) : null
+  } catch {
+    return null
+  }
+}
+
+function writeStore(pools: TalentPool[]): void {
+  sessionStore()?.setItem(TALENT_POOLS_STORAGE_KEY, JSON.stringify(pools))
+}
+
+/** Session list when present; otherwise a shallow copy of the seed catalog. */
+export function getTalentPools(): TalentPool[] {
+  return readStore() ?? [...TALENT_POOLS]
+}
+
 export function getTalentPoolById(poolId: string): TalentPool | undefined {
-  return TALENT_POOLS.find((pool) => pool.id === poolId)
+  return getTalentPools().find((pool) => pool.id === poolId)
+}
+
+export function updateTalentPool(pool: TalentPool): TalentPool {
+  writeStore(getTalentPools().map((row) => (row.id === pool.id ? pool : row)))
+  return pool
+}
+
+export function deleteTalentPool(poolId: string): void {
+  writeStore(getTalentPools().filter((pool) => pool.id !== poolId))
 }
 
 export function formatTalentMetric(value: number): string {

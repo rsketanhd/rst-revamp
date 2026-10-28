@@ -611,8 +611,14 @@ function NavGroupItem({
             ? 'grid-rows-[1fr] opacity-100'
             : 'grid-rows-[0fr] opacity-0',
         )}
+        aria-hidden={!isGroupOpen}
       >
-        <div className="min-h-0 overflow-hidden">
+        <div
+          className={cn(
+            'min-h-0 overflow-hidden',
+            !isGroupOpen && 'pointer-events-none',
+          )}
+        >
           <ul className="rounded-b-lg bg-white pb-1.5 pt-0.5">
             {item.children?.map((child) =>
               child.children?.length ? (
@@ -622,6 +628,7 @@ function NavGroupItem({
                   <NavLink
                     to={child.to}
                     title={child.label}
+                    tabIndex={isGroupOpen ? undefined : -1}
                     className={({ isActive }) =>
                       cn(
                         'flex min-h-9 items-center truncate py-2 pl-10 pr-3 text-[14px] transition-colors',

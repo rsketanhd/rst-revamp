@@ -8,14 +8,15 @@ import {
   TalentCrmMetricCards,
   TalentPoolCard,
 } from '../components/talent-crm'
-import { Button, SegmentedToggle } from '../components/ui'
+import { Button, ConfirmDeleteModal, SegmentedToggle, toast } from '../components/ui'
 import {
   countTalentCrmFilters,
+  deleteTalentPool,
   emptyTalentCrmFilters,
   filterTalentPools,
   formatPaddedCount,
+  getTalentPools,
   TALENT_CRM_METRICS,
-  TALENT_POOLS,
   type TalentCrmFilters,
   type TalentPool,
   type TalentPoolScope,
@@ -26,17 +27,20 @@ const SCOPE_OPTIONS: Array<{ value: TalentPoolScope; label: string }> = [
   { value: 'all', label: 'All Talent Pools' },
 ]
 
+const TOAST_TITLE = 'Talent CRM'
+
 /**
  * Talent CRM — Talent Pool landing (metrics, search, scope, pool list).
  */
 export function TalentCrmPage() {
   const navigate = useNavigate()
-  const [pools, setPools] = useState(TALENT_POOLS)
+  const [pools, setPools] = useState(() => getTalentPools())
   const [query, setQuery] = useState('')
   const [scope, setScope] = useState<TalentPoolScope>('my')
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [filters, setFilters] = useState<TalentCrmFilters>(emptyTalentCrmFilters)
+  const [pendingDelete, setPendingDelete] = useState<TalentPool | null>(null)
 
   const filtered = useMemo(
     () => filterTalentPools(pools, query, scope, filters),
@@ -49,8 +53,19 @@ export function TalentCrmPage() {
     navigate(`/talent-crm/talent-pool/${pool.id}`)
   }
 
-  function handleDeletePool(pool: TalentPool) {
-    setPools((current) => current.filter((row) => row.id !== pool.id))
+  function handleEditPool(pool: TalentPool) {
+    navigate('/talent-crm/talent-pool/new', {
+      state: { editPoolId: pool.id },
+    })
+  }
+
+  function confirmDelete() {
+    const pool = pendingDelete
+    if (!pool) return
+    deleteTalentPool(pool.id)
+    setPools(getTalentPools())
+    setPendingDelete(null)
+    toast.success(`“${pool.name}” was deleted.`, { title: TOAST_TITLE })
   }
 
   return (
@@ -154,11 +169,20 @@ export function TalentCrmPage() {
               key={pool.id}
               pool={pool}
               onOpen={handleOpenPool}
-              onDelete={handleDeletePool}
+              onEdit={handleEditPool}
+              onDelete={setPendingDelete}
             />
           ))
         )}
       </div>
+
+      <ConfirmDeleteModal
+        open={pendingDelete !== null}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+        title="Delete Talent Pool"
+        itemName={pendingDelete?.name}
+      />
     </PageContainer>
   )
 }

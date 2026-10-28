@@ -4,18 +4,21 @@ import {
   ArrowLeft,
   Check,
   GraduationCap,
-  Plus,
   Search,
   Send,
   SlidersHorizontal,
+  Sparkles,
   Star,
   UserPlus,
   UserRound,
 } from 'lucide-react'
+import { AddFetchCandidatePanel } from '../components/applications/AddFetchCandidatePanel'
 import { PipelineFunnel } from '../components/applications/PipelineFunnel'
 import { getApplicantRowMenuItems } from '../components/applications/applicantRowActions'
 import { PageContainer, PageHeader } from '../components/layout'
+import { CreateCampaignFlow } from '../components/talent-crm/CreateCampaignFlow'
 import { TalentPoolCandidatesFiltersPanel } from '../components/talent-crm/TalentPoolCandidatesFiltersPanel'
+import { candidateProfilePath } from '../data/candidateProfile'
 import {
   formatOwners,
   formatTalentMetric,
@@ -48,7 +51,6 @@ import {
   getVisibleTableColumns,
   Pagination,
   ThreeDotsMenu,
-  toast,
   type TableColumnConfig,
 } from '../components/ui'
 
@@ -76,7 +78,6 @@ const DEFAULT_COLUMNS: Array<TableColumnConfig & { id: CandidateColumnId }> = [
 ]
 
 const LIST_PATH = '/talent-crm/talent-pool'
-const TOAST_TITLE = 'Talent CRM'
 
 /**
  * Talent Pool details — pipeline, search/filter, and candidates table.
@@ -88,6 +89,8 @@ export function TalentPoolDetailPage() {
   const [activeStage, setActiveStage] =
     useState<TalentPoolCandidateStage>('lead')
   const [query, setQuery] = useState('')
+  const [addCandidateOpen, setAddCandidateOpen] = useState(false)
+  const [createCampaignOpen, setCreateCampaignOpen] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [columnsOpen, setColumnsOpen] = useState(false)
   const [filters, setFilters] = useState<TalentPoolCandidateFilters>(
@@ -167,7 +170,12 @@ export function TalentPoolDetailPage() {
       case 'name':
         return (
           <DataTableTd key={columnId}>
-            <span className="font-semibold text-[#2D2061]">{row.name}</span>
+            <Link
+              to={candidateProfilePath(row.id, poolId)}
+              className="font-semibold text-[#2D2061] hover:underline"
+            >
+              {row.name}
+            </Link>
           </DataTableTd>
         )
       case 'email':
@@ -227,24 +235,16 @@ export function TalentPoolDetailPage() {
             <>
               <Button
                 type="button"
-                onClick={() =>
-                  toast.success('Create Campaign coming soon.', {
-                    title: TOAST_TITLE,
-                  })
-                }
+                onClick={() => setCreateCampaignOpen(true)}
                 className="!h-10 w-full shrink-0 !rounded-md bg-[#2D2061] px-4 text-sm font-semibold text-white hover:bg-[#241a52] sm:w-auto"
               >
-                <Plus className="size-4" strokeWidth={2.25} aria-hidden="true" />
+                <Sparkles className="size-4" strokeWidth={2} aria-hidden="true" />
                 Create Campaign
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                onClick={() =>
-                  toast.success('Add candidate coming soon.', {
-                    title: TOAST_TITLE,
-                  })
-                }
+                onClick={() => setAddCandidateOpen(true)}
                 className="!h-10 w-full shrink-0 !rounded-md border-[#2D2061]/30 bg-white px-4 text-sm font-semibold text-[#2D2061] hover:bg-[#f7f6fb] sm:w-auto"
               >
                 <UserPlus className="size-4" strokeWidth={2} aria-hidden="true" />
@@ -402,6 +402,22 @@ export function TalentPoolDetailPage() {
         onClose={() => setColumnsOpen(false)}
         columns={columns}
         onApply={setColumns}
+      />
+
+      <AddFetchCandidatePanel
+        open={addCandidateOpen}
+        onClose={() => setAddCandidateOpen(false)}
+        job={{
+          id: pool.id,
+          code: pool.id.toUpperCase(),
+          title: pool.name,
+        }}
+      />
+
+      <CreateCampaignFlow
+        open={createCampaignOpen}
+        onClose={() => setCreateCampaignOpen(false)}
+        initialTalentPoolName={pool.name}
       />
     </PageContainer>
   )

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { PageContainer } from '../components/layout'
 import { CandidateProfileBanner } from '../components/candidate-profile/CandidateProfileBanner'
 import { CandidateDocumentsPanel } from '../components/candidate-profile/CandidateDocumentsPanel'
@@ -41,10 +41,12 @@ function defaultProfileTabs(showScoreSummary: boolean): ProfileTabConfig[] {
 export function CandidateProfilePage() {
   const navigate = useNavigate()
   const { jobCode, applicantId, candidateId } = useParams()
+  const [searchParams] = useSearchParams()
   const navigation = resolveProfileNavigation({
     jobCode,
     applicantId,
     candidateId,
+    poolId: searchParams.get('poolId') || undefined,
   })
   const [status, setStatus] = useState('New')
   const [tab, setTab] = useState('summary')
