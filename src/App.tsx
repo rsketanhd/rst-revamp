@@ -47,6 +47,7 @@ import { TalentPoolDetailPage } from './pages/TalentPoolDetailPage'
 import { CampaignDetailPage } from './pages/CampaignDetailPage'
 import { CampaignsPage } from './pages/CampaignsPage'
 import { CreateCampaignPage } from './pages/CreateCampaignPage'
+import { CommunicationHubPage } from './pages/CommunicationHubPage'
 
 export default function App() {
   return (
@@ -192,6 +193,7 @@ export default function App() {
             <Route path="/e2e-interviews/feedback" element={<ModulePage />} />
             <Route path="/offer-management" element={<OfferManagementPage />} />
             <Route path="/offer-management/new" element={<CreateOfferPage />} />
+            <Route path="/communication-hub" element={<CommunicationHubPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route
               path="/reports/job-statistics-overview"

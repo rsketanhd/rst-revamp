@@ -101,7 +101,7 @@ export function CandidateProfilePage() {
 
   return (
     <PageContainer contentClassName="gap-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="button"
           onClick={() => navigate(navigation.backTo)}

@@ -66,6 +66,10 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
     title: 'Offer Management',
     subtitle: 'Create, track, and manage candidate offers.',
   },
+  '/communication-hub': {
+    title: 'Communication Hub',
+    subtitle: 'Manage candidate conversations, threads, and outreach.',
+  },
   '/my-jobs': {
     title: 'All Jobs',
     subtitle: 'Browse and manage jobs relevant to your profile.',

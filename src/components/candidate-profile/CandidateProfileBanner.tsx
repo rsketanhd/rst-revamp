@@ -55,24 +55,28 @@ export function CandidateProfileBanner({
   }
 
   return (
-    <section className="overflow-hidden rounded-xl bg-[linear-gradient(100deg,#D45B86_0%,#8E3D78_38%,#3A2A6A_68%,#1B1744_100%)] text-white shadow-[0_8px_24px_rgba(45,32,97,0.12)]">
-      <div className="flex flex-col gap-5 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex min-w-0 items-start gap-4">
+    <section className="shrink-0 overflow-hidden rounded-xl bg-[linear-gradient(100deg,#D45B86_0%,#8E3D78_38%,#3A2A6A_68%,#1B1744_100%)] text-white shadow-[0_8px_24px_rgba(45,32,97,0.12)]">
+      <div className="flex min-h-[9.5rem] flex-col gap-5 px-5 py-6 sm:min-h-[10.5rem] sm:px-6 sm:py-7 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 items-center gap-4 sm:gap-5">
           <span
-            className="inline-flex size-16 shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-[#F3D5C4] text-lg font-semibold text-[#6B3A4A]"
+            className="inline-flex size-20 shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-[#F3D5C4] text-xl font-semibold text-[#6B3A4A] sm:size-[5.5rem] sm:text-2xl"
             aria-hidden="true"
           >
             {initials}
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-semibold tracking-tight">{identity.name}</h1>
-              <span className="rounded-full bg-[#D7E7FF] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#1A6FD0]">
+              <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">
+                {identity.name}
+              </h1>
+              <span className="rounded-full bg-[#D7E7FF] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#1A6FD0]">
                 New
               </span>
             </div>
-            <p className="mt-0.5 text-sm text-white/90">{identity.headline}</p>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-white/85">
+            <p className="mt-1 text-sm text-white/90 sm:text-[15px]">
+              {identity.headline}
+            </p>
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-white/85 sm:text-sm">
               <span className="inline-flex items-center gap-1.5">
                 <Mail className="size-3.5" strokeWidth={2} aria-hidden="true" />
                 {identity.email}
@@ -83,7 +87,7 @@ export function CandidateProfileBanner({
               </span>
               <span>{identity.appliedAgo}</span>
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-3.5 flex flex-wrap items-center gap-2">
               <span className="text-[11px] font-medium uppercase tracking-wide text-white/70">
                 Tags
               </span>
