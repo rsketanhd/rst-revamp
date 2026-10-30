@@ -400,7 +400,7 @@ export function CandidatesPage() {
       ) : null}
 
       <DataTable
-        minWidthClassName="min-w-[72rem]"
+        minWidthClassName="min-w-[28rem] sm:min-w-[48rem] lg:min-w-[64rem]"
         footer={
           <DataTablePaginationBar
             rowsPerPage={rowsPerPage}

@@ -980,7 +980,7 @@ export function ActiveCandidatesPanel() {
             No candidates match this filter.
           </p>
         ) : (
-          <table className="w-full min-w-[48rem] border-collapse text-left text-[12.5px]">
+          <table className="w-full min-w-[28rem] border-collapse text-left text-[12.5px] sm:min-w-[40rem] lg:min-w-[48rem]">
             <thead className="bg-[#FAFAFC] text-[11px] font-semibold uppercase tracking-[0.04em] text-[#8B8B9E]">
               <tr>
                 <th className="px-4 py-2.5">Candidate</th>

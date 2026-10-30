@@ -287,7 +287,7 @@ export function CampaignsPage() {
       </div>
 
       <DataTable
-        minWidthClassName="min-w-[72rem]"
+        minWidthClassName="min-w-[32rem] sm:min-w-[56rem] lg:min-w-[72rem]"
         footer={
           <DataTablePaginationBar
             rowsPerPage={rowsPerPage}

@@ -377,8 +377,12 @@ export function JobsPage() {
         removeListings([job])
         toast.success(`“${job.title}” was archived.`, { title: 'Archived' })
         return
-      case 'share':
       case 'interviewTeam':
+        navigate('/e2e-interviews/two-way/interview-sets/new', {
+          state: { jobCode: job.code, jobTitle: job.title },
+        })
+        return
+      case 'share':
       case 'oneWayQuestions':
       case 'mask':
         console.info('job action', jobCode, action)
@@ -429,8 +433,17 @@ export function JobsPage() {
         })
         clearSelection()
         return
-      case 'share':
       case 'interviewTeam':
+        if (selectedJobs.length === 1) {
+          const job = selectedJobs[0]
+          navigate('/e2e-interviews/two-way/interview-sets/new', {
+            state: { jobCode: job.code, jobTitle: job.title },
+          })
+          return
+        }
+        navigate('/e2e-interviews/two-way/interview-sets/new')
+        return
+      case 'share':
       case 'oneWayQuestions':
       case 'mask':
         console.info('bulk job action', actionId, selectedIds)
@@ -506,7 +519,7 @@ export function JobsPage() {
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden bg-white">
       <AppTopBar />
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-white p-4 sm:p-6 lg:p-8">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-white p-3 sm:p-5 lg:p-8">
         <PageHeader
           className="mb-5 sm:mb-6"
           title="Job Management"
@@ -560,7 +573,7 @@ export function JobsPage() {
           <button
             type="button"
             onClick={() => setFiltersOpen(true)}
-            className="relative inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#2D2061]/25 bg-white px-4 text-sm font-medium text-[#2D2061] shadow-[0_1px_2px_rgba(45,32,97,0.04)] transition-colors hover:bg-[#faf9fd]"
+            className="relative inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-lg border border-[#2D2061]/25 bg-white px-4 text-sm font-medium text-[#2D2061] shadow-[0_1px_2px_rgba(45,32,97,0.04)] transition-colors hover:bg-[#faf9fd] sm:w-auto"
           >
             <SlidersHorizontal className="size-4 shrink-0" aria-hidden="true" />
             Filter By

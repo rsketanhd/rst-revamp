@@ -401,7 +401,7 @@ export function InterviewSchedulerPage() {
           />
 
           <DataTable
-            minWidthClassName="min-w-[72rem] lg:min-w-[80rem]"
+            minWidthClassName="min-w-[32rem] sm:min-w-[56rem] lg:min-w-[72rem]"
             footer={
               <DataTablePaginationBar
                 rowsPerPage={rowsPerPage}

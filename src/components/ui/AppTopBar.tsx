@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, BookOpen, CircleHelp, RefreshCw } from 'lucide-react'
+import { Bell, BookOpen, CircleHelp, Menu, RefreshCw, X } from 'lucide-react'
 import {
   getMyProfile,
   getProfileDesignation,
@@ -8,6 +8,7 @@ import {
   getProfileInitials,
 } from '../../data/myProfile'
 import { hasUnseenKnowledgeRelease } from '../../data/releaseNotes'
+import { useShellNav } from '../layout/ShellNavContext'
 import { cn } from '../../lib/cn'
 import {
   DEFAULT_NOTIFICATIONS,
@@ -19,7 +20,7 @@ import { ProfileMenu, type ProfileMenuItemId, type ProfileMenuProps } from './Pr
 import { getUserRole, setAuthenticated } from '../../lib/auth'
 
 const TOP_BAR_PILL =
-  'inline-flex h-8 items-center gap-1.5 rounded-full border border-[#D5D2E2] bg-white px-2.5 text-xs font-semibold text-[#2D2061] shadow-sm transition-colors hover:border-[#2D2061] hover:bg-[#F5F5F8] sm:px-3 sm:text-sm'
+  'inline-flex size-8 items-center justify-center gap-1.5 rounded-full border border-[#D5D2E2] bg-white text-xs font-semibold text-[#2D2061] shadow-sm transition-colors hover:border-[#2D2061] hover:bg-[#F5F5F8] sm:h-8 sm:w-auto sm:px-3 sm:text-sm'
 
 export type AppTopBarProps = {
   /** ISO or display string, e.g. `"08/14/2023 9:23 PM"` */
@@ -65,6 +66,7 @@ export function AppTopBar({
   onViewProfile,
 }: AppTopBarProps) {
   const navigate = useNavigate()
+  const { mobileNavOpen, toggleMobileNav } = useShellNav()
   const [internalSyncing, setInternalSyncing] = useState(false)
   const [panelOpen, setPanelOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
@@ -168,26 +170,42 @@ export function AppTopBar({
         className,
       )}
     >
-      <button
-        type="button"
-        onClick={() => {
-          void handleSync()
-        }}
-        className="inline-flex min-w-0 items-center gap-1.5 text-xs text-[#6B6B80] transition-colors hover:text-[#2D2061] sm:gap-2 sm:text-sm"
-      >
-        <RefreshCw
-          className={cn(
-            'size-4 shrink-0 text-[#6B6B80]',
-            syncing && 'animate-spin',
+      <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+        <button
+          type="button"
+          onClick={toggleMobileNav}
+          aria-label={mobileNavOpen ? 'Close navigation' : 'Open navigation'}
+          aria-expanded={mobileNavOpen}
+          className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-[#2D2061] transition-colors hover:bg-black/5 lg:hidden"
+        >
+          {mobileNavOpen ? (
+            <X className="size-5" strokeWidth={2} aria-hidden="true" />
+          ) : (
+            <Menu className="size-5" strokeWidth={2} aria-hidden="true" />
           )}
-          strokeWidth={1.75}
-          aria-hidden="true"
-        />
-        <span className="truncate">
-          <span className="hidden sm:inline">Last Sync : </span>
-          <span className="font-medium text-[#4A4A60]">{lastSyncLabel}</span>
-        </span>
-      </button>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            void handleSync()
+          }}
+          className="inline-flex min-w-0 items-center gap-1.5 text-xs text-[#6B6B80] transition-colors hover:text-[#2D2061] sm:gap-2 sm:text-sm"
+        >
+          <RefreshCw
+            className={cn(
+              'size-4 shrink-0 text-[#6B6B80]',
+              syncing && 'animate-spin',
+            )}
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
+          <span className="hidden min-w-0 truncate sm:inline">
+            Last Sync :{' '}
+            <span className="font-medium text-[#4A4A60]">{lastSyncLabel}</span>
+          </span>
+        </button>
+      </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
         <button

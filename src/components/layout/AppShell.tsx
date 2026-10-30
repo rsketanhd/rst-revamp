@@ -1,41 +1,54 @@
 import type { ReactNode } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { CopilotChatPanel } from '../copilot'
 import { getUserRole } from '../../lib/auth'
 import { getAuthEmail, hasCompletedCopilotSetup } from '../../lib/copilot'
-import { SideNavigation } from './SideNavigation'
 import { cn } from '../../lib/cn'
+import { ShellNavProvider } from './ShellNavContext'
+import { SideNavigation } from './SideNavigation'
 
 export type AppShellProps = {
   className?: string
 }
 
-const COMPACT_SHELL_MQ = '(max-width: 1023px)'
+/** Matches Tailwind `lg` — desktop sidebar vs mobile drawer. */
+const DESKTOP_SHELL_MQ = '(min-width: 1024px)'
 
-function getInitialCollapsed() {
-  if (typeof window === 'undefined') return false
-  return window.matchMedia(COMPACT_SHELL_MQ).matches
+function getInitialDesktop() {
+  if (typeof window === 'undefined') return true
+  return window.matchMedia(DESKTOP_SHELL_MQ).matches
 }
 
 export function AppShell({ className }: AppShellProps) {
-  const [collapsed, setCollapsed] = useState(getInitialCollapsed)
+  const [isDesktop, setIsDesktop] = useState(getInitialDesktop)
+  const [collapsed, setCollapsed] = useState(() => !getInitialDesktop())
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [copilotOpen, setCopilotOpen] = useState(false)
   const collapsedBeforeMaximize = useRef<boolean | null>(null)
   const location = useLocation()
   const navigate = useNavigate()
   const userRole = getUserRole()
 
-  // Auto-collapse sidebar on mobile/tablet so main content has usable width.
   useEffect(() => {
-    const media = window.matchMedia(COMPACT_SHELL_MQ)
-    function syncCollapsed() {
-      if (media.matches) setCollapsed(true)
+    const media = window.matchMedia(DESKTOP_SHELL_MQ)
+    function sync() {
+      const desktop = media.matches
+      setIsDesktop(desktop)
+      if (!desktop) {
+        setCollapsed(true)
+        setMobileNavOpen(false)
+      }
     }
-    syncCollapsed()
-    media.addEventListener('change', syncCollapsed)
-    return () => media.removeEventListener('change', syncCollapsed)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
   }, [])
+
+  // Close the mobile drawer on navigation.
+  useEffect(() => {
+    setMobileNavOpen(false)
+  }, [location.pathname])
 
   // Open chat after first-run setup navigates here with openCopilot state.
   useEffect(() => {
@@ -48,6 +61,20 @@ export function AppShell({ className }: AppShellProps) {
     )
   }, [location.pathname, location.search, location.state, navigate])
 
+  useEffect(() => {
+    if (!mobileNavOpen) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMobileNavOpen(false)
+    }
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [mobileNavOpen])
+
   function handleCopilotMaximizedChange(maximized: boolean) {
     if (maximized) {
       collapsedBeforeMaximize.current = collapsed
@@ -59,7 +86,7 @@ export function AppShell({ className }: AppShellProps) {
       collapsedBeforeMaximize.current = null
       return
     }
-    if (!window.matchMedia(COMPACT_SHELL_MQ).matches) {
+    if (window.matchMedia(DESKTOP_SHELL_MQ).matches) {
       setCollapsed(false)
     }
   }
@@ -69,6 +96,17 @@ export function AppShell({ className }: AppShellProps) {
     setCopilotOpen(false)
   }
 
+  const shellNav = useMemo(
+    () => ({
+      isCompact: !isDesktop,
+      mobileNavOpen,
+      openMobileNav: () => setMobileNavOpen(true),
+      closeMobileNav: () => setMobileNavOpen(false),
+      toggleMobileNav: () => setMobileNavOpen((open) => !open),
+    }),
+    [isDesktop, mobileNavOpen],
+  )
+
   const needsCopilotSetup =
     userRole === 'candidate' && !hasCompletedCopilotSetup(getAuthEmail())
   if (needsCopilotSetup) {
@@ -76,31 +114,64 @@ export function AppShell({ className }: AppShellProps) {
   }
 
   return (
-    <div
-      className={cn(
-        'flex h-full max-h-full w-full overflow-hidden bg-white',
-        className,
-      )}
-    >
-      <SideNavigation
-        collapsed={collapsed}
-        onCollapsedChange={setCollapsed}
-        onAiCopilotClick={() => setCopilotOpen(true)}
-      />
+    <ShellNavProvider value={shellNav}>
+      <div
+        className={cn(
+          'flex h-full max-h-full w-full min-w-0 overflow-hidden bg-white',
+          className,
+        )}
+      >
+        {/*
+          Desktop rail: CSS-hidden below lg so layout never depends on JS
+          matchMedia (DevTools device mode can lag / mis-report).
+        */}
+        <div className="hidden h-full shrink-0 lg:flex">
+          <SideNavigation
+            collapsed={collapsed}
+            onCollapsedChange={setCollapsed}
+            onAiCopilotClick={() => setCopilotOpen(true)}
+          />
+        </div>
 
-      {/* Right content fills remaining width; pages control their own scroll */}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-white">
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white">
-          <Outlet />
-        </main>
+        {/* Mobile / tablet overlay drawer — out of document flow */}
+        <div
+          className={cn(
+            'fixed inset-0 z-[80] bg-black/45 transition-opacity duration-300 lg:hidden',
+            mobileNavOpen
+              ? 'pointer-events-auto opacity-100'
+              : 'pointer-events-none opacity-0',
+          )}
+          aria-hidden={!mobileNavOpen}
+          onClick={() => setMobileNavOpen(false)}
+        />
+        <SideNavigation
+          drawerMode
+          drawerOpen={mobileNavOpen}
+          collapsed={false}
+          onCollapsedChange={() => {}}
+          onAiCopilotClick={() => {
+            setMobileNavOpen(false)
+            setCopilotOpen(true)
+          }}
+          className={cn(
+            'shadow-[8px_0_32px_rgba(26,22,56,0.18)] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:hidden',
+            mobileNavOpen ? 'translate-x-0' : '-translate-x-full pointer-events-none',
+          )}
+        />
+
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white">
+          <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white">
+            <Outlet />
+          </main>
+        </div>
+
+        <CopilotChatPanel
+          open={copilotOpen}
+          onClose={handleCopilotClose}
+          onMaximizedChange={handleCopilotMaximizedChange}
+        />
       </div>
-
-      <CopilotChatPanel
-        open={copilotOpen}
-        onClose={handleCopilotClose}
-        onMaximizedChange={handleCopilotMaximizedChange}
-      />
-    </div>
+    </ShellNavProvider>
   )
 }
 

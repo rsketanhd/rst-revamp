@@ -41,13 +41,28 @@ export function DiscoveryCandidateCard({
 
   return (
     <article
+      role={onViewProfile ? 'link' : undefined}
+      tabIndex={onViewProfile ? 0 : undefined}
+      onClick={onViewProfile}
+      onKeyDown={(event) => {
+        if (!onViewProfile) return
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onViewProfile()
+        }
+      }}
       className={cn(
         'rounded-xl border border-[#E8E6F0] bg-white p-4 transition-shadow sm:p-5',
+        onViewProfile && 'cursor-pointer hover:border-[#C8C0E8] hover:shadow-[0_2px_8px_rgba(45,32,97,0.06)]',
         selected && 'border-[#C8C0E8] shadow-[0_2px_8px_rgba(45,32,97,0.06)]',
       )}
     >
       <div className="flex gap-3">
-        <label className="mt-1 shrink-0 cursor-pointer">
+        <label
+          className="mt-1 shrink-0 cursor-pointer"
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
           <input
             type="checkbox"
             checked={selected}
@@ -80,7 +95,11 @@ export function DiscoveryCandidateCard({
                   </p>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-1.5">
+                <div
+                  className="flex shrink-0 items-center gap-1.5"
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
                   <IconAction
                     label={`View profile of ${candidate.name}`}
                     onClick={onViewProfile}

@@ -1,4 +1,5 @@
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { useMemo } from 'react'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { PageContainer, PageHeader } from '../components/layout'
 import { getUserRole } from '../lib/auth'
@@ -27,6 +28,7 @@ import {
   DomainRulesPanel,
   getDefaultSettingsSectionForRole,
   getSettingsNavGroupsForRole,
+  getSettingsSectionPath,
   isSettingsSectionIdForRole,
   JobsGeneralPanel,
   JobsCareerPagePanel,
@@ -140,12 +142,32 @@ export function SettingsPage() {
     return <Navigate to={`/settings/${DEFAULT_APPROVALS_SECTION}`} replace />
   }
 
+  const navigate = useNavigate()
   const resolvedId = resolveSettingsSectionId(activeSectionId)
   const navGroups = getSettingsNavGroupsForRole(role)
   const pageSubtitle =
     role === 'candidate'
       ? 'Manage your account and notification preferences.'
       : 'Track credit balance, usage, and purchase history.'
+
+  const mobileSectionOptions = useMemo(() => {
+    const options: Array<{ value: string; label: string }> = []
+    for (const group of navGroups) {
+      for (const item of group.items) {
+        if (item.children?.length) {
+          for (const child of item.children) {
+            options.push({
+              value: child.id,
+              label: `${item.label} · ${child.label}`,
+            })
+          }
+        } else {
+          options.push({ value: item.id, label: item.label })
+        }
+      }
+    }
+    return options
+  }, [navGroups])
 
   return (
     <PageContainer contentClassName="gap-5">
@@ -160,8 +182,28 @@ export function SettingsPage() {
       ) : null}
       <PageHeader title="Settings" subtitle={pageSubtitle} />
 
+      <label className="block lg:hidden">
+        <span className="mb-1.5 block text-[12px] font-semibold uppercase tracking-wide text-[#8B8B9E]">
+          Section
+        </span>
+        <select
+          value={resolvedId}
+          onChange={(event) =>
+            navigate(getSettingsSectionPath(event.target.value as SettingsSectionId))
+          }
+          aria-label="Settings section"
+          className="h-11 w-full rounded-lg border border-[#E0DDEA] bg-white px-3 text-sm font-medium text-[#2D2061] outline-none focus:border-[#2D2061] focus:ring-2 focus:ring-[#2D2061]/10"
+        >
+          {mobileSectionOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
       <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-        <aside className="w-full shrink-0 lg:sticky lg:top-0 lg:w-[15.5rem] xl:w-[16.5rem]">
+        <aside className="hidden w-full shrink-0 lg:sticky lg:top-0 lg:block lg:w-[15.5rem] xl:w-[16.5rem]">
           <SettingsNav activeId={resolvedId} groups={navGroups} />
         </aside>
 

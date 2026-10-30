@@ -3,11 +3,13 @@ import { BookmarkPlus, X } from 'lucide-react'
 import { PageContainer } from '../components/layout'
 import {
   DiscoveryCandidateCard,
+  DiscoveryCandidateProfilePanel,
   DiscoveryChatPanel,
   DiscoveryFiltersPanel,
   DiscoveryPromptScreen,
 } from '../components/discovery'
 import { BulkActionsBar, Button, toast } from '../components/ui'
+import { cn } from '../lib/cn'
 import {
   AI_SUGGESTIONS,
   DEFAULT_PROMPT,
@@ -24,6 +26,7 @@ import {
 } from '../data/discovery'
 
 type ViewMode = 'prompt' | 'results'
+type MobileResultsPane = 'chat' | 'list'
 
 /**
  * Candidate Discovery — prompt search first, then chat + results refined by filters.
@@ -50,6 +53,10 @@ export function CandidateDiscoveryPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [selected, setSelected] = useState<Record<string, boolean>>({})
+  const [profileCandidateId, setProfileCandidateId] = useState<string | null>(
+    null,
+  )
+  const [mobilePane, setMobilePane] = useState<MobileResultsPane>('list')
 
   const results = useMemo(
     () =>
@@ -111,6 +118,8 @@ export function CandidateDiscoveryPage() {
     setListFilters(emptyDiscoveryListFilters())
     setDraftFilters(emptyDiscoveryListFilters())
     setSelected({})
+    setProfileCandidateId(null)
+    setMobilePane('list')
 
     const filtered = filterDiscoveryCandidates(
       allCandidates,
@@ -192,6 +201,7 @@ export function CandidateDiscoveryPage() {
   function handleCloseResults() {
     setView('prompt')
     setSelected({})
+    setProfileCandidateId(null)
   }
 
   function handleSaveSearch() {
@@ -207,7 +217,7 @@ export function CandidateDiscoveryPage() {
 
   if (view === 'prompt') {
     return (
-      <PageContainer contentClassName="gap-0 !px-6 sm:!px-10 lg:!px-14 xl:!px-16">
+      <PageContainer contentClassName="gap-0 !px-3 sm:!px-6 lg:!px-10 xl:!px-14">
         <DiscoveryPromptScreen
           prompt={prompt}
           onPromptChange={handlePromptChange}
@@ -234,125 +244,183 @@ export function CandidateDiscoveryPage() {
       contentClassName="!p-0 gap-0 min-h-0 flex-1 overflow-hidden"
       className="overflow-hidden"
     >
-      <div className="flex h-full min-h-0 flex-1 flex-col lg:flex-row">
-        <DiscoveryChatPanel
-          title={truncateTitle(activePrompt)}
-          messages={messages}
-          onSend={handleChatSend}
-          onOpenFilters={() => {
-            setDraftFilters({ ...listFilters })
-            setFiltersOpen(true)
-          }}
-        />
-
-        <section className="flex min-h-0 min-w-0 flex-1 flex-col bg-[#FAFAFC]">
-          <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#ECEAF3] bg-white px-4 py-3 sm:px-5">
-            <p className="text-sm font-semibold text-[#2D2061]">
-              {displayed.length} Candidates matching your search criteria
-              {results.length > displayed.length
-                ? ` · ${results.length} total`
-                : null}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleSaveSearch}
-                className="!h-9 !rounded-md border-[#E0DDEA] bg-white px-3 text-xs font-semibold text-[#2D2061] hover:bg-[#F7F6FA]"
-              >
-                <BookmarkPlus className="size-3.5" strokeWidth={2} />
-                Save Search
-              </Button>
-              <button
-                type="button"
-                onClick={handleCloseResults}
-                aria-label="Close results"
-                className="inline-flex size-9 items-center justify-center rounded-md text-[#6B6B80] transition-colors hover:bg-[#F7F6FA] hover:text-[#2D2061]"
-              >
-                <X className="size-5" strokeWidth={1.75} />
-              </button>
-            </div>
-          </header>
-
-          {selectedCount > 0 ? (
-            <div className="shrink-0 border-b border-[#ECEAF3] bg-white px-4 py-2.5 sm:px-5">
-              <BulkActionsBar
-                selectedCount={selectedCount}
-                entityLabel="Candidate"
-                actions={[{ id: 'sendMail', label: 'Send Mail' }]}
-                onAction={(id) => {
-                  if (id === 'sendMail') {
-                    toast.success(
-                      `Mail composer prepared for ${selectedCount} candidate(s).`,
-                      { title: 'Send Mail' },
-                    )
-                  }
-                }}
-                onClear={() => setSelected({})}
-                selectAll={{
-                  checked:
-                    displayed.length > 0 &&
-                    displayed.every((c) => selected[c.id]),
-                  indeterminate:
-                    selectedCount > 0 && selectedCount < displayed.length,
-                  onChange: (checked) => {
-                    if (!checked) {
-                      setSelected({})
-                      return
-                    }
-                    setSelected(
-                      Object.fromEntries(displayed.map((c) => [c.id, true])),
-                    )
-                  },
-                }}
-              />
-            </div>
-          ) : null}
-
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
-            {displayed.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-[#E0DDEA] bg-white px-6 py-12 text-center">
-                <p className="text-sm font-semibold text-[#2D2061]">
-                  No candidates match these filters
-                </p>
-                <p className="mt-1 text-sm text-[#8B8B9E]">
-                  Adjust your prompt, chat refinement, or Filters to expand
-                  results.
-                </p>
-              </div>
-            ) : (
-              displayed.map((candidate) => (
-                <DiscoveryCandidateCard
-                  key={candidate.id}
-                  candidate={candidate}
-                  selected={Boolean(selected[candidate.id])}
-                  onSelectChange={(checked) =>
-                    setSelected((current) => ({
-                      ...current,
-                      [candidate.id]: checked,
-                    }))
-                  }
-                  onViewProfile={() =>
-                    toast.success(`Opening profile for ${candidate.name}.`, {
-                      title: 'Profile',
-                    })
-                  }
-                  onMessage={() =>
-                    toast.success(`Compose message to ${candidate.name}.`, {
-                      title: 'Message',
-                    })
-                  }
-                  onAdd={() =>
-                    toast.success(`${candidate.name} added to shortlist.`, {
-                      title: 'Add candidate',
-                    })
-                  }
-                />
-              ))
+      {!profileCandidateId ? (
+        <div
+          role="group"
+          aria-label="Mobile discovery panes"
+          className="flex shrink-0 gap-1 border-b border-[#ECEAF3] bg-white px-3 py-2 lg:hidden"
+        >
+          <button
+            type="button"
+            onClick={() => setMobilePane('list')}
+            className={cn(
+              'h-9 flex-1 rounded-full text-[12px] font-semibold transition-colors',
+              mobilePane === 'list'
+                ? 'bg-[#2D2061] text-white'
+                : 'bg-[#F4F2F8] text-[#6B6B80]',
             )}
-          </div>
-        </section>
+          >
+            Results
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobilePane('chat')}
+            className={cn(
+              'h-9 flex-1 rounded-full text-[12px] font-semibold transition-colors',
+              mobilePane === 'chat'
+                ? 'bg-[#2D2061] text-white'
+                : 'bg-[#F4F2F8] text-[#6B6B80]',
+            )}
+          >
+            Chat
+          </button>
+        </div>
+      ) : null}
+
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        <div
+          className={cn(
+            'min-h-0 shrink-0',
+            profileCandidateId
+              ? 'hidden lg:flex lg:h-full lg:min-h-0'
+              : mobilePane === 'chat'
+                ? 'flex h-full min-h-0 lg:h-full'
+                : 'hidden lg:flex lg:h-full lg:min-h-0',
+          )}
+        >
+          <DiscoveryChatPanel
+            title={truncateTitle(activePrompt)}
+            messages={messages}
+            onSend={handleChatSend}
+            onOpenFilters={() => {
+              setDraftFilters({ ...listFilters })
+              setFiltersOpen(true)
+            }}
+          />
+        </div>
+
+        {profileCandidateId ? (
+          <DiscoveryCandidateProfilePanel
+            candidateId={profileCandidateId}
+            neighborIds={displayed.map((candidate) => candidate.id)}
+            onBack={() => setProfileCandidateId(null)}
+            onSelectCandidate={setProfileCandidateId}
+          />
+        ) : (
+          <section
+            className={cn(
+              'min-h-0 min-w-0 flex-1 flex-col bg-[#FAFAFC]',
+              mobilePane === 'list' ? 'flex' : 'hidden lg:flex',
+            )}
+          >
+            <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#ECEAF3] bg-white px-4 py-3 sm:px-5">
+              <p className="min-w-0 text-sm font-semibold text-[#2D2061]">
+                <span className="sm:hidden">{displayed.length} candidates</span>
+                <span className="hidden sm:inline">
+                  {displayed.length} Candidates matching your search criteria
+                  {results.length > displayed.length
+                    ? ` · ${results.length} total`
+                    : null}
+                </span>
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSaveSearch}
+                  className="!h-9 !rounded-md border-[#E0DDEA] bg-white px-3 text-xs font-semibold text-[#2D2061] hover:bg-[#F7F6FA]"
+                >
+                  <BookmarkPlus className="size-3.5" strokeWidth={2} />
+                  <span className="hidden sm:inline">Save Search</span>
+                  <span className="sm:hidden">Save</span>
+                </Button>
+                <button
+                  type="button"
+                  onClick={handleCloseResults}
+                  aria-label="Close results"
+                  className="inline-flex size-9 items-center justify-center rounded-md text-[#6B6B80] transition-colors hover:bg-[#F7F6FA] hover:text-[#2D2061]"
+                >
+                  <X className="size-5" strokeWidth={1.75} />
+                </button>
+              </div>
+            </header>
+
+            {selectedCount > 0 ? (
+              <div className="shrink-0 border-b border-[#ECEAF3] bg-white px-4 py-2.5 sm:px-5">
+                <BulkActionsBar
+                  selectedCount={selectedCount}
+                  entityLabel="Candidate"
+                  actions={[{ id: 'sendMail', label: 'Send Mail' }]}
+                  onAction={(id) => {
+                    if (id === 'sendMail') {
+                      toast.success(
+                        `Mail composer prepared for ${selectedCount} candidate(s).`,
+                        { title: 'Send Mail' },
+                      )
+                    }
+                  }}
+                  onClear={() => setSelected({})}
+                  selectAll={{
+                    checked:
+                      displayed.length > 0 &&
+                      displayed.every((c) => selected[c.id]),
+                    indeterminate:
+                      selectedCount > 0 && selectedCount < displayed.length,
+                    onChange: (checked) => {
+                      if (!checked) {
+                        setSelected({})
+                        return
+                      }
+                      setSelected(
+                        Object.fromEntries(displayed.map((c) => [c.id, true])),
+                      )
+                    },
+                  }}
+                />
+              </div>
+            ) : null}
+
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
+              {displayed.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[#E0DDEA] bg-white px-6 py-12 text-center">
+                  <p className="text-sm font-semibold text-[#2D2061]">
+                    No candidates match these filters
+                  </p>
+                  <p className="mt-1 text-sm text-[#8B8B9E]">
+                    Adjust your prompt, chat refinement, or Filters to expand
+                    results.
+                  </p>
+                </div>
+              ) : (
+                displayed.map((candidate) => (
+                  <DiscoveryCandidateCard
+                    key={candidate.id}
+                    candidate={candidate}
+                    selected={Boolean(selected[candidate.id])}
+                    onSelectChange={(checked) =>
+                      setSelected((current) => ({
+                        ...current,
+                        [candidate.id]: checked,
+                      }))
+                    }
+                    onViewProfile={() => setProfileCandidateId(candidate.id)}
+                    onMessage={() =>
+                      toast.success(`Compose message to ${candidate.name}.`, {
+                        title: 'Message',
+                      })
+                    }
+                    onAdd={() =>
+                      toast.success(`${candidate.name} added to shortlist.`, {
+                        title: 'Add candidate',
+                      })
+                    }
+                  />
+                ))
+              )}
+            </div>
+          </section>
+        )}
       </div>
 
       <DiscoveryFiltersPanel

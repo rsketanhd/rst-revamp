@@ -5,6 +5,8 @@ export type { PageContainerProps } from './PageContainer'
 export { PageHeader } from './PageHeader'
 export type { PageHeaderProps } from './PageHeader'
 export { RequireAuth } from './RequireAuth'
+export { ShellNavProvider, useShellNav } from './ShellNavContext'
+export type { ShellNavContextValue } from './ShellNavContext'
 export { SideNavigation } from './SideNavigation'
 export type {
   NavItem,

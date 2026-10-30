@@ -113,7 +113,7 @@ export function ApprovalsPage() {
           delegation ? (
             <div
               className={cn(
-                'flex max-w-full flex-nowrap items-center gap-2.5 rounded-[8px] border border-[#D8D2EF] bg-[#F8F7FC] px-3 py-1.5',
+                'flex max-w-full flex-wrap items-center gap-2.5 rounded-[8px] border border-[#D8D2EF] bg-[#F8F7FC] px-3 py-1.5',
               )}
             >
               <p className="min-w-0 truncate whitespace-nowrap text-sm text-[#4A4A60]">

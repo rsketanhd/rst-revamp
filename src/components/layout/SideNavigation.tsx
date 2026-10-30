@@ -63,6 +63,13 @@ export type SideNavigationProps = {
   sections?: NavSection[]
   showAiCopilot?: boolean
   onAiCopilotClick?: () => void
+  /**
+   * Mobile overlay drawer: keep the rail fully expanded and hide the
+   * collapse control (open/close is handled by the shell hamburger).
+   */
+  drawerMode?: boolean
+  /** When `drawerMode`, reflects whether the overlay is visible. */
+  drawerOpen?: boolean
 }
 
 const RECRUITER_NAV_SECTIONS: NavSection[] = [
@@ -263,6 +270,8 @@ export function SideNavigation({
   sections,
   showAiCopilot,
   onAiCopilotClick,
+  drawerMode = false,
+  drawerOpen = false,
 }: SideNavigationProps) {
   const [uncontrolledCollapsed, setUncontrolledCollapsed] =
     useState(defaultCollapsed)
@@ -272,7 +281,9 @@ export function SideNavigation({
   const userRole = getUserRole()
   const navSections = sections ?? navSectionsForRole(userRole)
   const aiCopilotVisible = showAiCopilot ?? true
-  const collapsed = controlledCollapsed ?? uncontrolledCollapsed
+  const collapsed = drawerMode
+    ? false
+    : (controlledCollapsed ?? uncontrolledCollapsed)
 
   function setCollapsed(next: boolean) {
     if (controlledCollapsed === undefined) {
@@ -306,13 +317,20 @@ export function SideNavigation({
   return (
     <aside
       className={cn(
-        'relative z-40 flex h-full shrink-0 flex-col border-r border-line bg-[#f0f0f4]',
-        'transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
-        collapsed ? 'w-[4.75rem]' : 'w-[17.5rem]',
+        'flex h-full flex-col border-r border-line bg-[#f0f0f4]',
+        drawerMode
+          ? 'fixed inset-y-0 left-0 z-[90] w-[17.5rem] max-w-[min(17.5rem,85vw)]'
+          : cn(
+              'relative z-40 shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+              collapsed ? 'w-[4.75rem]' : 'w-[17.5rem]',
+            ),
         className,
       )}
       aria-label="Side navigation"
+      aria-hidden={drawerMode ? !drawerOpen : undefined}
+      inert={drawerMode && !drawerOpen ? true : undefined}
       data-collapsed={collapsed}
+      data-drawer={drawerMode || undefined}
     >
       <div
         className={cn(
@@ -331,24 +349,26 @@ export function SideNavigation({
           )}
         />
 
-        <button
-          type="button"
-          onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
-          className={cn(
-            'absolute top-1/2 right-0 z-50 flex size-7 -translate-y-1/2 translate-x-1/2',
-            'items-center justify-center rounded-full',
-            'border border-line bg-surface text-brand-800 shadow-sm',
-            'transition-all duration-300 hover:bg-surface-soft',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-800/20',
-          )}
-        >
-          {collapsed ? (
-            <ChevronRight className="size-4" aria-hidden="true" />
-          ) : (
-            <ChevronLeft className="size-4" aria-hidden="true" />
-          )}
-        </button>
+        {!drawerMode ? (
+          <button
+            type="button"
+            onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+            className={cn(
+              'absolute top-1/2 right-0 z-50 flex size-7 -translate-y-1/2 translate-x-1/2',
+              'items-center justify-center rounded-full',
+              'border border-line bg-surface text-brand-800 shadow-sm',
+              'transition-all duration-300 hover:bg-surface-soft',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-800/20',
+            )}
+          >
+            {collapsed ? (
+              <ChevronRight className="size-4" aria-hidden="true" />
+            ) : (
+              <ChevronLeft className="size-4" aria-hidden="true" />
+            )}
+          </button>
+        ) : null}
       </div>
 
       <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 py-3">

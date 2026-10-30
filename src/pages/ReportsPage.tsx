@@ -127,11 +127,34 @@ export function ReportsPage() {
         className="border-b border-[#ECEAF3] pb-4"
       />
 
+      <label className="block lg:hidden">
+        <span className="mb-1.5 block text-[12px] font-semibold uppercase tracking-wide text-[#8B8B9E]">
+          Category
+        </span>
+        <select
+          value={activeCategory}
+          onChange={(event) => {
+            const next = event.target.value
+            if (!isReportCategoryId(next)) return
+            setActiveCategory(next)
+            navigate(getReportSectionPath(next))
+          }}
+          aria-label="Report category"
+          className="h-11 w-full rounded-lg border border-[#E0DDEA] bg-white px-3 text-sm font-medium text-[#2D2061] outline-none focus:border-[#2D2061] focus:ring-2 focus:ring-[#2D2061]/10"
+        >
+          {REPORT_CATEGORIES.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.title}
+            </option>
+          ))}
+        </select>
+      </label>
+
       <div
         ref={contentRef}
         className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-start lg:gap-8"
       >
-        <aside className="w-full shrink-0 lg:sticky lg:top-0 lg:w-[15.5rem] xl:w-[16.5rem]">
+        <aside className="hidden w-full shrink-0 lg:sticky lg:top-0 lg:block lg:w-[15.5rem] xl:w-[16.5rem]">
           <SettingsNav
             activeId={activeCategory}
             groups={REPORT_NAV_GROUPS}
@@ -140,7 +163,7 @@ export function ReportsPage() {
           />
         </aside>
 
-        <div className="min-w-0 flex-1 rounded-xl border border-[#E4E1EE] bg-white p-5 sm:p-6">
+        <div className="min-w-0 flex-1 rounded-xl border border-[#E4E1EE] bg-white p-4 sm:p-5 lg:p-6">
           <div className="flex flex-col gap-8">
             {REPORT_CATEGORIES.map((category) => (
               <ReportSection

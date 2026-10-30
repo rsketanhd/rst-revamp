@@ -479,6 +479,14 @@ export function getDiscoveryCandidates(): DiscoveryCandidate[] {
   return ALL_CANDIDATES.map((c) => ({ ...c, skills: [...c.skills], tags: [...c.tags] }))
 }
 
+export function getDiscoveryCandidateById(
+  id: string,
+): DiscoveryCandidate | undefined {
+  const candidate = ALL_CANDIDATES.find((item) => item.id === id)
+  if (!candidate) return undefined
+  return { ...candidate, skills: [...candidate.skills], tags: [...candidate.tags] }
+}
+
 export function emptyDiscoveryListFilters(): DiscoveryListFilters {
   return {
     minExperience: 0,

@@ -480,7 +480,7 @@ function ClientsTable({
   onRemove: (id: string) => void
 }) {
   return (
-    <DataTable minWidthClassName="min-w-[64rem]">
+    <DataTable minWidthClassName="min-w-[28rem] sm:min-w-[48rem] lg:min-w-[64rem]">
       <DataTableHead>
         <DataTableSortHeader
           label="Client Name"
@@ -577,7 +577,7 @@ function EndClientsTable({
   onRemove: (id: string) => void
 }) {
   return (
-    <DataTable minWidthClassName="min-w-[60rem]">
+    <DataTable minWidthClassName="min-w-[28rem] sm:min-w-[48rem] lg:min-w-[60rem]">
       <DataTableHead>
         <DataTableSortHeader
           label="Subsidiary / Hiring Entity"

@@ -106,15 +106,22 @@ export function InterviewPlanPage() {
             <ScoreRing value={plan.overallFit} label="Overall" />
             <ul className="flex w-full min-w-0 flex-1 flex-col gap-2">
               {plan.criteria.map((c) => (
-                <li key={c.label} className="grid grid-cols-[9.5rem_minmax(0,1fr)_2.5rem] items-center gap-3 text-xs">
-                  <span className="truncate text-[#4A4760]">{c.label}</span>
-                  <span className="h-1.5 overflow-hidden rounded-full bg-[#EEEDF5]">
+                <li
+                  key={c.label}
+                  className="grid grid-cols-[minmax(0,1fr)_2.5rem] items-center gap-x-2 gap-y-1 text-xs sm:grid-cols-[9.5rem_minmax(0,1fr)_2.5rem] sm:gap-3"
+                >
+                  <span className="truncate text-[#4A4760] sm:col-auto">
+                    {c.label}
+                  </span>
+                  <span className="col-span-2 h-1.5 overflow-hidden rounded-full bg-[#EEEDF5] sm:col-span-1 sm:col-auto">
                     <span
                       className="block h-full rounded-full bg-[#15A05B]"
                       style={{ width: `${c.score}%` }}
                     />
                   </span>
-                  <span className="text-right font-bold tabular-nums text-[#1A1A2E]">{c.score}%</span>
+                  <span className="row-start-1 col-start-2 text-right font-bold tabular-nums text-[#1A1A2E] sm:col-start-auto sm:row-start-auto">
+                    {c.score}%
+                  </span>
                 </li>
               ))}
             </ul>

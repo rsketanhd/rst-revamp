@@ -491,7 +491,7 @@ export function CopilotChatPanel({
         'border-l border-[#E6E5F2] shadow-[-10px_0_30px_rgba(31,29,79,0.12)]',
         'transition-[width] duration-200 ease-out',
         maximized
-          ? 'left-0 w-full border-l-0 shadow-none sm:left-[4.75rem] sm:w-auto'
+          ? 'left-0 w-full border-l-0 shadow-none lg:left-[4.75rem] lg:w-auto'
           : 'w-[min(28.8rem,100vw)]',
       )}
       aria-label="AI Copilot"

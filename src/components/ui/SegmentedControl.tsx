@@ -29,7 +29,7 @@ export function SegmentedControl<T extends string>({
       role="group"
       aria-label={ariaLabel}
       className={cn(
-        'inline-flex rounded-full border border-line bg-surface p-0.5',
+        'inline-flex max-w-full overflow-x-auto overscroll-x-contain rounded-full border border-line bg-surface p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
         className,
       )}
     >
@@ -41,7 +41,7 @@ export function SegmentedControl<T extends string>({
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              'min-w-0 flex-none rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:px-3.5',
+              'min-w-0 shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-colors sm:px-3.5',
               active
                 ? 'bg-[#2D2061] text-white'
                 : 'text-[#2D2061]/70 hover:text-[#2D2061]',

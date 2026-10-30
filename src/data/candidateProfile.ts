@@ -1,5 +1,6 @@
 import { getApplicantsForJob, getJobByCode } from './applications'
 import { getCandidates } from './candidates'
+import { getDiscoveryCandidateById, getDiscoveryCandidates } from './discovery'
 import { TALENT_POOL_CANDIDATES } from './talentPoolDetail'
 
 export type ProfileOrigin = 'application' | 'candidate'
@@ -312,6 +313,36 @@ export function resolveProfileNavigation(input: {
 
   return (
     resolveDirectoryCandidate(input.candidateId) ??
-    resolveTalentPoolCandidate(input.candidateId, input.poolId)
+    resolveTalentPoolCandidate(input.candidateId, input.poolId) ??
+    resolveDiscoveryCandidate(input.candidateId)
   )
+}
+
+function resolveDiscoveryCandidate(
+  candidateId: string,
+): ProfileNavigation | null {
+  const candidate = getDiscoveryCandidateById(candidateId)
+  if (!candidate) return null
+  const discoveryList = getDiscoveryCandidates()
+  const { previousTo, nextTo } = neighbors(
+    discoveryList,
+    candidate.id,
+    (id) => candidateProfilePath(id),
+  )
+  return {
+    origin: 'candidate',
+    identity: {
+      id: candidate.id,
+      name: candidate.name,
+      email: candidate.email,
+      headline: `${candidate.title} at ${candidate.company}`,
+      location: candidate.location,
+      appliedAgo: `Score ${candidate.score}% · ${candidate.source}`,
+    },
+    backTo: '/candidate-discovery',
+    backLabel: 'Back to "Candidate Discovery"',
+    previousTo,
+    nextTo,
+    showScoreSummary: false,
+  }
 }

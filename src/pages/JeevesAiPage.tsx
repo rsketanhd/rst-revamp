@@ -251,7 +251,7 @@ export function JeevesAiPage() {
           </div>
 
           <DataTable
-            minWidthClassName="min-w-[64rem] lg:min-w-[72rem]"
+            minWidthClassName="min-w-[32rem] sm:min-w-[52rem] lg:min-w-[64rem]"
             footer={
               <DataTablePaginationBar
                 rowsPerPage={rowsPerPage}

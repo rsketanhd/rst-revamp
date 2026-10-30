@@ -457,7 +457,9 @@ export function OneWayInterviewDetailPage() {
 
       <DataTable
         minWidthClassName={
-          isCompletedTab ? 'min-w-[72rem] lg:min-w-[80rem]' : 'min-w-[64rem]'
+          isCompletedTab
+            ? 'min-w-[32rem] sm:min-w-[56rem] lg:min-w-[72rem]'
+            : 'min-w-[28rem] sm:min-w-[48rem] lg:min-w-[64rem]'
         }
         footer={
           <DataTablePaginationBar

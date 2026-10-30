@@ -56,17 +56,17 @@ export function CandidateProfileBanner({
 
   return (
     <section className="shrink-0 overflow-hidden rounded-xl bg-[linear-gradient(100deg,#D45B86_0%,#8E3D78_38%,#3A2A6A_68%,#1B1744_100%)] text-white shadow-[0_8px_24px_rgba(45,32,97,0.12)]">
-      <div className="flex min-h-[9.5rem] flex-col gap-5 px-5 py-6 sm:min-h-[10.5rem] sm:px-6 sm:py-7 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+      <div className="flex min-h-[8.5rem] flex-col gap-4 px-4 py-5 sm:min-h-[10.5rem] sm:gap-5 sm:px-6 sm:py-7 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-5">
           <span
-            className="inline-flex size-20 shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-[#F3D5C4] text-xl font-semibold text-[#6B3A4A] sm:size-[5.5rem] sm:text-2xl"
+            className="inline-flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-[#F3D5C4] text-base font-semibold text-[#6B3A4A] sm:size-[5.5rem] sm:text-2xl"
             aria-hidden="true"
           >
             {initials}
           </span>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">
+              <h1 className="text-xl font-semibold tracking-tight sm:text-[1.75rem]">
                 {identity.name}
               </h1>
               <span className="rounded-full bg-[#D7E7FF] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#1A6FD0]">
@@ -77,9 +77,9 @@ export function CandidateProfileBanner({
               {identity.headline}
             </p>
             <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-white/85 sm:text-sm">
-              <span className="inline-flex items-center gap-1.5">
-                <Mail className="size-3.5" strokeWidth={2} aria-hidden="true" />
-                {identity.email}
+              <span className="inline-flex min-w-0 items-center gap-1.5">
+                <Mail className="size-3.5 shrink-0" strokeWidth={2} aria-hidden="true" />
+                <span className="min-w-0 break-all">{identity.email}</span>
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <MapPin className="size-3.5" strokeWidth={2} aria-hidden="true" />
@@ -122,13 +122,13 @@ export function CandidateProfileBanner({
           </div>
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-end gap-2">
-          <label className="flex flex-col gap-1 text-[11px] font-medium text-white/75">
+        <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end">
+          <label className="flex w-full flex-col gap-1 text-[11px] font-medium text-white/75 sm:w-auto">
             Current Status
             <select
               value={status}
               onChange={(event) => onStatusChange(event.target.value)}
-              className="h-9 min-w-[11rem] appearance-none rounded-md border border-white/15 bg-white px-3 text-[13px] font-medium text-[#2A2740] outline-none"
+              className="h-9 w-full min-w-0 appearance-none rounded-md border border-white/15 bg-white px-3 text-[13px] font-medium text-[#2A2740] outline-none sm:min-w-[11rem]"
             >
               {PROFILE_STATUS_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -142,7 +142,7 @@ export function CandidateProfileBanner({
             variant="outline"
             size="sm"
             onClick={onSendMail}
-            className="!h-9 !rounded-md border-white/20 bg-white px-4 text-[13px] font-semibold text-[#2D2061] hover:bg-[#F7F6FB]"
+            className="!h-9 w-full !rounded-md border-white/20 bg-white px-4 text-[13px] font-semibold text-[#2D2061] hover:bg-[#F7F6FB] sm:w-auto"
           >
             Send Mail
           </Button>

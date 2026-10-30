@@ -110,7 +110,7 @@ export function CandidateProfilePage() {
           <ArrowLeft className="size-3.5" strokeWidth={2} aria-hidden="true" />
           {navigation.backLabel}
         </button>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           <Button
             type="button"
             variant="outline"
@@ -119,10 +119,11 @@ export function CandidateProfilePage() {
             onClick={() => {
               if (navigation.previousTo) navigate(navigation.previousTo)
             }}
-            className="!h-9 !rounded-md border-[#D5D2E2] px-3 text-[13px] font-semibold text-[#2D2061]"
+            className="!h-9 flex-1 !rounded-md border-[#D5D2E2] px-3 text-[13px] font-semibold text-[#2D2061] sm:flex-none"
           >
             <ChevronLeft className="size-4" strokeWidth={2} aria-hidden="true" />
-            Previous Candidate
+            <span className="sm:hidden">Previous</span>
+            <span className="hidden sm:inline">Previous Candidate</span>
           </Button>
           <Button
             type="button"
@@ -132,9 +133,10 @@ export function CandidateProfilePage() {
             onClick={() => {
               if (navigation.nextTo) navigate(navigation.nextTo)
             }}
-            className="!h-9 !rounded-md border-[#D5D2E2] px-3 text-[13px] font-semibold text-[#2D2061]"
+            className="!h-9 flex-1 !rounded-md border-[#D5D2E2] px-3 text-[13px] font-semibold text-[#2D2061] sm:flex-none"
           >
-            Next Candidate
+            <span className="sm:hidden">Next</span>
+            <span className="hidden sm:inline">Next Candidate</span>
             <ChevronRight className="size-4" strokeWidth={2} aria-hidden="true" />
           </Button>
         </div>
@@ -151,8 +153,10 @@ export function CandidateProfilePage() {
         }
       />
 
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(18rem,0.9fr)_minmax(20rem,1.1fr)]">
-        <ResumePreview />
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(18rem,0.9fr)_minmax(20rem,1.1fr)]">
+        <div className="min-w-0 overflow-hidden">
+          <ResumePreview />
+        </div>
         <section className="min-w-0">
           <div className="flex items-center gap-1 border-b border-[#E8E6F0]">
             <button

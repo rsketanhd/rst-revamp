@@ -23,11 +23,11 @@ export function DataTable({
   children,
   className,
   footer,
-  minWidthClassName = 'min-w-[62rem] sm:min-w-[72rem] lg:min-w-[78rem]',
+  minWidthClassName = 'min-w-[28rem] sm:min-w-[48rem] lg:min-w-[64rem]',
 }: DataTableProps) {
   return (
     <div className={cn('w-full min-w-0 bg-white', className)}>
-      <div className="-mx-1 overflow-x-auto overscroll-x-contain px-1 sm:mx-0 sm:px-0">
+      <div className="-mx-1 overflow-x-auto overscroll-x-contain px-1 [scrollbar-width:thin] sm:mx-0 sm:px-0">
         <table
           className={cn(
             'w-full border-collapse text-left text-[13px]',

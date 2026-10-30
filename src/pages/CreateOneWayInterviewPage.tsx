@@ -125,7 +125,7 @@ export function CreateOneWayInterviewPage() {
         </div>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col bg-white">
-          <div className="flex min-h-0 flex-1 flex-col px-8 pt-8">
+          <div className="flex min-h-0 flex-1 flex-col px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pt-8">
             <header className="shrink-0 border-b border-[#eceaf3] bg-white pb-3">
               <button
                 type="button"
@@ -163,7 +163,7 @@ export function CreateOneWayInterviewPage() {
                 />
               </aside>
 
-              <div className="relative z-0 min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto bg-white py-3 pl-6 pr-0 scrollbar-none">
+              <div className="relative z-0 min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto bg-white px-4 py-3 sm:pl-6 sm:pr-0 scrollbar-none">
                 {step === 0 ? (
                   <StepInterviewDetails
                     value={form}
@@ -192,20 +192,20 @@ export function CreateOneWayInterviewPage() {
             </div>
           </div>
 
-          <footer className="z-30 shrink-0 border-t border-[#eceaf3] bg-white px-8 py-4">
-            <div className="flex items-center justify-end gap-3">
+          <footer className="z-30 shrink-0 border-t border-[#eceaf3] bg-white px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+            <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end sm:gap-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handlePrevious}
-                className="min-w-[6.5rem] border-[#2D2061]/40 text-[#2D2061] hover:bg-[#f7f6fb]"
+                className="w-full min-w-0 sm:w-auto sm:min-w-[6.5rem] border-[#2D2061]/40 text-[#2D2061] hover:bg-[#f7f6fb]"
               >
                 Previous
               </Button>
               <Button
                 type="button"
                 onClick={handleContinue}
-                className="min-w-[6.5rem] !bg-[#2D2061] hover:!bg-[#241a52]"
+                className="w-full min-w-0 sm:w-auto sm:min-w-[6.5rem] !bg-[#2D2061] hover:!bg-[#241a52]"
               >
                 {step >= LAST_STEP ? (editing ? 'Save Changes' : 'Create') : 'Continue'}
               </Button>

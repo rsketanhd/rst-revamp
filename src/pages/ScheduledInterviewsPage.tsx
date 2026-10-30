@@ -206,7 +206,7 @@ export function ScheduledInterviewsPage() {
       </div>
 
       <DataTable
-        minWidthClassName="min-w-[68rem]"
+        minWidthClassName="min-w-[32rem] sm:min-w-[52rem] lg:min-w-[68rem]"
         footer={
           <DataTablePaginationBar
             rowsPerPage={rowsPerPage}
