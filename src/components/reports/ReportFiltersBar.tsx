@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import { SlidersHorizontal } from 'lucide-react'
 import { ReportDateRangeField } from './ReportDateRangeField'
 import { cn } from '../../lib/cn'
+import { FilterCtaButton } from '../ui/FilterCtaButton'
 
 export type ReportFiltersBarProps = {
   lastStatusChange: string
@@ -67,27 +67,12 @@ export function ReportFiltersBar({
           </div>
         ) : null}
 
-        <button
-          type="button"
+        <FilterCtaButton
+          label="Additional filters"
+          count={additionalFilterCount}
           onClick={onAdditionalFilters}
-          className={cn(
-            'relative inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-md border border-[#2D2061] bg-white px-4',
-            'text-sm font-semibold text-[#2D2061] transition-colors hover:bg-[#f7f6fb]',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D2061]/25',
-          )}
-        >
-          <SlidersHorizontal
-            className="size-4 shrink-0"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-          Additional filters
-          {additionalFilterCount > 0 ? (
-            <span className="absolute -right-2 -top-2 inline-flex size-5 items-center justify-center rounded-full bg-[#3B82F6] text-[10px] font-bold text-white">
-              {additionalFilterCount}
-            </span>
-          ) : null}
-        </button>
+          className="!h-11 !rounded-md !border-[#2D2061] !font-semibold"
+        />
       </div>
     </div>
   )

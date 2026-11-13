@@ -4,7 +4,6 @@ import {
   Search,
   Send,
   Share2,
-  SlidersHorizontal,
 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import {
@@ -26,6 +25,7 @@ import {
   DataTableRow,
   DataTableSortHeader,
   DataTableTd,
+  FilterCtaButton,
   ThreeDotsMenu,
   toast,
   type SortDirection,
@@ -188,27 +188,12 @@ export function UserManagementPanel() {
             </button>
           </div>
 
-          <button
-            type="button"
+          <FilterCtaButton
+            label="Filter"
+            count={activeFilterCount}
             onClick={() => setFiltersOpen(true)}
-            className={cn(
-              'relative inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-md border border-[#ddd9e8] bg-white px-4',
-              'text-sm font-semibold text-[#2D2061] transition-colors hover:bg-[#f7f6fb]',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D2061]/25',
-            )}
-          >
-            <SlidersHorizontal
-              className="size-4 shrink-0"
-              strokeWidth={2}
-              aria-hidden="true"
-            />
-            Filter
-            {activeFilterCount > 0 ? (
-              <span className="ml-0.5 inline-flex size-5 items-center justify-center rounded-full bg-[#2D2061] text-[10px] font-bold leading-none text-white">
-                {activeFilterCount}
-              </span>
-            ) : null}
-          </button>
+            className="!rounded-md !border-[#ddd9e8] !font-semibold !shadow-none"
+          />
         </div>
 
         {/* Secondary actions */}

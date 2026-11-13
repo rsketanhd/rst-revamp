@@ -8,7 +8,6 @@ import {
   Copy,
   Link2,
   Search,
-  SlidersHorizontal,
 } from 'lucide-react'
 import { PageContainer, PageHeader } from '../components/layout'
 import { ViewTemplatesPanel } from '../components/interviews/ViewTemplatesPanel'
@@ -37,6 +36,7 @@ import {
   DataTableSortHeader,
   DataTableTd,
   DataTableTh,
+  FilterCtaButton,
   Pagination,
   Select,
   SidePanel,
@@ -141,6 +141,8 @@ export function OneWayInterviewDetailPage() {
   const [search, setSearch] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [filters, setFilters] = useState<DetailFilters>(EMPTY_FILTERS)
+  const filterCount =
+    Number(Boolean(filters.templateType)) + Number(Boolean(filters.status))
   const [templatesOpen, setTemplatesOpen] = useState(false)
   const [inviteOpen, setInviteOpen] = useState(false)
   const [selected, setSelected] = useState<Record<string, boolean>>({})
@@ -444,15 +446,12 @@ export function OneWayInterviewDetailPage() {
             <ArrowRight className="size-4" strokeWidth={2} aria-hidden="true" />
           </button>
         </div>
-        <Button
-          type="button"
-          variant="outline"
+        <FilterCtaButton
+          label="Filter"
+          count={filterCount}
           onClick={() => setFiltersOpen(true)}
-          className="!h-11 shrink-0 !rounded-md border-[#d5d2e2] bg-white px-4 text-sm font-semibold text-[#2D2061] hover:bg-[#f7f6fb]"
-        >
-          <SlidersHorizontal className="size-4" strokeWidth={2} aria-hidden="true" />
-          Filter
-        </Button>
+          className="!h-11 !rounded-md !border-[#d5d2e2] !font-semibold"
+        />
       </div>
 
       <DataTable

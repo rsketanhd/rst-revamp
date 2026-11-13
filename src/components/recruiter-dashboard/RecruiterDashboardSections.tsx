@@ -255,7 +255,7 @@ export function DashboardKpiStrip() {
   const navigate = useNavigate()
 
   return (
-    <section className="grid shrink-0 grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+    <section className="grid shrink-0 grid-cols-2 items-stretch gap-3 md:grid-cols-3 xl:grid-cols-6">
       {RECRUITER_DASHBOARD_KPIS.map((kpi) => (
         <button
           key={kpi.id}
@@ -263,7 +263,7 @@ export function DashboardKpiStrip() {
           onClick={() =>
             goTo(navigate, kpi.href, `Opening ${kpi.label}.`, 'Dashboard')
           }
-          className="rounded-xl border border-[#E8E6F0] bg-white px-3.5 py-3.5 text-left shadow-[0_1px_2px_rgba(45,32,97,0.04)] transition-colors hover:border-[#2D2061] hover:bg-[#FAFAFC]"
+          className="flex h-full min-h-0 flex-col rounded-xl border border-[#E8E6F0] bg-white px-3.5 py-3.5 text-left shadow-[0_1px_2px_rgba(45,32,97,0.04)] transition-colors hover:border-[#2D2061] hover:bg-[#FAFAFC]"
         >
           <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-[#8B8B9E]">
             {kpi.label}
@@ -284,9 +284,9 @@ export function LatestApplicantsPanel() {
     <DashboardPanel
       title="Latest Applicants"
       subtitle="Showing latest applications."
-      bodyClassName="p-0 sm:p-0"
+      bodyClassName="!p-0 sm:!p-0"
     >
-      <div className="overflow-x-auto">
+      <div className="min-h-0 flex-1 overflow-x-auto">
         <table className="w-full min-w-[18rem] border-collapse text-left text-[12.5px]">
           <thead>
             <tr className="border-b border-[#F0EEF5] text-[11px] font-semibold uppercase tracking-[0.04em] text-[#8B8B9E]">
@@ -366,9 +366,9 @@ export function RecruiterJobOverviewPanel() {
       {rows.length === 0 ? (
         <p className="text-sm text-[#8B8B9E]">No recruiters for this filter.</p>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex min-h-0 flex-1 flex-col gap-3">
           {rows.map((row) => (
-            <li key={row.id}>
+            <li key={row.id} className="shrink-0">
               <button
                 type="button"
                 onClick={() =>
@@ -427,7 +427,7 @@ export function ActivityStatusPanel() {
         onClick={() =>
           goTo(navigate, '/jobs', 'Opening jobs by status.', 'Jobs')
         }
-        className="w-full rounded-xl text-left transition-opacity hover:opacity-90"
+        className="flex min-h-0 w-full flex-1 flex-col items-center justify-center rounded-xl text-left transition-opacity hover:opacity-90"
       >
         <MiniDonut
           slices={ACTIVITY_STATUS_SLICES}
@@ -511,7 +511,7 @@ export function SystemLicensePanel() {
         </button>
       }
     >
-      <div className="mb-4">
+      <div className="mb-4 shrink-0">
         <div className="flex h-3 overflow-hidden rounded-full bg-[#F0EEF5]">
           {LICENSE_SEGMENTS.map((segment) => (
             <button
@@ -534,11 +534,13 @@ export function SystemLicensePanel() {
           <ColorLegend items={LICENSE_SEGMENTS} />
         </div>
       </div>
-      <MiniDonut
-        slices={LICENSE_DONUT}
-        centerValue={String(totalSeats)}
-        centerLabel="Seats"
-      />
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+        <MiniDonut
+          slices={LICENSE_DONUT}
+          centerValue={String(totalSeats)}
+          centerLabel="Seats"
+        />
+      </div>
     </DashboardPanel>
   )
 }
@@ -562,69 +564,71 @@ export function PlatformEngagementPanel() {
         </button>
       }
     >
-      <div className="grid gap-3 sm:grid-cols-3">
-        {PLATFORM_ENGAGEMENT_KPIS.map((kpi) => (
-          <button
-            key={kpi.id}
-            type="button"
-            onClick={() =>
-              notify(`${kpi.label}: ${kpi.value}`, 'Engagement')
-            }
-            className="rounded-xl border border-[#F0EEF5] bg-[#FAFAFC] px-3 py-3 text-left transition-colors hover:border-[#2D2061]"
-          >
-            <p className="text-[11px] font-semibold text-[#8B8B9E]">
-              {kpi.label}
-            </p>
-            <p className="mt-1 text-xl font-bold tabular-nums text-[#2D2061]">
-              {kpi.value}
-            </p>
-            <p className="mt-0.5 text-[11px] text-[#8B8B9E]">{kpi.hint}</p>
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-4">
-        <div className="mb-1.5 flex items-center justify-between text-[12px]">
-          <span className="font-semibold text-[#4B4A66]">
-            Candidate Engagement
-          </span>
-          <span className="font-bold text-[#2D2061]">
-            {CANDIDATE_ENGAGEMENT_RATE}%
-          </span>
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="grid shrink-0 gap-3 sm:grid-cols-3">
+          {PLATFORM_ENGAGEMENT_KPIS.map((kpi) => (
+            <button
+              key={kpi.id}
+              type="button"
+              onClick={() =>
+                notify(`${kpi.label}: ${kpi.value}`, 'Engagement')
+              }
+              className="rounded-xl border border-[#F0EEF5] bg-[#FAFAFC] px-3 py-3 text-left transition-colors hover:border-[#2D2061]"
+            >
+              <p className="text-[11px] font-semibold text-[#8B8B9E]">
+                {kpi.label}
+              </p>
+              <p className="mt-1 text-xl font-bold tabular-nums text-[#2D2061]">
+                {kpi.value}
+              </p>
+              <p className="mt-0.5 text-[11px] text-[#8B8B9E]">{kpi.hint}</p>
+            </button>
+          ))}
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-[#F0EEF5]">
-          <div
-            className="h-full rounded-full bg-[#6D5BD0]"
-            style={{ width: `${CANDIDATE_ENGAGEMENT_RATE}%` }}
-          />
-        </div>
-      </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-[#F0EEF5]">
-        <table className="w-full min-w-[16rem] text-left text-[12px]">
-          <thead className="bg-[#FAFAFC] text-[11px] uppercase tracking-[0.04em] text-[#8B8B9E]">
-            <tr>
-              <th className="px-3 py-2 font-semibold">Segment</th>
-              <th className="px-3 py-2 font-semibold">Active</th>
-              <th className="px-3 py-2 font-semibold">New</th>
-            </tr>
-          </thead>
-          <tbody>
-            {PLATFORM_ENGAGEMENT_SEGMENTS.map((row) => (
-              <tr key={row.id} className="border-t border-[#F0EEF5]">
-                <td className="px-3 py-2 font-semibold text-[#1F1D4F]">
-                  {row.segment}
-                </td>
-                <td className="px-3 py-2 tabular-nums text-[#2D2061]">
-                  {row.active}
-                </td>
-                <td className="px-3 py-2 tabular-nums text-[#1F8F57]">
-                  {row.newCount}
-                </td>
+        <div className="mt-4 shrink-0">
+          <div className="mb-1.5 flex items-center justify-between text-[12px]">
+            <span className="font-semibold text-[#4B4A66]">
+              Candidate Engagement
+            </span>
+            <span className="font-bold text-[#2D2061]">
+              {CANDIDATE_ENGAGEMENT_RATE}%
+            </span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-[#F0EEF5]">
+            <div
+              className="h-full rounded-full bg-[#6D5BD0]"
+              style={{ width: `${CANDIDATE_ENGAGEMENT_RATE}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 min-h-0 flex-1 overflow-x-auto rounded-xl border border-[#F0EEF5]">
+          <table className="w-full min-w-[16rem] text-left text-[12px]">
+            <thead className="bg-[#FAFAFC] text-[11px] uppercase tracking-[0.04em] text-[#8B8B9E]">
+              <tr>
+                <th className="px-3 py-2 font-semibold">Segment</th>
+                <th className="px-3 py-2 font-semibold">Active</th>
+                <th className="px-3 py-2 font-semibold">New</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {PLATFORM_ENGAGEMENT_SEGMENTS.map((row) => (
+                <tr key={row.id} className="border-t border-[#F0EEF5]">
+                  <td className="px-3 py-2 font-semibold text-[#1F1D4F]">
+                    {row.segment}
+                  </td>
+                  <td className="px-3 py-2 tabular-nums text-[#2D2061]">
+                    {row.active}
+                  </td>
+                  <td className="px-3 py-2 tabular-nums text-[#1F8F57]">
+                    {row.newCount}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </DashboardPanel>
   )

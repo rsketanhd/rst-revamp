@@ -7,12 +7,15 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import type { ChatMessage } from '../../data/discovery'
+import { FilterCtaButton } from '../ui/FilterCtaButton'
 
 export type DiscoveryChatPanelProps = {
   title: string
   messages: ChatMessage[]
   onSend: (text: string) => void
   onOpenFilters: () => void
+  /** Applied list-filter count shown on the Filters CTA. */
+  filterCount?: number
 }
 
 const MAX_CHARS = 200
@@ -25,6 +28,7 @@ export function DiscoveryChatPanel({
   messages,
   onSend,
   onOpenFilters,
+  filterCount = 0,
 }: DiscoveryChatPanelProps) {
   const [draft, setDraft] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
@@ -117,14 +121,17 @@ export function DiscoveryChatPanel({
           </div>
         </div>
 
-        <button
-          type="button"
+        <FilterCtaButton
+          label="Filters"
+          count={filterCount}
           onClick={onOpenFilters}
-          className="mt-3 inline-flex h-10 items-center gap-2 rounded-lg bg-[#2D2061] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#241a52]"
-        >
-          <Filter className="size-4" strokeWidth={2} aria-hidden="true" />
-          Filters
-        </button>
+          icon={<Filter className="size-4" strokeWidth={2} aria-hidden="true" />}
+          className={cn(
+            'mt-3 !h-10 !border-transparent !bg-[#2D2061] !font-semibold !text-white !shadow-none hover:!bg-[#241a52]',
+            filterCount > 0 &&
+              '[&>span:last-child]:!bg-white [&>span:last-child]:!text-[#2D2061]',
+          )}
+        />
       </div>
     </aside>
   )

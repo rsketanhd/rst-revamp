@@ -6,6 +6,8 @@ import {
 } from '../components/approvals/ApprovalDelegationPanel'
 import { ViewApprovalDelegationPanel } from '../components/approvals/ViewApprovalDelegationPanel'
 import { JobViewEditPanel } from '../components/jobs/JobViewEditPanel'
+import { CreateOfferPanel } from '../components/offers/CreateOfferPanel'
+import { OfferViewPanel } from '../components/offers/OfferViewPanel'
 import { PageContainer, PageHeader } from '../components/layout'
 import { Button, SegmentedControl, toast } from '../components/ui'
 import { SettingsUnderlineTabs } from '../components/settings/SettingsUnderlineTabs'
@@ -15,11 +17,13 @@ import {
   filterApprovals,
   INITIAL_APPROVALS,
   jobListingFromApproval,
+  offerRecordFromApproval,
   type ApprovalInbox,
   type ApprovalKindFilter,
   type ApprovalRecord,
 } from '../data/approvals'
 import type { JobListing } from '../data/jobs'
+import type { OfferRecord } from '../data/offers'
 import { cn } from '../lib/cn'
 
 const INITIAL_DELEGATION: ApprovalDelegationForm = {
@@ -62,6 +66,8 @@ export function ApprovalsPage() {
   const [approvalDetail, setApprovalDetail] = useState<ApprovalRecord | null>(
     null,
   )
+  const [detailOffer, setDetailOffer] = useState<OfferRecord | null>(null)
+  const [editingOffer, setEditingOffer] = useState<OfferRecord | null>(null)
 
   const visible = useMemo(
     () => filterApprovals(approvals, inbox, kindFilter),
@@ -183,6 +189,7 @@ export function ApprovalsPage() {
                 record={record}
                 onView={() => {
                   if (record.kind === 'job') {
+                    setDetailOffer(null)
                     setDetailJob(jobListingFromApproval(record))
                     if (inbox === 'submitted-by-me') {
                       setJobViewFooter('edit-only')
@@ -196,9 +203,10 @@ export function ApprovalsPage() {
                     }
                     return
                   }
-                  toast.success(`Opening offer ${record.code}.`, {
-                    title: 'Approvals',
-                  })
+
+                  setDetailJob(null)
+                  setApprovalDetail(null)
+                  setDetailOffer(offerRecordFromApproval(record))
                 }}
               />
             </li>
@@ -248,6 +256,34 @@ export function ApprovalsPage() {
         }}
         onSave={(job) => {
           toast.success(`“${job.title}” was saved.`, { title: 'Job updated' })
+        }}
+      />
+
+      <OfferViewPanel
+        open={Boolean(detailOffer)}
+        offer={detailOffer}
+        onClose={() => setDetailOffer(null)}
+        onSend={(offer) => {
+          toast.success(`Offer sent to ${offer.email}.`, {
+            title: 'Approvals',
+          })
+          setDetailOffer(null)
+        }}
+        onEdit={(offer) => {
+          setDetailOffer(null)
+          setEditingOffer(offer)
+        }}
+      />
+
+      <CreateOfferPanel
+        open={Boolean(editingOffer)}
+        offer={editingOffer}
+        onClose={() => setEditingOffer(null)}
+        onSave={(offer) => {
+          toast.success(`Offer for ${offer.candidateName} was saved.`, {
+            title: 'Approvals',
+          })
+          setEditingOffer(null)
         }}
       />
     </PageContainer>

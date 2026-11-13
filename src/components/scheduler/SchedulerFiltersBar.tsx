@@ -1,6 +1,5 @@
-import { SlidersHorizontal } from 'lucide-react'
 import { cn } from '../../lib/cn'
-import { Select } from '../ui'
+import { FilterCtaButton, Select } from '../ui'
 
 export type SchedulerFiltersBarProps = {
   lastUpdatedOn: string
@@ -13,6 +12,8 @@ export type SchedulerFiltersBarProps = {
   hidingOptions: string[]
   onCandidateHidingChange: (value: string) => void
   onMoreFilters?: () => void
+  /** Applied more-filters count shown on the More Filters CTA. */
+  moreFilterCount?: number
   className?: string
 }
 
@@ -30,6 +31,7 @@ export function SchedulerFiltersBar({
   hidingOptions,
   onCandidateHidingChange,
   onMoreFilters,
+  moreFilterCount = 0,
   className,
 }: SchedulerFiltersBarProps) {
   return (
@@ -73,22 +75,12 @@ export function SchedulerFiltersBar({
           />
         </div>
 
-        <button
-          type="button"
+        <FilterCtaButton
+          label="More Filters"
+          count={moreFilterCount}
           onClick={onMoreFilters}
-          className={cn(
-            'inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-md border border-[#2D2061] bg-white px-4 sm:w-auto',
-            'text-sm font-semibold text-[#2D2061] transition-colors hover:bg-[#f7f6fb]',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D2061]/25',
-          )}
-        >
-          <SlidersHorizontal
-            className="size-4 shrink-0"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-          More Filters
-        </button>
+          className="!h-11 w-full !rounded-md !border-[#2D2061] !font-semibold sm:w-auto"
+        />
       </div>
     </div>
   )

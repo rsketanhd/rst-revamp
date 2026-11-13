@@ -1,6 +1,5 @@
-import { SlidersHorizontal } from 'lucide-react'
 import { cn } from '../../lib/cn'
-import { RangeSlider, Select, StarRating } from '../ui'
+import { FilterCtaButton, RangeSlider, Select, StarRating } from '../ui'
 
 export type CandidatesFiltersBarProps = {
   source: string
@@ -14,6 +13,8 @@ export type CandidatesFiltersBarProps = {
   suitability: [number, number]
   onSuitabilityChange: (value: [number, number]) => void
   onMoreFilters?: () => void
+  /** Applied more-filters count shown on the More Filters CTA. */
+  moreFilterCount?: number
   className?: string
 }
 
@@ -32,6 +33,7 @@ export function CandidatesFiltersBar({
   suitability,
   onSuitabilityChange,
   onMoreFilters,
+  moreFilterCount = 0,
   className,
 }: CandidatesFiltersBarProps) {
   return (
@@ -93,22 +95,12 @@ export function CandidatesFiltersBar({
           />
         </div>
 
-        <button
-          type="button"
+        <FilterCtaButton
+          label="More Filters"
+          count={moreFilterCount}
           onClick={onMoreFilters}
-          className={cn(
-            'inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-md border border-[#2D2061] bg-white px-4',
-            'text-sm font-semibold text-[#2D2061] transition-colors hover:bg-[#f7f6fb]',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D2061]/25',
-          )}
-        >
-          <SlidersHorizontal
-            className="size-4 shrink-0"
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-          More Filters
-        </button>
+          className="!h-11 !rounded-md !border-[#2D2061] !font-semibold"
+        />
       </div>
     </div>
   )

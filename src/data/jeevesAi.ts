@@ -171,3 +171,8 @@ export function emptyJeevesMoreFilters(): JeevesMoreFilters {
     preferredLocation: '',
   }
 }
+
+export function countJeevesMoreFilters(value: JeevesMoreFilters): number {
+  return Object.values(value).filter((v) => Boolean(v && String(v).trim()))
+    .length
+}

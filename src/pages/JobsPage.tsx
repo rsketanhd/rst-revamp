@@ -9,7 +9,6 @@ import {
   MapPin,
   Search,
   Send,
-  SlidersHorizontal,
   Sparkles,
 } from 'lucide-react'
 import { cn } from '../lib/cn'
@@ -28,6 +27,7 @@ import {
 import { getExtraJobs, patchExtraJob, removeExtraJob, upsertExtraJob } from '../data/jobStore'
 import {
   BulkActionsBar,
+  FilterCtaButton,
   FilterSortPanel,
   JobCardMenu,
   JOB_CARD_ACTIONS,
@@ -570,19 +570,11 @@ export function JobsPage() {
               <Send className="size-4" strokeWidth={1.75} />
             </span>
           </div>
-          <button
-            type="button"
+          <FilterCtaButton
+            count={activeFilterCount}
             onClick={() => setFiltersOpen(true)}
-            className="relative inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-lg border border-[#2D2061]/25 bg-white px-4 text-sm font-medium text-[#2D2061] shadow-[0_1px_2px_rgba(45,32,97,0.04)] transition-colors hover:bg-[#faf9fd] sm:w-auto"
-          >
-            <SlidersHorizontal className="size-4 shrink-0" aria-hidden="true" />
-            Filter By
-            {activeFilterCount > 0 ? (
-              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#2D2061] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
-                {activeFilterCount}
-              </span>
-            ) : null}
-          </button>
+            className="w-full sm:w-auto"
+          />
         </div>
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">

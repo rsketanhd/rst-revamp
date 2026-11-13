@@ -1,6 +1,5 @@
-import { SlidersHorizontal } from 'lucide-react'
 import { cn } from '../../lib/cn'
-import { Select } from '../ui'
+import { FilterCtaButton, Select } from '../ui'
 
 export type JeevesFiltersBarProps = {
   lastUpdatedOn: string
@@ -12,6 +11,8 @@ export type JeevesFiltersBarProps = {
   hidingOptions: string[]
   onCandidateHidingChange: (value: string) => void
   onMoreFilters?: () => void
+  /** Applied more-filters count shown on the More Filters CTA. */
+  moreFilterCount?: number
   className?: string
 }
 
@@ -28,6 +29,7 @@ export function JeevesFiltersBar({
   hidingOptions,
   onCandidateHidingChange,
   onMoreFilters,
+  moreFilterCount = 0,
   className,
 }: JeevesFiltersBarProps) {
   return (
@@ -72,17 +74,12 @@ export function JeevesFiltersBar({
           />
         </div>
 
-        <button
-          type="button"
+        <FilterCtaButton
+          label="More Filters"
+          count={moreFilterCount}
           onClick={onMoreFilters}
-          className={cn(
-            'inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-md border border-[#2D2061] bg-white px-4',
-            'text-sm font-semibold text-[#2D2061] transition-colors hover:bg-[#f7f6fb]',
-          )}
-        >
-          <SlidersHorizontal className="size-4" strokeWidth={2} aria-hidden="true" />
-          More Filters
-        </button>
+          className="!h-11 !rounded-md !border-[#2D2061] !font-semibold"
+        />
       </div>
     </div>
   )

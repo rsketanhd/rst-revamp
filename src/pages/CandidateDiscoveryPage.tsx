@@ -16,6 +16,7 @@ import {
   SAVED_SEARCHES,
   buildAssistantSummary,
   detectPromptCriteria,
+  countDiscoveryListFilters,
   emptyDiscoveryListFilters,
   filterDiscoveryCandidates,
   getDiscoveryCandidates,
@@ -292,6 +293,7 @@ export function CandidateDiscoveryPage() {
             title={truncateTitle(activePrompt)}
             messages={messages}
             onSend={handleChatSend}
+            filterCount={countDiscoveryListFilters(listFilters)}
             onOpenFilters={() => {
               setDraftFilters({ ...listFilters })
               setFiltersOpen(true)

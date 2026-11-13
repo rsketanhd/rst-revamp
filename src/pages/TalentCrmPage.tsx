@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Send, SlidersHorizontal, Sparkles } from 'lucide-react'
+import { Search, Send, Sparkles } from 'lucide-react'
 import { PageContainer, PageHeader } from '../components/layout'
 import {
   CreateTalentPoolFlow,
@@ -8,7 +8,13 @@ import {
   TalentCrmMetricCards,
   TalentPoolCard,
 } from '../components/talent-crm'
-import { Button, ConfirmDeleteModal, SegmentedToggle, toast } from '../components/ui'
+import {
+  Button,
+  ConfirmDeleteModal,
+  FilterCtaButton,
+  SegmentedToggle,
+  toast,
+} from '../components/ui'
 import {
   countTalentCrmFilters,
   deleteTalentPool,
@@ -109,19 +115,11 @@ export function TalentCrmPage() {
             <Send className="size-4" strokeWidth={1.75} />
           </span>
         </div>
-        <button
-          type="button"
+        <FilterCtaButton
+          label="Filter & Sort"
+          count={filterCount}
           onClick={() => setFiltersOpen(true)}
-          className="relative inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#2D2061]/25 bg-white px-4 text-sm font-medium text-[#2D2061] shadow-[0_1px_2px_rgba(45,32,97,0.04)] transition-colors hover:bg-[#faf9fd]"
-        >
-          <SlidersHorizontal className="size-4 shrink-0" aria-hidden="true" />
-          Filter &amp; Sort
-          {filterCount > 0 ? (
-            <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#2D2061] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
-              {filterCount}
-            </span>
-          ) : null}
-        </button>
+        />
       </div>
 
       <TalentCrmFiltersPanel

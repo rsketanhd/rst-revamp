@@ -9,7 +9,12 @@ import {
   SidePanel,
   Tooltip,
 } from '../../ui'
-import type { CreateJobFormState, LinkedInAllFilters } from './types'
+import {
+  countLinkedInAllFilters,
+  type CreateJobFormState,
+  type LinkedInAllFilters,
+} from './types'
+import { FilterCtaButton } from '../../ui/FilterCtaButton'
 import { StepHeader } from './StepChrome'
 import { cn } from '../../../lib/cn'
 
@@ -733,13 +738,12 @@ function LinkedInFiltersContent({
             <h3 className="text-[15px] font-bold text-[#2D2061]">
               LinkedIn Filters
             </h3>
-            <button
-              type="button"
+            <FilterCtaButton
+              label="More Filters"
+              count={countLinkedInAllFilters(value.linkedInAllFilters)}
               onClick={() => setAllFiltersOpen(true)}
-              className="inline-flex h-8 items-center rounded-md border border-[#D5D2E2] bg-white px-3 text-xs font-medium text-[#2D2061] transition-colors hover:border-[#2D2061]/40 hover:bg-[#f7f6fb]"
-            >
-              More Filters
-            </button>
+              className="!h-8 !rounded-md !border-[#D5D2E2] !px-3 !text-xs !font-medium !shadow-none hover:!border-[#2D2061]/40"
+            />
           </div>
 
           {resultsVisible ? (

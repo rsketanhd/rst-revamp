@@ -104,6 +104,11 @@ export type {
   FilterSortValues,
   SortOption,
 } from './FilterSortPanel'
+export {
+  FilterCtaButton,
+  FILTER_CTA_COUNT_BADGE,
+} from './FilterCtaButton'
+export type { FilterCtaButtonProps } from './FilterCtaButton'
 export { HelpFeedbackModal } from './HelpFeedbackModal'
 export type { HelpFeedbackModalProps } from './HelpFeedbackModal'
 export { StarRating } from './StarRating'

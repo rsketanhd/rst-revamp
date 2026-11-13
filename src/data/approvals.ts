@@ -1,4 +1,5 @@
 import type { JobListing } from './jobs'
+import type { OfferRecord } from './offers'
 
 export type ApprovalKind = 'job' | 'offer'
 
@@ -22,6 +23,35 @@ export type ApprovalRecord = {
   submittedBy: string
   inbox: ApprovalInbox[]
   completed?: boolean
+}
+
+/** Build an OfferRecord for the shared Offer View panel from an approval row. */
+export function offerRecordFromApproval(record: ApprovalRecord): OfferRecord {
+  const candidateName = record.title.replace(/^Offer\s*[—–-]\s*/i, '').trim()
+  const pendingSend = record.toStatus.toLowerCase().includes('pending')
+  const fromDraft = record.fromStatus.toLowerCase() === 'draft'
+
+  return {
+    id: `approval-offer-${record.id}`,
+    candidateName: candidateName || record.title,
+    email: `${(candidateName || 'candidate')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '.')
+      .replace(/^\.|\.$/g, '')}@example.com`,
+    job: 'Offer role',
+    compensationAed: 28000,
+    joiningDate: '12 Apr 2026',
+    joiningDateIso: '2026-04-12',
+    expiryDate: '11 May 2026',
+    status: record.completed
+      ? pendingSend
+        ? 'draft'
+        : 'accepted'
+      : fromDraft
+        ? 'draft'
+        : 'sent',
+    sentOn: record.completed && !pendingSend ? '10 Mar 2026' : '',
+  }
 }
 
 /** Build a JobListing for the shared Job View/Edit side panel from an approval row. */

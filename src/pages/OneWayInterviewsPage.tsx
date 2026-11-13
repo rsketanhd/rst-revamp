@@ -4,7 +4,6 @@ import {
   EyeOff,
   FolderOpen,
   LayoutList,
-  SlidersHorizontal,
   SquarePen,
   UserPlus,
 } from 'lucide-react'
@@ -15,6 +14,7 @@ import { InviteCandidatesPanel } from '../components/interviews/InviteCandidates
 import {
   BulkActionsBar,
   Button,
+  FilterCtaButton,
   SegmentedControl,
   ThreeDotsMenu,
   toast,
@@ -188,19 +188,12 @@ export function OneWayInterviewsPage() {
             }}
             className="w-full sm:w-auto"
           />
-          <button
-            type="button"
+          <FilterCtaButton
+            label="Filter & Sort By"
+            count={filterCount}
             onClick={() => setFiltersOpen(true)}
-            className="relative inline-flex h-9 items-center justify-center gap-2 rounded-full border border-[#E0DDEA] bg-white px-3.5 text-xs font-semibold text-[#2D2061] transition-colors hover:bg-[#f7f6fb] sm:h-8"
-          >
-            <SlidersHorizontal className="size-3.5" strokeWidth={2} aria-hidden="true" />
-            Filter &amp; Sort By
-            {filterCount > 0 ? (
-              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#2D2061] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
-                {filterCount}
-              </span>
-            ) : null}
-          </button>
+            className="!h-9 !rounded-full !border-[#E0DDEA] !px-3.5 !text-xs !font-semibold !shadow-none sm:!h-8"
+          />
         </div>
       </div>
 

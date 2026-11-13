@@ -32,7 +32,7 @@ export function RecruiterDashboardPage() {
 
         <DashboardKpiStrip />
 
-        <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-3">
+        <div className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-3">
           <LatestApplicantsPanel />
           <RecruiterJobOverviewPanel />
           <ActivityStatusPanel />
@@ -40,7 +40,7 @@ export function RecruiterDashboardPage() {
 
         <HiringVelocityPanel />
 
-        <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
+        <div className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-2">
           <SystemLicensePanel />
           <PlatformEngagementPanel />
         </div>

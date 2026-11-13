@@ -1,5 +1,6 @@
 import { ChevronDown } from 'lucide-react'
 import { cn } from '../../lib/cn'
+import { FILTER_CTA_COUNT_BADGE } from '../ui/FilterCtaButton'
 
 export type MyJobsFiltersBarProps = {
   jobType: string
@@ -74,7 +75,7 @@ export function MyJobsFiltersBar({
         All Filters
         <ChevronDown className="size-3.5 text-[#6B6B80]" strokeWidth={2} />
         {activeFilterCount > 0 ? (
-          <span className="ml-0.5 inline-flex size-4 items-center justify-center rounded-full bg-[#2D2061] text-[9px] font-bold text-white">
+          <span className={cn(FILTER_CTA_COUNT_BADGE, 'ml-0.5')}>
             {activeFilterCount}
           </span>
         ) : null}

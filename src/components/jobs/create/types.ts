@@ -146,6 +146,21 @@ export const emptyLinkedInAllFilters: LinkedInAllFilters = {
   schoolKeyword: [],
 }
 
+export function countLinkedInAllFilters(filters: LinkedInAllFilters): number {
+  let count = 0
+  if (filters.connections.length > 0) count += 1
+  if (filters.followersOf.length > 0) count += 1
+  if (filters.profileLanguage.length > 0) count += 1
+  if (filters.connectionDegree) count += 1
+  if (filters.openTo) count += 1
+  if (filters.firstName.length > 0) count += 1
+  if (filters.lastName.length > 0) count += 1
+  if (filters.titleAdvanced.length > 0) count += 1
+  if (filters.companyKeyword.length > 0) count += 1
+  if (filters.schoolKeyword.length > 0) count += 1
+  return count
+}
+
 export const defaultCreateJobForm: CreateJobFormState = {
   method: 'copy',
   sourceJobId: '',

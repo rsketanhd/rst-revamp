@@ -6,6 +6,7 @@ import { SchedulerMoreFiltersPanel } from '../components/scheduler/SchedulerMore
 import { TeamPanelConfigurations } from '../components/scheduler/TeamPanelConfigurations'
 import { UpdateInterviewTeamPanel } from '../components/scheduler/UpdateInterviewTeamPanel'
 import {
+  countSchedulerMoreFilters,
   emptySchedulerMoreFilters,
   getSchedulerCandidates,
   SCHEDULER_HIDING_OPTIONS,
@@ -365,6 +366,7 @@ export function InterviewSchedulerPage() {
               setPage(1)
             }}
             onMoreFilters={() => setMoreFiltersOpen(true)}
+            moreFilterCount={countSchedulerMoreFilters(moreFilters)}
           />
 
           <SchedulerMoreFiltersPanel

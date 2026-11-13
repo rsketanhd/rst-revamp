@@ -9,11 +9,11 @@ export type CandidateStatCardsProps = {
  */
 export function CandidateStatCards({ stats }: CandidateStatCardsProps) {
   return (
-    <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <section className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2">
       {stats.map((stat) => (
         <div
           key={stat.id}
-          className="flex items-center justify-between gap-4 rounded-xl bg-[#F4F5F8] px-5 py-4"
+          className="flex h-full min-h-0 items-center justify-between gap-4 rounded-xl bg-[#F4F5F8] px-5 py-4"
         >
           <p className="min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.06em] text-[#8B8B9E]">
             {stat.label}

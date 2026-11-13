@@ -499,6 +499,22 @@ export function emptyDiscoveryListFilters(): DiscoveryListFilters {
   }
 }
 
+/** Count of applied discovery list filters (ignores default experience/score range). */
+export function countDiscoveryListFilters(
+  filters: DiscoveryListFilters,
+): number {
+  const empty = emptyDiscoveryListFilters()
+  let count = 0
+  if (filters.minExperience !== empty.minExperience) count += 1
+  if (filters.maxExperience !== empty.maxExperience) count += 1
+  if (filters.locationQuery.trim()) count += 1
+  if (filters.skillsQuery.trim()) count += 1
+  if (filters.noticePeriod.trim()) count += 1
+  if (filters.minScore !== empty.minScore) count += 1
+  if (filters.source) count += 1
+  return count
+}
+
 /**
  * Filter discovery candidates using prompt text + structured filters.
  */
